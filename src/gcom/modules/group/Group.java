@@ -22,6 +22,7 @@ public class Group {
     private CommunicationMode comMode;
     private int maxMembers = 2000;
     private static int counter;
+    private GroupDef gDef;
     
     public Group() {
         this("G-" + counter++);
@@ -36,6 +37,10 @@ public class Group {
     public Group(String groupID, int maxMembers) {
         this(groupID);
         this.maxMembers = maxMembers;
+    }
+    
+    public Group(GroupDef gDef){
+        this.gDef=gDef;
     }
     
     public void addMember(Member member) throws GroupManagementException {

@@ -20,16 +20,13 @@ public class GroupManagement {
         groups = new HashMap<String, Group>();
     }
 
-    public static void createGroup(String groupId) throws GroupManagementException {
-        createGroup(groupId, DEFAULT_MAX_MEMBERS);
-    }
-
-    public static Group createGroup(String groupId, int maxMembers) throws GroupManagementException {
-        if (groups.containsKey(groupId)) {
-            throw new GroupManagementException("Duplicate GroupID : " + groupId + " already exists.");
+      public Group createGroup(GroupDef gDef) throws GroupManagementException{
+        String gName=gDef.getGroupName();
+        if (groups.containsKey(gName)) {
+            throw new GroupManagementException("Duplicate Group Name : " + gName+ " already exists.");
         } else {
-            Group g = new Group(groupId, maxMembers);
-            groups.put(groupId, g);
+            Group g = new Group(gDef);
+            groups.put(gName, g);
             return g;
         }
     }
