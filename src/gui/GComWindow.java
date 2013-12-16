@@ -10,6 +10,8 @@
  */
 package gui;
 
+import gcom.RMIServer;
+import java.rmi.RemoteException;
 import javax.swing.JOptionPane;
 
 /**
@@ -21,6 +23,7 @@ public class GComWindow extends javax.swing.JFrame {
     /** Creates new form GComWindow */
     public GComWindow() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /** This method is called from within the constructor to
@@ -32,6 +35,8 @@ public class GComWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtLog = new javax.swing.JTextArea();
         mainMenu = new javax.swing.JMenuBar();
         mnuFile = new javax.swing.JMenu();
         mnuConnect = new javax.swing.JMenuItem();
@@ -39,6 +44,11 @@ public class GComWindow extends javax.swing.JFrame {
         mnuAbout = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        txtLog.setColumns(20);
+        txtLog.setEditable(false);
+        txtLog.setRows(5);
+        jScrollPane1.setViewportView(txtLog);
 
         mnuFile.setText("File");
 
@@ -64,11 +74,17 @@ public class GComWindow extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 637, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 613, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 536, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(297, Short.MAX_VALUE))
         );
 
         pack();
@@ -77,8 +93,18 @@ public class GComWindow extends javax.swing.JFrame {
 private void mnuConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuConnectActionPerformed
     String input = JOptionPane.showInputDialog(this, "Enter port number :", "Port", JOptionPane.QUESTION_MESSAGE, null, null, "1099") + "";
     if (input != null) {
-        System.out.println("ok");
-        System.out.println("JKK");
+        try {
+            int port = Integer.parseInt(input);
+            new RMIServer(port).start();
+            String msg = "RMI Registry Server started on port " + port;
+            txtLog.setText(txtLog.getText() + msg + "\n");
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Cannot connect to the RMIRegistry on given port : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Invalid port number : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+        }
+
+
     }
 }//GEN-LAST:event_mnuConnectActionPerformed
 
@@ -118,10 +144,12 @@ private void mnuConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mnuAbout;
     private javax.swing.JMenuItem mnuConnect;
     private javax.swing.JMenu mnuEdit;
     private javax.swing.JMenu mnuFile;
+    private javax.swing.JTextArea txtLog;
     // End of variables declaration//GEN-END:variables
 }
