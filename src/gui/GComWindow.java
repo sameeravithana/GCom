@@ -11,7 +11,10 @@
 package gui;
 
 import gcom.RMIServer;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -19,6 +22,8 @@ import javax.swing.JOptionPane;
  * @author ens13pps
  */
 public class GComWindow extends javax.swing.JFrame {
+
+    RMIServer server;
 
     /** Creates new form GComWindow */
     public GComWindow() {
@@ -39,7 +44,7 @@ public class GComWindow extends javax.swing.JFrame {
         txtLog = new javax.swing.JTextArea();
         mainMenu = new javax.swing.JMenuBar();
         mnuFile = new javax.swing.JMenu();
-        mnuConnect = new javax.swing.JMenuItem();
+        mnuStartServer = new javax.swing.JCheckBoxMenuItem();
         mnuEdit = new javax.swing.JMenu();
         mnuAbout = new javax.swing.JMenu();
 
@@ -52,13 +57,13 @@ public class GComWindow extends javax.swing.JFrame {
 
         mnuFile.setText("File");
 
-        mnuConnect.setText("Connect to Registry");
-        mnuConnect.addActionListener(new java.awt.event.ActionListener() {
+        mnuStartServer.setText("RMI Server");
+        mnuStartServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuConnectActionPerformed(evt);
+                mnuStartServerActionPerformed(evt);
             }
         });
-        mnuFile.add(mnuConnect);
+        mnuFile.add(mnuStartServer);
 
         mainMenu.add(mnuFile);
 
@@ -90,23 +95,33 @@ public class GComWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-private void mnuConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuConnectActionPerformed
-    String input = JOptionPane.showInputDialog(this, "Enter port number :", "Port", JOptionPane.QUESTION_MESSAGE, null, null, "1099") + "";
-    if (input != null) {
-        try {
-            int port = Integer.parseInt(input);
-            new RMIServer(port).start();
-            String msg = "RMI Registry Server started on port " + port;
-            txtLog.setText(txtLog.getText() + msg + "\n");
-        } catch (RemoteException e) {
-            JOptionPane.showMessageDialog(this, "Cannot connect to the RMIRegistry on given port : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Invalid port number : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuStartServerActionPerformed
+    if (mnuStartServer.getState()) {
+        String input = JOptionPane.showInputDialog(this, "Enter port number :", "Port", JOptionPane.QUESTION_MESSAGE, null, null, "1099") + "";
+        if (input != null) {
+            try {
+                int port = Integer.parseInt(input);
+                server = new RMIServer(port);
+                server.start();
+                String msg = "RMI Registry Server started on port " + port;
+                txtLog.setText(txtLog.getText() + msg + "\n");
+
+            } catch (RemoteException e) {
+                JOptionPane.showMessageDialog(this, "Cannot connect to the RMIRegistry on given port : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Invalid port number : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+            }
         }
-
-
+    } else {
+        try {
+            server.stop();
+            String msg = "RMI Registry Server stopped.";
+            txtLog.setText(txtLog.getText() + msg + "\n");
+        } catch (NoSuchObjectException ex) {
+            Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-}//GEN-LAST:event_mnuConnectActionPerformed
+}//GEN-LAST:event_mnuStartServerActionPerformed
 
     /**
      * @param args the command line arguments
@@ -147,9 +162,9 @@ private void mnuConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mnuAbout;
-    private javax.swing.JMenuItem mnuConnect;
     private javax.swing.JMenu mnuEdit;
     private javax.swing.JMenu mnuFile;
+    private javax.swing.JCheckBoxMenuItem mnuStartServer;
     private javax.swing.JTextArea txtLog;
     // End of variables declaration//GEN-END:variables
 }
