@@ -4,6 +4,7 @@
  */
 package gcom;
 
+<<<<<<< HEAD
 import gcom.modules.group.Member;
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
@@ -72,4 +73,24 @@ public class RMIServer {
     }
     
     
+=======
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+
+/**
+ *
+ * @author ens13pps
+ */
+public class RMIServer {
+
+    private int port = 1099;
+
+    public RMIServer(int port) {
+        this.port = port;
+    }
+
+    public void start() throws RemoteException {
+        LocateRegistry.createRegistry(port);
+    }
+>>>>>>> 89225d3301da343dbfb9dd9a49758735f8991da2
 }
