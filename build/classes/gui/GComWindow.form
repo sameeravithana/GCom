@@ -9,12 +9,12 @@
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuConnect">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="mnuStartServer">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Connect to Registry"/>
+                <Property name="text" type="java.lang.String" value="RMI Server"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuConnectActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuStartServerActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
