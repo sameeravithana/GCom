@@ -35,7 +35,7 @@ public class ChatWindow extends javax.swing.JDialog {
         chatPane = new javax.swing.JTabbedPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Chat Window");
+        setTitle("GCOM Chat Application");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
