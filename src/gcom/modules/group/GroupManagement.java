@@ -20,10 +20,11 @@ public class GroupManagement {
         groups = new HashMap<String, Group>();
     }
 
+
     public static Group createGroup(GroupDef gDef) throws GroupManagementException{
         String gName=gDef.getGroupName();
         if (groups.containsKey(gName)) {
-            throw new GroupManagementException("Duplicate Group Name : " + gName+ " already exists.");
+            throw new GroupManagementException("Duplicate Group Name : " + gName + " already exists.");
         } else {
             Group g = new Group(gDef);
             groups.put(gName, g);
@@ -66,7 +67,7 @@ public class GroupManagement {
         }
     }
 
-    public static void sendMessage(String groupId, GroupMessage message) throws GroupManagementException {
+    public static void sendMessage(String groupId, Message message) throws GroupManagementException {
         if (groups.containsKey(groupId)) {
             Group group = groups.get(groupId);
             group.send(message);

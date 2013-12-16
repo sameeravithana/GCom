@@ -11,6 +11,7 @@
 package gui;
 
 import gcom.RMIServer;
+import gcom.modules.group.Group;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.util.logging.Level;
@@ -22,7 +23,7 @@ import javax.swing.JOptionPane;
  * @author ens13pps
  */
 public class GComWindow extends javax.swing.JFrame {
-
+    
     RMIServer server;
 
     /** Creates new form GComWindow */
@@ -40,11 +41,15 @@ public class GComWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtLog = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        trGComStructure = new javax.swing.JTree();
         mainMenu = new javax.swing.JMenuBar();
         mnuFile = new javax.swing.JMenu();
         mnuStartServer = new javax.swing.JCheckBoxMenuItem();
+        mnuNewGroup = new javax.swing.JMenuItem();
         mnuEdit = new javax.swing.JMenu();
         mnuAbout = new javax.swing.JMenu();
 
@@ -55,8 +60,13 @@ public class GComWindow extends javax.swing.JFrame {
         txtLog.setRows(5);
         jScrollPane1.setViewportView(txtLog);
 
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("GCom");
+        trGComStructure.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        jScrollPane2.setViewportView(trGComStructure);
+
         mnuFile.setText("File");
 
+        mnuStartServer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
         mnuStartServer.setText("RMI Server");
         mnuStartServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -64,6 +74,15 @@ public class GComWindow extends javax.swing.JFrame {
             }
         });
         mnuFile.add(mnuStartServer);
+
+        mnuNewGroup.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_G, java.awt.event.InputEvent.CTRL_MASK));
+        mnuNewGroup.setText("New Group");
+        mnuNewGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuNewGroupActionPerformed(evt);
+            }
+        });
+        mnuFile.add(mnuNewGroup);
 
         mainMenu.add(mnuFile);
 
@@ -81,15 +100,19 @@ public class GComWindow extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 613, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 476, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(126, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(297, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 512, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -98,14 +121,14 @@ public class GComWindow extends javax.swing.JFrame {
 private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuStartServerActionPerformed
     if (mnuStartServer.getState()) {
         String input = JOptionPane.showInputDialog(this, "Enter port number :", "Port", JOptionPane.QUESTION_MESSAGE, null, null, "1099") + "";
-        if (input != null) {
+        if (input != null || !input.trim().isEmpty()) {
             try {
                 int port = Integer.parseInt(input);
                 server = new RMIServer(port);
                 server.start();
                 String msg = "RMI Registry Server started on port " + port;
                 txtLog.setText(txtLog.getText() + msg + "\n");
-
+                
             } catch (RemoteException e) {
                 JOptionPane.showMessageDialog(this, "Cannot connect to the RMIRegistry on given port : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
@@ -122,6 +145,15 @@ private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GE
         }
     }
 }//GEN-LAST:event_mnuStartServerActionPerformed
+    private void updateStatus(String newStatus) {
+        txtLog.setText(txtLog.getText() + newStatus + "\n");
+    }
+private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewGroupActionPerformed
+    NewGroup ng = new NewGroup(GComWindow.this, true);
+    ng.setVisible(true);
+    Group createdGroup = ng.getCreatedGroup();
+    updateStatus("New Group Created : " + createdGroup.getGroupName());
+}//GEN-LAST:event_mnuNewGroupActionPerformed
 
     /**
      * @param args the command line arguments
@@ -152,19 +184,23 @@ private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
-
+            
             public void run() {
                 new GComWindow().setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mnuAbout;
     private javax.swing.JMenu mnuEdit;
     private javax.swing.JMenu mnuFile;
+    private javax.swing.JMenuItem mnuNewGroup;
     private javax.swing.JCheckBoxMenuItem mnuStartServer;
+    private javax.swing.JTree trGComStructure;
     private javax.swing.JTextArea txtLog;
     // End of variables declaration//GEN-END:variables
 }

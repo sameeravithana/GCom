@@ -16,33 +16,34 @@ import java.util.Set;
  * @author praneeth
  */
 public class Group {
-    
+
     private String groupID;
     private HashMap<String, Member> members;
     private CommunicationMode comMode;
     private int maxMembers = 2000;
     private static int counter;
     private GroupDef gDef;
-    
+
     public Group() {
         this("G-" + counter++);
     }
-    
+
     public Group(String groupID) {
         this.groupID = groupID;
-        
+
         members = new HashMap<String, Member>();
     }
-    
+
     public Group(String groupID, int maxMembers) {
         this(groupID);
         this.maxMembers = maxMembers;
     }
-    
-    public Group(GroupDef gDef){
-        this.gDef=gDef;
+
+    public Group(GroupDef gDef) {
+        this.gDef = gDef;
+
     }
-    
+
     public void addMember(Member member) throws GroupManagementException {
         String memberId = member.getId();
         if (members.containsKey(member.getId())) {
@@ -51,7 +52,7 @@ public class Group {
             members.put(memberId, member);
         }
     }
-    
+
     public void removeMember(String memberId) throws GroupManagementException {
         if (members.containsKey(memberId)) {
             members.remove(memberId);
@@ -59,7 +60,7 @@ public class Group {
             throw new GroupManagementException("Invalid Member Id : Member id" + memberId + " does not exist in " + groupID);
         }
     }
-    
+
     public Member getMember(String memberId) throws GroupManagementException {
         if (members.containsKey(memberId)) {
             return members.get(memberId);
@@ -67,7 +68,7 @@ public class Group {
             throw new GroupManagementException("Invalid Member Id : Member id" + memberId + " does not exist in " + groupID);
         }
     }
-    
+
     public ArrayList<Member> getMembersList() {
         return new ArrayList(members.values());
     }
@@ -75,8 +76,8 @@ public class Group {
     /**
      * @return the groupID
      */
-    public String getGroupID() {
-        return groupID;
+    public String getGroupName() {
+        return gDef.getGroupName();
     }
 
     /**
@@ -106,8 +107,8 @@ public class Group {
     public void setMaxMembers(int maxMembers) {
         this.maxMembers = maxMembers;
     }
-    
-    public void send(GroupMessage message) {
+
+    public void send(Message message) {
         Set<String> keySet = members.keySet();
         Iterator<String> iterator = keySet.iterator();
         while (iterator.hasNext()) {
@@ -127,13 +128,13 @@ public class Group {
         // make the initiater 1st in the list
         membersList.remove(initiater);
         membersList.add(0, initiater);
-        
+
     }
-    
-    private void send(Member member, GroupMessage message) {
+
+    private void send(Member member, Message message) {
         // call members server method ?
     }
-    
+
     @Override
     public void finalize() throws Throwable {
         super.finalize();
