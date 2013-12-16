@@ -20,7 +20,7 @@ public class Group {
     private String groupID;
     private HashMap<String, Member> members;
     private CommunicationMode comMode;
-    private int maxMembers = 1000;
+    private int maxMembers = 2000;
     private static int counter;
     
     public Group() {
