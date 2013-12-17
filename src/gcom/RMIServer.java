@@ -36,11 +36,12 @@ public class RMIServer {
         this.serverFlag=false;
     }  
     
-    public void start()  throws RemoteException{
+    public Registry start()  throws RemoteException{
         if(this.serverFlag)  registry=LocateRegistry.createRegistry(this.port);
         else{
             registry=LocateRegistry.getRegistry(this.host, this.port);
         }
+        return registry;
     }
     
     public void stop() throws NoSuchObjectException{
