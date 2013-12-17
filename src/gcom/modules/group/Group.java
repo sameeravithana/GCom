@@ -4,6 +4,7 @@
  */
 package gcom.modules.group;
 
+import gcom.RMIServer;
 import gcom.modules.com.CommunicationMode;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +52,7 @@ public class Group {
         } else {
             
             members.put(memberId, member);
+            
         }
     }
 
@@ -101,6 +103,10 @@ public class Group {
     public int getMaxMembers() {
         return maxMembers;
     }
+    
+    public int getMemberCount(){
+        return members.size();
+    }
 
     /**
      * @param maxMembers the maxMembers to set
@@ -109,7 +115,7 @@ public class Group {
         this.maxMembers = maxMembers;
     }
 
-    public void send(GroupMessage message) {
+    public void send(Message message) {
         Set<String> keySet = members.keySet();
         Iterator<String> iterator = keySet.iterator();
         while (iterator.hasNext()) {
@@ -132,7 +138,7 @@ public class Group {
 
     }
 
-    private void send(Member member, GroupMessage message) {
+    private void send(Member member, Message message) {
         // call members server method ?
     }
 

@@ -4,6 +4,7 @@
  */
 package gcom.modules.group;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -20,8 +21,9 @@ public class GroupManagement {
         groups = new HashMap<String, Group>();
     }
 
-    public static Group createGroup(GroupDef gDef) throws GroupManagementException {
-        String gName = gDef.getGroupName();
+
+    public static Group createGroup(GroupDef gDef) throws GroupManagementException{
+        String gName=gDef.getGroupName();
         if (groups.containsKey(gName)) {
             throw new GroupManagementException("Duplicate Group Name : " + gName + " already exists.");
         } else {
@@ -66,12 +68,18 @@ public class GroupManagement {
         }
     }
 
-    public static void sendMessage(String groupId, GroupMessage message) throws GroupManagementException {
+    public static void sendMessage(String groupId, Message message) throws GroupManagementException {
         if (groups.containsKey(groupId)) {
             Group group = groups.get(groupId);
             group.send(message);
         } else {
             throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
         }
+    }
+    
+    public static HashMap<String, Integer> getGroups(){
+        HashMap<String, Integer> gs=new HashMap<String, Integer>();
+        for(String key:groups.keySet()) gs.put(key, groups.get(key).getMemberCount());
+        return gs;
     }
 }
