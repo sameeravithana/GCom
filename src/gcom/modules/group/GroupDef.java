@@ -4,17 +4,14 @@
  */
 package gcom.modules.group;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Properties;
+import java.io.Serializable;
 
 
 /**
  *
  * @author ens13pps
  */
-public class GroupDef {
+public class GroupDef implements Serializable{
 
     private String groupName;
     private String groupType, comType, ordType;

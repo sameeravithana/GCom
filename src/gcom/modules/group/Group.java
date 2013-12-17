@@ -4,10 +4,9 @@
  */
 package gcom.modules.group;
 
-import gcom.RMIServer;
+import gcom.interfaces.IGroup;
 import gcom.modules.com.CommunicationMode;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -16,7 +15,7 @@ import java.util.Set;
  *
  * @author praneeth
  */
-public class Group {
+public class Group implements IGroup {
 
     private String groupID;
     private HashMap<String, Member> members;
@@ -31,7 +30,6 @@ public class Group {
 
     public Group(String groupID) {
         this.groupID = groupID;
-
         members = new HashMap<String, Member>();
     }
 
@@ -42,17 +40,17 @@ public class Group {
 
     public Group(GroupDef gDef) {
         this.gDef = gDef;
-
+        members = new HashMap<String, Member>();
     }
 
     public void addMember(Member member) throws GroupManagementException {
-        String memberId = member.getId();
-        if (members.containsKey(member.getId())) {
+        String memberId = member.getName();
+        if (members.containsKey(member.getName())) {
             throw new GroupManagementException("Duplicate Member Id : Member id" + memberId + " already exists in " + groupID);
         } else {
-            
+
             members.put(memberId, member);
-            
+
         }
     }
 
@@ -64,6 +62,7 @@ public class Group {
         }
     }
 
+    @Override
     public Member getMember(String memberId) throws GroupManagementException {
         if (members.containsKey(memberId)) {
             return members.get(memberId);
@@ -72,6 +71,7 @@ public class Group {
         }
     }
 
+    @Override
     public ArrayList<Member> getMembersList() {
         return new ArrayList(members.values());
     }
@@ -79,6 +79,7 @@ public class Group {
     /**
      * @return the groupID
      */
+    @Override
     public String getGroupName() {
         return gDef.getGroupName();
     }
@@ -86,6 +87,7 @@ public class Group {
     /**
      * @return the comMode
      */
+    @Override
     public CommunicationMode getComMode() {
         return comMode;
     }
@@ -100,12 +102,16 @@ public class Group {
     /**
      * @return the maxMembers
      */
+    @Override
     public int getMaxMembers() {
         return maxMembers;
     }
-    
-    public int getMemberCount(){
-        if(members!=null)  return members.size();
+
+    @Override
+    public int getMemberCount() {
+        if (members != null) {
+            return members.size();
+        }
         return 0;
     }
 
@@ -116,6 +122,7 @@ public class Group {
         this.maxMembers = maxMembers;
     }
 
+    @Override
     public void send(Message message) {
         Set<String> keySet = members.keySet();
         Iterator<String> iterator = keySet.iterator();
@@ -126,12 +133,13 @@ public class Group {
         }
     }
 
+    @Override
     public void initiateElection(Member initiater) {
         ArrayList<Member> membersList = getMembersList();
         for (Member m : membersList) {
-            m.setIsElectionParticipant(false);
+            m.setElectionParticipant(false);
         }
-        initiater.setIsElectionParticipant(true);
+        initiater.setElectionParticipant(true);
 
         // make the initiater 1st in the list
         membersList.remove(initiater);

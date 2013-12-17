@@ -10,11 +10,11 @@
  */
 package gui.member;
 
+import gcom.modules.group.Group;
+import gcom.modules.group.Member;
 import gui.SingleChat;
 import java.awt.Color;
 import java.awt.Component;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -32,18 +32,25 @@ import javax.swing.JList;
  */
 public class MemberWindow extends javax.swing.JFrame {
 
-    /** Creates new form MemberWindow */
-    ArrayList<String> contacts;
+    //** Creates new form MemberWindow */
+    private ArrayList<String> contacts;
+    private Member member;
+    private Group group;
 
-    public MemberWindow() {
+    public MemberWindow(String memName, Group group) {
         initComponents();
         // setLocationRelativeTo(null);
+        //this.member = member;
+        this.group = group;
+        lblMemberName.setText(memName);
+        setTitle(getTitle() + " : " + group.getGroupName());
         setIconImage(new ImageIcon(MemberWindow.class.getResource("/pics/logo.png")).getImage());
         contacts = getContacts();
         fillContacts(contacts);
         lstContacts.setCellRenderer(new myRenderer());
-    }
 
+
+    }
     private void fillContacts(ArrayList<String> contacts) {
         DefaultListModel l = new DefaultListModel();
         Vector v = new Vector();
@@ -70,7 +77,7 @@ public class MemberWindow extends javax.swing.JFrame {
         contactListPopUp = new javax.swing.JPopupMenu();
         refreshList = new javax.swing.JMenuItem();
         logoLabel = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        lblMemberName = new javax.swing.JLabel();
         cmbStatus = new javax.swing.JComboBox();
         jSeparator1 = new javax.swing.JSeparator();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -93,8 +100,8 @@ public class MemberWindow extends javax.swing.JFrame {
 
         logoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/logo.png"))); // NOI18N
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 18));
-        jLabel1.setText("Praneeth Nilanga Peiris");
+        lblMemberName.setFont(new java.awt.Font("Dialog", 0, 18));
+        lblMemberName.setText("Praneeth Nilanga Peiris");
 
         cmbStatus.setFont(new java.awt.Font("Dialog", 0, 12));
         cmbStatus.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Online", "Away", "Busy", "Invisible" }));
@@ -173,7 +180,7 @@ public class MemberWindow extends javax.swing.JFrame {
                         .addComponent(logoLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                            .addComponent(lblMemberName, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
                             .addComponent(cmbStatus, 0, 234, Short.MAX_VALUE))))
                 .addContainerGap())
         );
@@ -183,7 +190,7 @@ public class MemberWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                        .addComponent(lblMemberName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(logoLabel))
@@ -192,7 +199,7 @@ public class MemberWindow extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -202,15 +209,16 @@ public class MemberWindow extends javax.swing.JFrame {
     private ArrayList<String> getContacts() {
         ArrayList<String> c = new ArrayList<String>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader("contacts.txt"));
-            while (br.ready()) {
-                c.add(br.readLine().trim());
+            ArrayList<Member> membersList = group.getMembersList();
+            for (Member m : membersList) {
+                c.add(m.getName());
             }
         } catch (Exception ex) {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
         return c;
     }
+    
     private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchFocusGained
         if (txtSearch.getText().trim().equalsIgnoreCase("Search Contacts")) {
             txtSearch.setText(null);
@@ -248,26 +256,26 @@ public class MemberWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_txtSearchKeyReleased
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                new MemberWindow().setVisible(true);
-            }
-        });
-    }
+//    /**
+//     * @param args the command line arguments
+//     */
+//    public static void main(String args[]) {
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//
+//            public void run() {
+//                new MemberWindow().setVisible(true);
+//            }
+//        });
+//    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu aboutMenu;
     private javax.swing.JComboBox cmbStatus;
     private javax.swing.JPopupMenu contactListPopUp;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblMemberName;
     private javax.swing.JLabel logoLabel;
     private javax.swing.JList lstContacts;
     private javax.swing.JMenuBar mnuMainMenu;

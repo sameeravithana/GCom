@@ -12,11 +12,15 @@ package gui;
 
 import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
+import gcom.interfaces.IMessage;
 import gcom.modules.group.Group;
 import gcom.modules.group.GroupManagement;
+import gcom.modules.group.Member;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -28,10 +32,11 @@ import javax.swing.tree.DefaultTreeModel;
  * @author ens13pps
  */
 public class GComWindow extends javax.swing.JFrame {
-    
+
     private RMIServer server;
     private DefaultTreeModel tm;
     private DefaultMutableTreeNode root;
+    private static HashMap<String, DefaultMutableTreeNode> nodes;
 
     /** Creates new form GComWindow */
     public GComWindow() {
@@ -39,17 +44,32 @@ public class GComWindow extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         tm = (DefaultTreeModel) trGComStructure.getModel();
         root = (DefaultMutableTreeNode) tm.getRoot();
-        
+        GroupManagement.setGComWindow(this);
+        nodes = new HashMap<String, DefaultMutableTreeNode>();
+
     }
-    
-    private void updateStatus(String newStatus) {
+
+    public void updateStatus(String newStatus) {
         txtLog.setText(txtLog.getText() + newStatus + "\n");
+        System.out.println(newStatus);
     }
-    
-    private void addNodeToTree(String child, DefaultMutableTreeNode parent) {
+
+    public void updateStatus(ArrayList<String> newStatus) {
+    }
+
+    public void updateStatus(Member member, IMessage.TYPE_MESSAGE type) {
+        DefaultMutableTreeNode tn = new DefaultMutableTreeNode(member.getName());
+        String parentName = member.getParentGroup().getGroupName();
+        DefaultMutableTreeNode parent = nodes.get(parentName);
+        tm.insertNodeInto(tn, parent, parent.getChildCount());
+        String msg = type + " " + parentName + " => " + member.getName() + "(" + member.getParentGroup().getMemberCount() + ")";
+        updateStatus(msg);
+    }
+
+    private void addGroupToTree(String child, DefaultMutableTreeNode parent) {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(child, true);
         tm.insertNodeInto(ch, parent, parent.getChildCount());
-        
+        nodes.put(child, ch);
     }
 
     /** This method is called from within the constructor to
@@ -141,25 +161,29 @@ public class GComWindow extends javax.swing.JFrame {
 
 private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuStartServerActionPerformed
     if (mnuStartServer.getState()) {
-        String input = JOptionPane.showInputDialog(this, "Enter port number :", "Port", JOptionPane.QUESTION_MESSAGE, null, null, "1099") + "";
-        if (input != null || !input.trim().isEmpty()) {
+        String input = null;
+        Object value = JOptionPane.showInputDialog(GComWindow.this, "Enter port number :", "Port", JOptionPane.OK_OPTION, null, null, "1099");
+        if (value != null && !(input = value.toString().trim()).isEmpty()) {
+
             try {
                 int port = Integer.parseInt(input);
                 server = new RMIServer(port);
                 server.start();
                 String msg = "RMI Registry Server started on port " + port;
                 txtLog.setText(txtLog.getText() + msg + "\n");
-                
+
                 GroupManagement obj = new GroupManagement();
-                IGroupManagement stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);	    
+                IGroupManagement stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);
                 server.rebind("IGroupManagement", stub);
                 msg = "Default stub binded:" + " IGroupManagement";
                 txtLog.setText(txtLog.getText() + msg + "\n");
-                
+
             } catch (RemoteException e) {
                 JOptionPane.showMessageDialog(this, "Cannot connect to the RMIRegistry on given port : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+                mnuStartServer.setState(false);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid port number : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+                mnuStartServer.setState(false);
             }
         }
     } else {
@@ -169,16 +193,19 @@ private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GE
             txtLog.setText(txtLog.getText() + msg + "\n");
         } catch (NoSuchObjectException ex) {
             Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+            mnuStartServer.setState(true);
         }
     }
 }//GEN-LAST:event_mnuStartServerActionPerformed
-    
+
 private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewGroupActionPerformed
     NewGroup ng = new NewGroup(GComWindow.this, true);
     ng.setVisible(true);
     Group createdGroup = ng.getCreatedGroup();
-    updateStatus("New Group Created : " + createdGroup.getGroupName());
-    addNodeToTree(createdGroup.getGroupName(), root);
+    if (createdGroup != null) {
+        updateStatus("New Group Created : " + createdGroup.getGroupName());
+        addGroupToTree(createdGroup.getGroupName(), root);
+    }
 }//GEN-LAST:event_mnuNewGroupActionPerformed
 
     /**
@@ -210,7 +237,7 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            
+
             public void run() {
                 new GComWindow().setVisible(true);
             }
