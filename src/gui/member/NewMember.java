@@ -179,7 +179,6 @@ private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid port number specified : " + port + "\nDo you want to use the default port (1099)?", "Invalid Port", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
         if (res == JOptionPane.YES_OPTION) {
             port = 1099;
-
         }
     }
     if (!host.isEmpty()) {
