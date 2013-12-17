@@ -77,9 +77,9 @@ public class GroupManagement {
         }
     }
     
-    public static ArrayList<String> getGroups(){
-        ArrayList<String> gs=new ArrayList<String>();
-        for(String key:groups.keySet()) gs.add(key);
+    public static HashMap<String, Integer> getGroups(){
+        HashMap<String, Integer> gs=new HashMap<String, Integer>();
+        for(String key:groups.keySet()) gs.put(key, groups.get(key).getMemberCount());
         return gs;
     }
 }

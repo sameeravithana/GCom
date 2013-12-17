@@ -6,6 +6,7 @@ package gcom.modules.group;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -54,7 +55,7 @@ public class Message implements gcom.interfaces.Message{
         return this.destination;
     }
     
-    public ArrayList<String> getGroups(){
+    public HashMap<String, Integer> getGroups(){
         return GroupManagement.getGroups();
     }
     

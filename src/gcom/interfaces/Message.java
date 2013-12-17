@@ -6,6 +6,7 @@ package gcom.interfaces;
 
 import gcom.modules.group.Member;
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  *
@@ -28,5 +29,7 @@ public interface Message extends Serializable{
     public void setDestination(Member destination);
     
     public Member getDestination();
+    
+    public HashMap<String, Integer> getGroups();
     
 }

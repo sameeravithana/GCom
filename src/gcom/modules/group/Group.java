@@ -4,6 +4,7 @@
  */
 package gcom.modules.group;
 
+import gcom.RMIServer;
 import gcom.modules.com.CommunicationMode;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,6 +51,7 @@ public class Group {
             throw new GroupManagementException("Duplicate Member Id : Member id" + memberId + " already exists in " + groupID);
         } else {
             members.put(memberId, member);
+            
         }
     }
 
@@ -99,6 +101,10 @@ public class Group {
      */
     public int getMaxMembers() {
         return maxMembers;
+    }
+    
+    public int getMemberCount(){
+        return members.size();
     }
 
     /**
