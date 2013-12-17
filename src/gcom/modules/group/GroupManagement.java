@@ -4,6 +4,7 @@
  */
 package gcom.modules.group;
 
+import gcom.interfaces.IGroupManagement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
  *
  * @author praneeth
  */
-public class GroupManagement {
+public class GroupManagement implements IGroupManagement{
 
     private static HashMap<String, Group> groups;
     private static String defaultGroupIdPrefix = "G";
@@ -77,9 +78,15 @@ public class GroupManagement {
         }
     }
     
-    public static HashMap<String, Integer> getGroups(){
+    private static HashMap<String, Integer> getGroups(){
         HashMap<String, Integer> gs=new HashMap<String, Integer>();
         for(String key:groups.keySet()) gs.put(key, groups.get(key).getMemberCount());
         return gs;
     }
+
+    public HashMap<String, Integer> getGroupDetails() {
+        return getGroups();
+    }
+    
+   
 }

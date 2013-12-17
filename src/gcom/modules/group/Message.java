@@ -54,8 +54,6 @@ public class Message implements gcom.interfaces.Message{
         return this.destination;
     }
     
-    public HashMap<String, Integer> getGroups(){
-        return GroupManagement.getGroups();
-    }
+   
     
 }

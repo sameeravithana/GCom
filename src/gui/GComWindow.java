@@ -11,9 +11,12 @@
 package gui;
 
 import gcom.RMIServer;
+import gcom.interfaces.IGroupManagement;
 import gcom.modules.group.Group;
+import gcom.modules.group.GroupManagement;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -145,6 +148,12 @@ private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GE
                 server = new RMIServer(port);
                 server.start();
                 String msg = "RMI Registry Server started on port " + port;
+                txtLog.setText(txtLog.getText() + msg + "\n");
+                
+                GroupManagement obj = new GroupManagement();
+                IGroupManagement stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);	    
+                server.rebind("IGroupManagement", stub);
+                msg = "Default stub binded:" + " IGroupManagement";
                 txtLog.setText(txtLog.getText() + msg + "\n");
                 
             } catch (RemoteException e) {

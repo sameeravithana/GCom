@@ -30,6 +30,6 @@ public interface Message extends Serializable{
     
     public Member getDestination();
     
-    public HashMap<String, Integer> getGroups();
+    
     
 }
