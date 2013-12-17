@@ -4,7 +4,7 @@
  */
 package gcom;
 
-import gui.MainFrame;
+import gui.GComWindow;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.UIManager;
@@ -22,7 +22,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            new MainFrame().setVisible(true);
+            new GComWindow().setVisible(true);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {

@@ -17,6 +17,8 @@ import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  *
@@ -24,12 +26,27 @@ import javax.swing.JOptionPane;
  */
 public class GComWindow extends javax.swing.JFrame {
     
-    RMIServer server;
+    private RMIServer server;
+    private DefaultTreeModel tm;
+    private DefaultMutableTreeNode root;
 
     /** Creates new form GComWindow */
     public GComWindow() {
         initComponents();
         setLocationRelativeTo(null);
+        tm = (DefaultTreeModel) trGComStructure.getModel();
+        root = (DefaultMutableTreeNode) tm.getRoot();
+        
+    }
+    
+    private void updateStatus(String newStatus) {
+        txtLog.setText(txtLog.getText() + newStatus + "\n");
+    }
+    
+    private void addNodeToTree(String child, DefaultMutableTreeNode parent) {
+        DefaultMutableTreeNode ch = new DefaultMutableTreeNode(child, true);
+        tm.insertNodeInto(ch, parent, parent.getChildCount());
+        
     }
 
     /** This method is called from within the constructor to
@@ -62,6 +79,7 @@ public class GComWindow extends javax.swing.JFrame {
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("GCom");
         trGComStructure.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        trGComStructure.setScrollsOnExpand(true);
         jScrollPane2.setViewportView(trGComStructure);
 
         mnuFile.setText("File");
@@ -145,14 +163,13 @@ private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GE
         }
     }
 }//GEN-LAST:event_mnuStartServerActionPerformed
-    private void updateStatus(String newStatus) {
-        txtLog.setText(txtLog.getText() + newStatus + "\n");
-    }
+    
 private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewGroupActionPerformed
     NewGroup ng = new NewGroup(GComWindow.this, true);
     ng.setVisible(true);
     Group createdGroup = ng.getCreatedGroup();
     updateStatus("New Group Created : " + createdGroup.getGroupName());
+    addNodeToTree(createdGroup.getGroupName(), root);
 }//GEN-LAST:event_mnuNewGroupActionPerformed
 
     /**

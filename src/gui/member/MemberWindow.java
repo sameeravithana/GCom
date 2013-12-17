@@ -4,12 +4,13 @@
  */
 
 /*
- * MainFrame.java
+ * MemberWindow.java
  *
  * Created on Dec 5, 2013, 6:36:59 PM
  */
-package gui;
+package gui.member;
 
+import gui.SingleChat;
 import java.awt.Color;
 import java.awt.Component;
 import java.io.BufferedReader;
@@ -24,19 +25,20 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 
+
 /**
  *
  * @author Praneeth
  */
-public class MainFrame extends javax.swing.JFrame {
+public class MemberWindow extends javax.swing.JFrame {
 
-    /** Creates new form MainFrame */
+    /** Creates new form MemberWindow */
     ArrayList<String> contacts;
 
-    public MainFrame() {
+    public MemberWindow() {
         initComponents();
         // setLocationRelativeTo(null);
-        setIconImage(new ImageIcon(MainFrame.class.getResource("/pics/logo.png")).getImage());
+        setIconImage(new ImageIcon(MemberWindow.class.getResource("/pics/logo.png")).getImage());
         contacts = getContacts();
         fillContacts(contacts);
         lstContacts.setCellRenderer(new myRenderer());
@@ -48,7 +50,7 @@ public class MainFrame extends javax.swing.JFrame {
         int c = 0;
         for (int i = 0; i < contacts.size(); i++) {
             JLabel lb = new JLabel(contacts.get(i));
-            lb.setIcon(new ImageIcon(new ImageIcon(MainFrame.class.getResource("/pics/online.png")).getImage()));
+            lb.setIcon(new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/online.png")).getImage()));
             System.out.println(contacts.get(i));
             //lstContacts.add(j);
             v.add(lb);
@@ -91,13 +93,13 @@ public class MainFrame extends javax.swing.JFrame {
 
         logoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/logo.png"))); // NOI18N
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Dialog", 0, 18));
         jLabel1.setText("Praneeth Nilanga Peiris");
 
-        cmbStatus.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        cmbStatus.setFont(new java.awt.Font("Dialog", 0, 12));
         cmbStatus.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Online", "Away", "Busy", "Invisible" }));
 
-        lstContacts.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        lstContacts.setFont(new java.awt.Font("Dialog", 0, 14));
         lstContacts.setComponentPopupMenu(contactListPopUp);
         lstContacts.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -205,7 +207,7 @@ public class MainFrame extends javax.swing.JFrame {
                 c.add(br.readLine().trim());
             }
         } catch (Exception ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
         return c;
     }
@@ -253,7 +255,7 @@ public class MainFrame extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                new MainFrame().setVisible(true);
+                new MemberWindow().setVisible(true);
             }
         });
     }
@@ -275,7 +277,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenu viewMenu;
     // End of variables declaration//GEN-END:variables
 }
-
 class myRenderer extends DefaultListCellRenderer {
 
     @Override

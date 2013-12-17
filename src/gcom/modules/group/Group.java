@@ -50,6 +50,7 @@ public class Group {
         if (members.containsKey(member.getId())) {
             throw new GroupManagementException("Duplicate Member Id : Member id" + memberId + " already exists in " + groupID);
         } else {
+            
             members.put(memberId, member);
             
         }
