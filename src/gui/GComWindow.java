@@ -25,7 +25,7 @@ import javax.swing.tree.DefaultTreeModel;
  * @author ens13pps
  */
 public class GComWindow extends javax.swing.JFrame {
-    
+
     private RMIServer server;
     private DefaultTreeModel tm;
     private DefaultMutableTreeNode root;
@@ -36,17 +36,17 @@ public class GComWindow extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         tm = (DefaultTreeModel) trGComStructure.getModel();
         root = (DefaultMutableTreeNode) tm.getRoot();
-        
+
     }
-    
+
     private void updateStatus(String newStatus) {
         txtLog.setText(txtLog.getText() + newStatus + "\n");
     }
-    
+
     private void addNodeToTree(String child, DefaultMutableTreeNode parent) {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(child, true);
         tm.insertNodeInto(ch, parent, parent.getChildCount());
-        
+
     }
 
     /** This method is called from within the constructor to
@@ -138,19 +138,25 @@ public class GComWindow extends javax.swing.JFrame {
 
 private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuStartServerActionPerformed
     if (mnuStartServer.getState()) {
-        String input = JOptionPane.showInputDialog(this, "Enter port number :", "Port", JOptionPane.QUESTION_MESSAGE, null, null, "1099") + "";
-        if (input != null || !input.trim().isEmpty()) {
+        JOptionPane jo = new JOptionPane("Enter port number :", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, null, "1099");
+        jo.setVisible(true);
+        Object value = jo.getValue();
+        String input = null;
+        JOptionPane.showConfirmDialog(GComWindow.this, "Enter port number :", "Port", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (value != null || !(input = value.toString().trim()).isEmpty()) {
+
             try {
                 int port = Integer.parseInt(input);
                 server = new RMIServer(port);
                 server.start();
                 String msg = "RMI Registry Server started on port " + port;
                 txtLog.setText(txtLog.getText() + msg + "\n");
-                
             } catch (RemoteException e) {
                 JOptionPane.showMessageDialog(this, "Cannot connect to the RMIRegistry on given port : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+                mnuStartServer.setState(false);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid port number : " + input, "Invalid Port", JOptionPane.ERROR_MESSAGE);
+                mnuStartServer.setState(false);
             }
         }
     } else {
@@ -160,16 +166,19 @@ private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GE
             txtLog.setText(txtLog.getText() + msg + "\n");
         } catch (NoSuchObjectException ex) {
             Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+            mnuStartServer.setState(true);
         }
     }
 }//GEN-LAST:event_mnuStartServerActionPerformed
-    
+
 private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewGroupActionPerformed
     NewGroup ng = new NewGroup(GComWindow.this, true);
     ng.setVisible(true);
     Group createdGroup = ng.getCreatedGroup();
-    updateStatus("New Group Created : " + createdGroup.getGroupName());
-    addNodeToTree(createdGroup.getGroupName(), root);
+    if (createdGroup != null) {
+        updateStatus("New Group Created : " + createdGroup.getGroupName());
+        addNodeToTree(createdGroup.getGroupName(), root);
+    }
 }//GEN-LAST:event_mnuNewGroupActionPerformed
 
     /**
@@ -201,7 +210,7 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            
+
             public void run() {
                 new GComWindow().setVisible(true);
             }
