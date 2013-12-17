@@ -5,33 +5,43 @@
 package gcom.modules.group;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  *
  * @author SamTube405
  */
-public class Message implements gcom.interfaces.Message{
+public class Message implements gcom.interfaces.IMessage{
     private String group_name;
     private Member source;
     private Member destination;
-    private Serializable message;
+    private String message;
+    ArrayList<String> params;
     private TYPE_MESSAGE type;
             
-    public Message(String group_name, Member source, Serializable message, TYPE_MESSAGE type) {
+    public Message(String group_name, Member source, String message, TYPE_MESSAGE type) {
         this.group_name=group_name;
         this.source=source;
         this.message=message;
         this.type=type;
     }
     
-     public Message(Serializable message, TYPE_MESSAGE type) {        
-        this.message=message;
+    public Message(String group_name, Member source, ArrayList<String> message, TYPE_MESSAGE type) {
+        this.group_name=group_name;
+        this.source=source;
+        this.params=message;
         this.type=type;
     }
+    
+     
 
-    public Serializable getMessage() {
+    public String getMessage() {
         return this.message;
+    }
+    
+    public ArrayList<String> getParams(){
+        return this.params;
     }
 
     public TYPE_MESSAGE getMessageType() {
@@ -54,8 +64,6 @@ public class Message implements gcom.interfaces.Message{
         return this.destination;
     }
     
-    public HashMap<String, Integer> getGroups(){
-        return GroupManagement.getGroups();
-    }
+   
     
 }

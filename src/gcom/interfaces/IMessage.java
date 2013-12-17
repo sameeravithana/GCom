@@ -6,19 +6,19 @@ package gcom.interfaces;
 
 import gcom.modules.group.Member;
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  *
  * @author samtube405
  */
-public interface Message extends Serializable{
+public interface IMessage extends Serializable{
     public static enum TYPE_MESSAGE {
 		APPLICATION, JOINREQUEST, PARTREQUEST, PARTRESPONSE,
 		REJECT, WELCOME, GOTMEMBER, LOSTMEMBER,
-		ELECTION, CLOSE
+		ELECTION, CLOSE,UPDATESTATUS
 	};
-    public Serializable getMessage();
+    public String getMessage();
     
     public TYPE_MESSAGE getMessageType();
     
@@ -30,6 +30,6 @@ public interface Message extends Serializable{
     
     public Member getDestination();
     
-    public HashMap<String, Integer> getGroups();
+    public ArrayList<String> getParams();
     
 }
