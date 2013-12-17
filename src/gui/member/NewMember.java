@@ -30,6 +30,7 @@ public class NewMember extends javax.swing.JDialog {
     public NewMember(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setLocationRelativeTo(null);
 
     }
 
@@ -173,6 +174,12 @@ public class NewMember extends javax.swing.JDialog {
 private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
     String host = cmbHost.getSelectedItem().toString().trim();
     int port = -1;
+    if (host.isEmpty()) {
+        int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid host specified : " + host + "\nDo you want to use localhost?", "Invalid Host", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        if (res == JOptionPane.YES_OPTION) {
+            host = "localhost";
+        }
+    }
     try {
         port = Integer.parseInt(cmbPort.getSelectedItem().toString().trim());
     } catch (Exception e) {
@@ -181,14 +188,7 @@ private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             port = 1099;
         }
     }
-    if (!host.isEmpty()) {
-        checkConnection(host, port);
-    } else {
-        int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid host specified : " + port + "\nDo you want to use localhost?", "Invalid Host", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-        if (res == JOptionPane.YES_OPTION) {
-            host = "localhost";
-        }
-    }
+    checkConnection(host, port);
 
 }//GEN-LAST:event_btnConnectActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -205,4 +205,8 @@ private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     private javax.swing.JLabel lblMsg;
     private javax.swing.JTextField txtMember;
     // End of variables declaration//GEN-END:variables
+
+    public static void main(String[] args) {
+        new NewMember(null, true).setVisible(true);
+    }
 }

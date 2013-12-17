@@ -14,6 +14,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RemoteObject;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -72,5 +74,13 @@ public class RMIServer {
 
     public RemoteObject getReference(String name) throws AccessException, RemoteException, NotBoundException {
         return (RemoteObject) registry.lookup(name);
+    }
+
+    public static void main(String[] args) {
+        try {
+            LocateRegistry.getRegistry("dthdfgh", 0);
+        } catch (RemoteException ex) {
+            Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
