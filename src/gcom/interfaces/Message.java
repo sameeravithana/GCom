@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 public interface Message extends Serializable{
     public static enum TYPE_MESSAGE {
-		APPLICATION, JOINREQUEST, PARTREQUEST,
+		APPLICATION, JOINREQUEST, PARTREQUEST, PARTRESPONSE,
 		REJECT, WELCOME, GOTMEMBER, LOSTMEMBER,
 		ELECTION, CLOSE
 	};

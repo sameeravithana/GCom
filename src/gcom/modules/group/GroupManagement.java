@@ -4,6 +4,7 @@
  */
 package gcom.modules.group;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -74,5 +75,11 @@ public class GroupManagement {
         } else {
             throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
         }
+    }
+    
+    public static ArrayList<String> getGroups(){
+        ArrayList<String> gs=new ArrayList<String>();
+        for(String key:groups.keySet()) gs.add(key);
+        return gs;
     }
 }

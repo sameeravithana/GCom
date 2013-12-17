@@ -5,6 +5,7 @@
 package gcom.modules.group;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  *
@@ -20,6 +21,11 @@ public class Message implements gcom.interfaces.Message{
     public Message(String group_name, Member source, Serializable message, TYPE_MESSAGE type) {
         this.group_name=group_name;
         this.source=source;
+        this.message=message;
+        this.type=type;
+    }
+    
+     public Message(Serializable message, TYPE_MESSAGE type) {        
         this.message=message;
         this.type=type;
     }
@@ -48,6 +54,8 @@ public class Message implements gcom.interfaces.Message{
         return this.destination;
     }
     
-    
+    public ArrayList<String> getGroups(){
+        return GroupManagement.getGroups();
+    }
     
 }
