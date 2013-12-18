@@ -12,10 +12,9 @@ package gui.member;
 
 import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
+import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
-import gcom.interfaces.IMessage.TYPE_MESSAGE;
 import gcom.modules.group.Group;
-import gcom.modules.group.GroupManagementException;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import java.awt.Color;
@@ -24,7 +23,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,11 +37,14 @@ public class NewMember extends javax.swing.JDialog {
     private Registry registry;
     private HashMap<String, Integer> gs;
     private IGroupManagement igm;
+    private IMember imem;
+    private RMIServer srv;
+    String groupName;
 
     /**
      * Creates new form NewMember
      */
-    public NewMember(java.awt.Frame parent, boolean modal) {
+    public NewMember(java.awt.Frame parent, boolean modal) throws RemoteException {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
@@ -54,7 +55,7 @@ public class NewMember extends javax.swing.JDialog {
     private void checkConnection(String host, int port) {
 
         try {
-            RMIServer srv = new RMIServer(host, port);
+            srv = new RMIServer(host, port);
             registry = srv.start();
             igm = srv.regLookUp("IGroupManagement");
             gs = igm.getGroupDetails();
@@ -91,6 +92,7 @@ public class NewMember extends javax.swing.JDialog {
         cmbGroup = new javax.swing.JComboBox();
         txtMember = new javax.swing.JTextField();
         btnCreateMember = new javax.swing.JButton();
+        btnUpdate = new javax.swing.JButton();
         btnConnect = new javax.swing.JButton();
         lblMsg = new javax.swing.JLabel();
 
@@ -119,6 +121,13 @@ public class NewMember extends javax.swing.JDialog {
             }
         });
 
+        btnUpdate.setText("Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelMemLayout = new javax.swing.GroupLayout(panelMem);
         panelMem.setLayout(panelMemLayout);
         panelMemLayout.setHorizontalGroup(
@@ -134,7 +143,8 @@ public class NewMember extends javax.swing.JDialog {
                     .addComponent(cmbGroup, 0, 186, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelMemLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnUpdate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnCreateMember, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -150,7 +160,9 @@ public class NewMember extends javax.swing.JDialog {
                     .addComponent(jLabel2)
                     .addComponent(txtMember, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnCreateMember)
+                .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCreateMember)
+                    .addComponent(btnUpdate))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
@@ -237,7 +249,7 @@ private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 }//GEN-LAST:event_btnConnectActionPerformed
 
 private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateMemberActionPerformed
-    String groupName = cmbGroup.getSelectedItem().toString().trim();
+    groupName = cmbGroup.getSelectedItem().toString().trim();
     String memName = txtMember.getText();
     if (memName.isEmpty()) {
         int res = JOptionPane.showConfirmDialog(NewMember.this, "Member name can not be empty", "Invalid Member", JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -245,24 +257,80 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
         ArrayList<String> params = new ArrayList<String>();
         params.add(groupName);
         params.add(memName);
-        Message msg = new Message(groupName, null, params, TYPE_MESSAGE.JOINREQUEST);
-        try {
-            Group group = igm.sendRequest(msg);
-
-            setVisible(false);
-            new MemberWindow(memName, group).setVisible(true);
+        Message msg = new Message(groupName, null, params, IMessage.TYPE_MESSAGE.JOINREQUEST);
 
 
-        } catch (RemoteException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+
+        if (gs.get(groupName) <= 0) {
+            try {
+                Group parent = igm.sendRequest(msg);
+                //setVisible(false);
+                //new MemberWindow(memName, parent).setVisible(true);
+                System.out.println("Member count: " + parent.getMemberCount());
+
+
+            } catch (RemoteException ex) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            try {
+                imem = srv.regMemLookUp(groupName);
+                //imem.setMemberWinow(this);
+                Group parent = imem.sendRequest(msg);
+                //setVisible(false);
+                //new MemberWindow(memName, parent).setVisible(true);
+                System.out.println("Member count: " + parent.getMemberCount());
+
+
+            } catch (AccessException ex) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RemoteException ex) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+
+//        ArrayList<String> params = new ArrayList<String>();
+//        params.add(groupName);
+//        params.add(memName);
+//        Message msg = new Message(groupName, null, params, IMessage.TYPE_MESSAGE.JOINREQUEST);
+//        try {
+//            Group group = igm.sendRequest(msg);
+//
+//            setVisible(false);
+//            new MemberWindow(memName, group).setVisible(true);
+//
+//
+//        } catch (RemoteException ex) {
+//            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+
 
     }
 
 }//GEN-LAST:event_btnCreateMemberActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+
+        try {
+            if (imem == null) {
+                imem = srv.regMemLookUp(groupName);
+            }
+            Group parent = imem.getParentGroup();
+            System.out.println("Updated member count: " + parent.getMemberCount());
+            JOptionPane.showMessageDialog(this, "Updated member count: " + parent.getMemberCount());
+        } catch (RemoteException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//GEN-LAST:event_btnUpdateActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnCreateMember;
+    private javax.swing.JButton btnUpdate;
     private javax.swing.JComboBox cmbGroup;
     private javax.swing.JComboBox cmbHost;
     private javax.swing.JComboBox cmbPort;
@@ -275,7 +343,7 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JTextField txtMember;
     // End of variables declaration//GEN-END:variables
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws RemoteException {
 
         new NewMember(null, true).setVisible(true);
     }

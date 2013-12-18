@@ -5,7 +5,7 @@
 package gcom;
 
 import gcom.interfaces.IGroupManagement;
-import gcom.modules.group.Member;
+import gcom.interfaces.IMember;
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NoSuchObjectException;
@@ -35,20 +35,21 @@ public class RMIServer {
     }
 
     public RMIServer(String host, int port) throws RemoteException {
-        this.host=host;
-        this.port=port;
-        this.serverFlag=false;
-    }  
-    
-    public Registry start()  throws RemoteException{
-        if(this.serverFlag)  registry=LocateRegistry.createRegistry(this.port);
-        else{
-            registry=LocateRegistry.getRegistry(this.host, this.port);
+        this.host = host;
+        this.port = port;
+        this.serverFlag = false;
+    }
+
+    public Registry start() throws RemoteException {
+        if (this.serverFlag) {
+            registry = LocateRegistry.createRegistry(this.port);
+        } else {
+            registry = LocateRegistry.getRegistry(this.host, this.port);
 
         }
         return registry;
     }
-    
+
     public void stop() throws NoSuchObjectException {
         UnicastRemoteObject.unexportObject(this.registry, true);
     }
@@ -60,8 +61,12 @@ public class RMIServer {
     public void rebind(String name, RemoteObject ro) throws AccessException, RemoteException {
         registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
     }
-    
-     public void rebind(String name, IGroupManagement ro) throws AccessException, RemoteException {
+
+    public void rebind(String name, IGroupManagement ro) throws AccessException, RemoteException {
+        registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
+    }
+
+    public void rebind(String name, IMember ro) throws AccessException, RemoteException {
         registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
     }
 
@@ -71,6 +76,10 @@ public class RMIServer {
 
     public IGroupManagement regLookUp(String name) throws AccessException, RemoteException, NotBoundException {
         return (IGroupManagement) registry.lookup(name);
+    }
+
+    public IMember regMemLookUp(String name) throws AccessException, RemoteException, NotBoundException {
+        return (IMember) registry.lookup(name);
     }
 
     public String[] list() throws AccessException, RemoteException {
