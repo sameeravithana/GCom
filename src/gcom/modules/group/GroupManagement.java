@@ -9,6 +9,7 @@ import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
 import gui.GComWindow;
+import gui.member.NewMember;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -53,23 +54,23 @@ public class GroupManagement implements IGroupManagement {
         }
     }
 
-    public void addMember(String groupId, Member member) throws GroupManagementException {
-        if (!groups.containsKey(groupId)) {
-            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
-        } else {
-            Group group = groups.get(groupId);
-            group.addMember(member);
-        }
-    }
-
-    public Member getMember(String groupId, String memberId) throws GroupManagementException {
-        if (!groups.containsKey(groupId)) {
-            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
-        } else {
-            Group group = groups.get(groupId);
-            return group.getMember(memberId);
-        }
-    }
+//    public void addMember(String groupId, Member member) throws GroupManagementException {
+//        if (!groups.containsKey(groupId)) {
+//            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
+//        } else {
+//            Group group = groups.get(groupId);
+//            group.addMember(member);
+//        }
+//    }
+//
+//    public Member getMember(String groupId, String memberId) throws GroupManagementException {
+//        if (!groups.containsKey(groupId)) {
+//            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
+//        } else {
+//            Group group = groups.get(groupId);
+//            return group.getMember(memberId);
+//        }
+//    }
 
     public void removeMember(String groupId, String memberId) throws GroupManagementException {
         if (!groups.containsKey(groupId)) {
@@ -101,7 +102,7 @@ public class GroupManagement implements IGroupManagement {
         return getGroups();
     }
 
-    public Group sendRequest(gcom.modules.group.Message message) throws RemoteException {
+    public IMember sendRequest(gcom.modules.group.Message message) throws RemoteException {
 //        Group parent = groups.get(message.getParams().get(0));
 //        Member m = new Member(message.getParams().get(1), parent);
 //
@@ -124,25 +125,27 @@ public class GroupManagement implements IGroupManagement {
 //            
 //        }
 //        return parent;
-        Group parent = groups.get(message.getParams().get(0));
-        Member m = new Member(message.getParams().get(1), parent);
-        try {
+        Group parent = groups.get(message.getParams().get(0));        
+        IMember m = message.getSource();
+        try {       
             parent.addMember(m);
-            updateStatus(m, IMessage.TYPE_MESSAGE.UPDATESTATUS);
             
-            RMIServer rmi = new RMIServer("localhost", 1099);
-            rmi.start();
-            IMember stub = (IMember) UnicastRemoteObject.exportObject(m, 0);
-            rmi.rebind(parent.getGroupName(), stub);
-            m.setGroupLeader(true);
-
         } catch (GroupManagementException ex) {
             Logger.getLogger(GroupManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if (parent.getMemberCount() <= 0) {
+            m.setParentGroup(parent);
+            
+            //updateStatus(m, IMessage.TYPE_MESSAGE.UPDATESTATUS);
+            
+            
+            
+            
+            
             m.setGroupLeader(true);
-        }
-        return parent;
+
+       
+        
+        return m;
 
     }
 

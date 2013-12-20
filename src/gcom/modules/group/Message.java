@@ -4,9 +4,8 @@
  */
 package gcom.modules.group;
 
-import java.io.Serializable;
+import gcom.interfaces.IMember;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  *
@@ -14,7 +13,7 @@ import java.util.HashMap;
  */
 public class Message implements gcom.interfaces.IMessage{
     private String group_name;
-    private Member source;
+    private IMember source;  
     private Member destination;
     private String message;
     ArrayList<String> params;
@@ -27,7 +26,9 @@ public class Message implements gcom.interfaces.IMessage{
         this.type=type;
     }
     
-    public Message(String group_name, Member source, ArrayList<String> message, TYPE_MESSAGE type) {
+   
+    
+    public Message(String group_name, IMember source, ArrayList<String> message, TYPE_MESSAGE type) {
         this.group_name=group_name;
         this.source=source;
         this.params=message;
@@ -52,7 +53,7 @@ public class Message implements gcom.interfaces.IMessage{
         return group_name;
     }
 
-    public Member getSource() {
+    public IMember getSource() {
         return source;
     }
 
@@ -63,6 +64,10 @@ public class Message implements gcom.interfaces.IMessage{
     public Member getDestination() {
         return this.destination;
     }
+
+    
+
+  
     
    
     

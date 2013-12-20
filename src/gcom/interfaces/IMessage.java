@@ -24,7 +24,7 @@ public interface IMessage extends Serializable{
     
     public String getGroupName();
 
-    public Member getSource();
+    public IMember getSource();
     
     public void setDestination(Member destination);
     

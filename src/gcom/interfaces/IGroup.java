@@ -9,13 +9,14 @@ import gcom.modules.group.GroupManagementException;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.rmi.Remote;
+import java.util.HashMap;
 
 /**
  *
  * @author ens13pps
  */
-public interface IGroup extends Serializable{
+public interface IGroup extends Remote,Serializable{
 
     /**
      * @return the comMode
@@ -32,11 +33,11 @@ public interface IGroup extends Serializable{
      */
     public int getMaxMembers();
 
-    public Member getMember(String memberId) throws GroupManagementException;
+    public IMember getMember(String memberId) throws GroupManagementException;
 
     public int getMemberCount();
 
-    public ArrayList<Member> getMembersList();
+    public HashMap<String, IMember>  getMembersList();
 
     public void initiateElection(Member initiater);
 

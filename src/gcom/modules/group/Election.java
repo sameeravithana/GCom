@@ -4,7 +4,9 @@
  */
 package gcom.modules.group;
 
+import gcom.interfaces.IMember;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -19,11 +21,11 @@ public class Election {
 
     public Election(Member initiater) {
         Group group = initiater.getParentGroup();
-        ArrayList<Member> membersList = group.getMembersList();
+        HashMap<String, IMember> membersList = group.getMembersList();
 
         // make the initiater 1st in the list
-        membersList.remove(initiater);
-        membersList.add(0, initiater);
+        //membersList.remove(initiater);
+        //membersList.add(0, initiater);
         electionSize = membersList.size();
         participation = new boolean[electionSize];
     }

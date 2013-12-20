@@ -10,12 +10,14 @@
  */
 package gui.member;
 
+import gcom.interfaces.IMember;
 import gcom.modules.group.Group;
 import gcom.modules.group.Member;
 import gui.SingleChat;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -209,10 +211,10 @@ public class MemberWindow extends javax.swing.JFrame {
     private ArrayList<String> getContacts() {
         ArrayList<String> c = new ArrayList<String>();
         try {
-            ArrayList<Member> membersList = group.getMembersList();
-            for (Member m : membersList) {
-                c.add(m.getName());
-            }
+            HashMap<String, IMember> membersList = group.getMembersList();
+//            for (Member m : membersList) {
+//                c.add(m.getName());
+//            }
         } catch (Exception ex) {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }

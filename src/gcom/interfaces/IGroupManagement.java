@@ -19,7 +19,7 @@ public interface IGroupManagement extends Remote {
 
     public HashMap<String, Integer> getGroupDetails() throws RemoteException;
 
-    public Group sendRequest(gcom.modules.group.Message message) throws RemoteException;
+    public IMember sendRequest(gcom.modules.group.Message message) throws RemoteException;
 
     public void updateStatus(IMessage message) throws RemoteException, GroupManagementException;
 

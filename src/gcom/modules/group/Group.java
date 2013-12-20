@@ -5,8 +5,11 @@
 package gcom.modules.group;
 
 import gcom.interfaces.IGroup;
+import gcom.interfaces.IMember;
 import gcom.modules.com.CommunicationMode;
-import java.util.ArrayList;
+import java.io.Serializable;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,10 +18,10 @@ import java.util.Set;
  *
  * @author praneeth
  */
-public class Group implements IGroup {
+public class Group implements Remote,Serializable,IGroup {
 
     private String groupID;
-    private HashMap<String, Member> members;
+    private HashMap<String, IMember> members;
     private CommunicationMode comMode;
     private int maxMembers = 2000;
     private static int counter;
@@ -30,7 +33,7 @@ public class Group implements IGroup {
 
     public Group(String groupID) {
         this.groupID = groupID;
-        members = new HashMap<String, Member>();
+        members = new HashMap<String, IMember>();
     }
 
     public Group(String groupID, int maxMembers) {
@@ -40,10 +43,10 @@ public class Group implements IGroup {
 
     public Group(GroupDef gDef) {
         this.gDef = gDef;
-        members = new HashMap<String, Member>();
+        members = new HashMap<String, IMember>();
     }
 
-    public void addMember(Member member) throws GroupManagementException {
+    public void addMember(IMember member) throws GroupManagementException, RemoteException {
         String memberId = member.getName();
         if (members.containsKey(member.getName())) {
             throw new GroupManagementException("Duplicate Member Id : Member id" + memberId + " already exists in " + groupID);
@@ -63,7 +66,7 @@ public class Group implements IGroup {
     }
 
     @Override
-    public Member getMember(String memberId) throws GroupManagementException {
+    public IMember getMember(String memberId) throws GroupManagementException {
         if (members.containsKey(memberId)) {
             return members.get(memberId);
         } else {
@@ -72,8 +75,8 @@ public class Group implements IGroup {
     }
 
     @Override
-    public ArrayList<Member> getMembersList() {
-        return new ArrayList(members.values());
+    public HashMap<String, IMember> getMembersList() {
+        return members;
     }
 
     /**
@@ -122,28 +125,28 @@ public class Group implements IGroup {
         this.maxMembers = maxMembers;
     }
 
-    @Override
-    public void send(Message message) {
-        Set<String> keySet = members.keySet();
-        Iterator<String> iterator = keySet.iterator();
-        while (iterator.hasNext()) {
-            String next = iterator.next();
-            Member m = members.get(next);
-            send(m, message);
-        }
-    }
+//    @Override
+//    public void send(Message message) {
+//        Set<String> keySet = members.keySet();
+//        Iterator<String> iterator = keySet.iterator();
+//        while (iterator.hasNext()) {
+//            String next = iterator.next();
+//            Member m = members.get(next);
+//            send(m, message);
+//        }
+//    }
 
     @Override
     public void initiateElection(Member initiater) {
-        ArrayList<Member> membersList = getMembersList();
-        for (Member m : membersList) {
-            m.setElectionParticipant(false);
-        }
-        initiater.setElectionParticipant(true);
-
-        // make the initiater 1st in the list
-        membersList.remove(initiater);
-        membersList.add(0, initiater);
+//        HashMap<String, Member> membersList = getMembersList();
+//        for (Member m : membersList) {
+//            m.setElectionParticipant(false);
+//        }
+//        initiater.setElectionParticipant(true);
+//
+//        // make the initiater 1st in the list
+//        membersList.remove(initiater);
+//        membersList.add(0, initiater);
 
     }
 
@@ -155,5 +158,9 @@ public class Group implements IGroup {
     public void finalize() throws Throwable {
         super.finalize();
         System.out.println("Group " + groupID + " is destroyed.");
+    }
+
+    public void send(Message message) {
+        
     }
 }

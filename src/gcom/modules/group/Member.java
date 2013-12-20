@@ -4,15 +4,15 @@
  */
 package gcom.modules.group;
 
-import gcom.RMIServer;
 import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
-import gui.member.NewMember;
 import java.io.Serializable;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.RemoteObject;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author praneeth
  */
-public class Member implements Serializable, IMember {
+public class Member implements IMember{
 
     private String name;
     private int identifier;
@@ -30,6 +30,7 @@ public class Member implements Serializable, IMember {
     private boolean isElectionParticipant;
     private boolean isGroupLeader;
     private HashMap<String, Member> members;
+    
     
 
     public Member(String name, Group parent) {
@@ -63,6 +64,7 @@ public class Member implements Serializable, IMember {
      */
     public void setParentGroup(Group parentGroup) {
         this.parentGroup = parentGroup;
+        //System.out.println(this.getName()+" Mem count: "+this.parentGroup.getMemberCount());
     }
 
     /**
@@ -121,8 +123,10 @@ public class Member implements Serializable, IMember {
         this.isGroupLeader = isGroupLeader;
     }
 
-    public Group sendRequest(Message message) throws RemoteException, AccessException {
-        Member m = new Member(message.getParams().get(1), this.parentGroup);
+    public IMember sendRequest(Message message) throws RemoteException, AccessException {
+        //Member m = new Member(message.getParams().get(1), this.parentGroup);
+        //m.setParentGroup(this.parentGroup);
+        IMember m = message.getSource();
 
         if (message.getMessageType() == IMessage.TYPE_MESSAGE.JOINREQUEST) {
             try {
@@ -139,20 +143,34 @@ public class Member implements Serializable, IMember {
 
         }
 
-        return this.parentGroup;
+        return m;
     }
 
     public void multicast() throws RemoteException, AccessException, NotBoundException {
-        for (Member m : this.parentGroup.getMembersList()) {
+        HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+        for (String key : membersList.keySet()) {
             //RMIServer srv = new RMIServer("localhost", 1099);
             //srv.start();
             //IMember imem = srv.regMemLookUp(m.getName());
+            //m.updateGroup(this.parentGroup);
+            //System.out.println("MEM OBJECT TYPE: "+(m instanceof Remote));
+            //System.out.println("I AM LEADER PROCESS: "+this.getName());
+            //m.setParentGroup(this.parentGroup);
+            IMember m=membersList.get(key);             
             m.updateGroup(this.parentGroup);
+            //System.out.println(m.getName()+" My Parent count: "+m.getParentGroup().getMemberCount());
+           
         }
     }
 
     public void updateGroup(Group parentGroup) throws RemoteException {
         this.parentGroup = parentGroup;        
-        System.out.println(this.getName() + " -> Update Group Message: " + this.parentGroup.getMemberCount());
+        System.out.println(this.getName() + " -> Update Group Message: New member count: " + this.parentGroup.getMemberCount());
     }
+
+    public void updateMember(Member member) throws RemoteException {
+        member.setParentGroup(this.parentGroup);
+    }
+
+ 
 }
