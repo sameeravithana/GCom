@@ -16,7 +16,7 @@ public interface IMessage extends Serializable{
     public static enum TYPE_MESSAGE {
 		APPLICATION, JOINREQUEST, PARTREQUEST, PARTRESPONSE,
 		REJECT, WELCOME, GOTMEMBER, LOSTMEMBER,
-		ELECTION, CLOSE,UPDATESTATUS
+		ELECTION, ELECTED, CLOSE,UPDATESTATUS
 	};
     public String getMessage();
     

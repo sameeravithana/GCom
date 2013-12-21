@@ -16,6 +16,8 @@ public class Message implements gcom.interfaces.IMessage{
     private IMember source;  
     private Member destination;
     private String message;
+    private int imessage;
+    private int position;
     ArrayList<String> params;
     private TYPE_MESSAGE type;
             
@@ -35,6 +37,13 @@ public class Message implements gcom.interfaces.IMessage{
         this.type=type;
     }
     
+    public Message(String group_name, int pos, int message, TYPE_MESSAGE type) {
+        this.group_name=group_name;
+        this.position=pos;
+        this.imessage=message;
+        this.type=type;
+    }
+    
      
 
     public String getMessage() {
@@ -46,7 +55,7 @@ public class Message implements gcom.interfaces.IMessage{
     }
 
     public TYPE_MESSAGE getMessageType() {
-        return this.type;
+        return this.getType();
     }
 
     public String getGroupName() {
@@ -63,6 +72,48 @@ public class Message implements gcom.interfaces.IMessage{
 
     public Member getDestination() {
         return this.destination;
+    }
+
+    /**
+     * @return the imessage
+     */
+    public int getImessage() {
+        return imessage;
+    }
+
+    /**
+     * @param imessage the imessage to set
+     */
+    public void setImessage(int imessage) {
+        this.imessage = imessage;
+    }
+
+    /**
+     * @return the type
+     */
+    public TYPE_MESSAGE getType() {
+        return type;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(TYPE_MESSAGE type) {
+        this.type = type;
+    }
+
+    /**
+     * @return the position
+     */
+    public int getPosition() {
+        return position;
+    }
+
+    /**
+     * @param position the position to set
+     */
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     

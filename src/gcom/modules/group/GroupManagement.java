@@ -103,44 +103,20 @@ public class GroupManagement implements IGroupManagement {
     }
 
     public IMember sendRequest(gcom.modules.group.Message message) throws RemoteException {
-//        Group parent = groups.get(message.getParams().get(0));
-//        Member m = new Member(message.getParams().get(1), parent);
-//
-//        if (message.getMessageType() == IMessage.TYPE_MESSAGE.JOINREQUEST) {
-//            
-//                try {
-//                    parent.addMember(m);
-//                    //m.setParentGroup(parent);
-//                    updateStatus(m, IMessage.TYPE_MESSAGE.UPDATESTATUS);
-//
-//                } catch (GroupManagementException ex) {
-//                    Logger.getLogger(GroupManagement.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                RMIServer rmi = new RMIServer("localhost", 1099);
-//                rmi.start();
-//
-//                IMember stub = (IMember) UnicastRemoteObject.exportObject(m, 0);
-//                rmi.rebind(parent.getGroupName(), stub);
-//                m.setGroupLeader(true);
-//            
-//        }
-//        return parent;
+
         Group parent = groups.get(message.getParams().get(0));        
         IMember m = message.getSource();
         try {       
             parent.addMember(m);
             
+            m.addMember(m);
+            
+            
         } catch (GroupManagementException ex) {
             Logger.getLogger(GroupManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
-            m.setParentGroup(parent);
-            
-            //updateStatus(m, IMessage.TYPE_MESSAGE.UPDATESTATUS);
-            
-            
-            
-            
-            
+            m.setParentGroup(parent);            
+            //updateStatus(m, IMessage.TYPE_MESSAGE.UPDATESTATUS);        
             m.setGroupLeader(true);
 
        

@@ -11,8 +11,7 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.LinkedList;
 
 /**
  *
@@ -77,6 +76,10 @@ public class Group implements Remote,Serializable,IGroup {
     @Override
     public HashMap<String, IMember> getMembersList() {
         return members;
+    }
+    
+    public LinkedList<IMember> getMembersLList() {
+        return new LinkedList<IMember>(members.values());
     }
 
     /**
