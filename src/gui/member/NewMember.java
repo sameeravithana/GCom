@@ -314,6 +314,11 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
                             getMember().setElectionParticipant(true);
                             getMember().callElection(emessage);   
                             
+                            if(getMember().isGroupLeader()){
+                                System.out.println("HURAAAYYY.....AM THE LEADER");
+                                srv.rebind(getMember().getParentGroup().getGroupName(), stub);
+                                
+                            }
                             
                         }else{
                             System.out.println("You have no neighbours..So you're the leader! "+getMember().getName());
