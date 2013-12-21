@@ -6,25 +6,22 @@ package gcom.modules.group;
 
 import gcom.RMIServer;
 import gcom.interfaces.IMember;
-import gcom.interfaces.IMessage;
-import java.io.Serializable;
+import gcom.interfaces.MESSAGE_TYPE;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.RemoteObject;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
 
 /**
  *
  * @author praneeth
  */
-public class Member implements IMember {
+public class Member extends JLabel implements IMember {
 
     private String name;
     private int identifier;
@@ -38,9 +35,9 @@ public class Member implements IMember {
     public Member(String name, Group parent) throws RemoteException {
         this.parentGroup = parent;
         this.name = name;
-        election = new Election(this);
         members = new LinkedList<IMember>();
         identifier = new Random().nextInt(100) + 1;
+        //election = new Election(this);
     }
 
     public void start() {
@@ -58,6 +55,8 @@ public class Member implements IMember {
      */
     public void setParentGroup(Group parentGroup) {
         this.parentGroup = parentGroup;
+        System.out.println("MEMBER COUNT : " + parentGroup.getMemberCount());
+        election = new Election(this);
         //System.out.println(this.getName()+" Mem count: "+this.parentGroup.getMemberCount());
     }
 
@@ -118,34 +117,22 @@ public class Member implements IMember {
     }
 
     public IMember sendRequest(Message message) throws RemoteException, AccessException {
-        //Member m = new Member(message.getParams().get(1), this.parentGroup);
-        //m.setParentGroup(this.parentGroup);
         IMember m = message.getSource();
 
-        if (message.getMessageType() == IMessage.TYPE_MESSAGE.JOINREQUEST) {
+        if (message.getMessageType() == MESSAGE_TYPE.JOIN_REQUEST) {
             try {
                 this.parentGroup.addMember(m);
-
                 this.addMember(m);
-
                 System.out.println("LEADER ADDED MEMBER: " + m.getName());
-
                 m.setParentGroup(this.parentGroup);
-
                 updateMembers(m);
-
                 multicast(m);
-
-
-
             } catch (GroupManagementException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NotBoundException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
-
         return m;
     }
 
@@ -159,7 +146,6 @@ public class Member implements IMember {
             if (!(key.equals(this.getName()) || key.equals(newmember.getName()))) {
                 m.addMember(newmember);
             }
-
 
         }
     }
@@ -231,26 +217,24 @@ public class Member implements IMember {
     public void callElection(Message emessage) throws RemoteException {
         LinkedList<IMember> llist = this.getMembers();
         int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
-        if (emessage.getType() == IMessage.TYPE_MESSAGE.ELECTION) {
-            System.out.println("#CALL ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getImessage());
+        MESSAGE_TYPE messageType = emessage.getMessageType();
+
+        if (messageType == MESSAGE_TYPE.ELECTION) {
+            System.out.println("#CALL ELECTION: " + messageType + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessage());
             System.out.println("Neighbour " + this.getNeighbour(position).getName() + " ID: " + this.getNeighbour(position).getIdentifier());
             this.getNeighbour(position).voteElection(emessage);
         }
-//        //for(int i=0;i<llist.size()-1;i++){
-//            System.out.println(llist.get(position).getName()+" "+this.getNeighbour(position).getName());
-//            //System.out.println(m.getName()+"->"+m.getNeighbour(position).getName()+" "+m.getNeighbour(position).getIdentifier());
-//        //}
     }
 
     public void voteElection(Message emessage) throws RemoteException {
         LinkedList<IMember> llist = this.getMembers();
         int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
-        if (emessage.getMessageType() == IMessage.TYPE_MESSAGE.ELECTION) {
-            if (this.getIdentifier() <= emessage.getImessage()) {
+        if (emessage.getMessageType() == MESSAGE_TYPE.ELECTION) {
+            if (this.getIdentifier() <= emessage.getMessageID()) {
                 this.setElectionParticipant(true);
-                System.out.println("*I FORWARD ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getImessage());
+                System.out.println("*I FORWARD ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
                 System.out.println("Neighbour " + this.getNeighbour(position).getName() + " ID: " + this.getNeighbour(position).getIdentifier());
-                if (emessage.getImessage() == this.getNeighbour(position).getIdentifier()) {
+                if (emessage.getMessageID() == this.getNeighbour(position).getIdentifier()) {
                     this.getNeighbour(position).stopElection(emessage);
                 } else {
                     this.getNeighbour(position).callElection(emessage);
@@ -259,21 +243,20 @@ public class Member implements IMember {
             } else {
                 if (!this.isElectionParticipant()) {
                     this.setElectionParticipant(true);
-                    emessage.setImessage(this.getIdentifier());
-                    System.out.println("*I MODIFY ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getImessage());
+                    emessage.setMessageID(this.getIdentifier());
+                    System.out.println("*I MODIFY ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
                     this.callElection(emessage);
                 }
             }
         }
 
-        if (emessage.getMessageType() == IMessage.TYPE_MESSAGE.ELECTED && this.getIdentifier() != emessage.getImessage()) {
+        if (emessage.getMessageType() == MESSAGE_TYPE.ELECTED && this.getIdentifier() != emessage.getMessageID()) {
             this.setElectionParticipant(false);
             this.setGroupLeader(false);
             //this.setIdentifier(emessage.getImessage());
-            System.out.println("*ELECTED MSG: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getImessage());
+            System.out.println("*ELECTED MSG: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
             this.getNeighbour(position).voteElection(emessage);
         }
-
 
     }
 
@@ -289,11 +272,8 @@ public class Member implements IMember {
 //        srv.start();
 //        IMember stub = (IMember) UnicastRemoteObject.exportObject(this, 0);
 //        srv.rebind(this.getParentGroup().getGroupName(), stub);
-
-
-
-        emessage.setType(IMessage.TYPE_MESSAGE.ELECTED);
-        System.out.println("#NEW LEADER: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getImessage());
+        emessage.setType(MESSAGE_TYPE.ELECTED);
+        System.out.println("#NEW LEADER: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
         this.getNeighbour(position).voteElection(emessage);
     }
 }

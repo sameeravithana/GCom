@@ -11,7 +11,8 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  *
@@ -76,10 +77,6 @@ public class Group implements Remote,Serializable,IGroup {
     @Override
     public HashMap<String, IMember> getMembersList() {
         return members;
-    }
-    
-    public LinkedList<IMember> getMembersLList() {
-        return new LinkedList<IMember>(members.values());
     }
 
     /**
@@ -155,12 +152,6 @@ public class Group implements Remote,Serializable,IGroup {
 
     private void send(Member member, Message message) {
         // call members server method ?
-    }
-
-    @Override
-    public void finalize() throws Throwable {
-        super.finalize();
-        System.out.println("Group " + groupID + " is destroyed.");
     }
 
     public void send(Message message) {

@@ -13,10 +13,12 @@ package gui.member;
 import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
-import gcom.interfaces.IMessage;
+import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
+import gui.GComWindow;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -26,7 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 /**
  *
@@ -39,19 +44,25 @@ public class NewMember extends javax.swing.JDialog {
     private IGroupManagement igm;
     private IMember imem;
     private RMIServer srv;
-    String groupName;
-    private IMember member;
-    IMember stub;
+    private String groupName;
+
+    private MemberContainer memContainer;
+
+    private String statusLog = "";
 
     /**
      * Creates new form NewMember
+     *
+     * @param parent
+     * @param modal
      */
-    public NewMember(java.awt.Frame parent, boolean modal) throws RemoteException {
+    public NewMember(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
         panelMem.setVisible(false);
-
+        setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
+        memContainer = new MemberContainer();
     }
 
     private void checkConnection(String host, int port) {
@@ -61,6 +72,9 @@ public class NewMember extends javax.swing.JDialog {
             registry = srv.start();
             igm = srv.regLookUp("IGroupManagement");
             gs = igm.getGroupDetails();
+            
+            statusLog += "Connection to " + host + " from " + port + " successful.";
+            
             lblMsg.setText("Connection to " + host + " from " + port + " successful.");
             lblMsg.setForeground(Color.black);
         } catch (AccessException ex) {
@@ -75,18 +89,77 @@ public class NewMember extends javax.swing.JDialog {
 
     }
 
-    /**
-     * @return the member
-     */
-    public IMember getMember() {
-        return member;
+    private void connect() throws HeadlessException {
+        String host = cmbHost.getSelectedItem().toString().trim();
+        int port = -1;
+        if (host.isEmpty()) {
+            int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid host specified : " + host + "\nDo you want to use localhost?", "Invalid Host", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            if (res == JOptionPane.YES_OPTION) {
+                host = "localhost";
+            }
+        }
+        try {
+            port = Integer.parseInt(cmbPort.getSelectedItem().toString().trim());
+        } catch (Exception e) {
+            int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid port number specified : " + port + "\nDo you want to use the default port (1099)?", "Invalid Port", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            if (res == JOptionPane.YES_OPTION) {
+                port = 1099;
+            }
+        }
+        checkConnection(host, port);
+        if (gs != null) {
+            panelMem.setVisible(true);
+            cmbGroup.removeAllItems();
+            for (String key : gs.keySet()) {
+                cmbGroup.addItem(key);
+            }
+        } else {
+            panelMem.setVisible(false);
+        }
     }
 
-    /**
-     * @param member the member to set
-     */
-    public void setMember(IMember member) {
-        this.member = member;
+    private void createMember() throws HeadlessException {
+        groupName = cmbGroup.getSelectedItem().toString().trim();
+        String memName = txtMember.getText();
+        if (memName.isEmpty()) {
+            JOptionPane.showMessageDialog(NewMember.this, "Member name can not be empty", "Invalid Member", JOptionPane.WARNING_MESSAGE);
+        } else {
+            try {
+                ArrayList<String> params = new ArrayList<String>();
+                params.add(groupName);
+                params.add(memName);
+
+                memContainer.setMember(new Member(memName, null));
+
+                IMember stub = (IMember) UnicastRemoteObject.exportObject(memContainer.getMember(), 0);
+                Message msg = new Message(groupName, memContainer.getMember(), params, MESSAGE_TYPE.JOIN_REQUEST);
+
+                memContainer.setStub(stub);
+
+                statusLog += "\nMember," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") added to Group " + groupName;
+
+                if (gs.get(groupName) <= 0) {
+                    memContainer.setMember(igm.sendRequest(msg));
+                    srv.rebind(groupName, stub);
+                    statusLog += " as the Group Leader";
+                } else {
+                    imem = srv.regMemLookUp(groupName);
+                    memContainer.setMember(imem.sendRequest(msg));
+                }
+                statusLog += ".";
+
+                setVisible(false);
+                MemberWindow memWindow = new MemberWindow(memContainer);
+                memWindow.initialize(memContainer, statusLog);
+                memWindow.setServer(srv);
+                memWindow.setVisible(true);
+
+            } catch (RemoteException ex) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
@@ -108,11 +181,12 @@ public class NewMember extends javax.swing.JDialog {
         cmbGroup = new javax.swing.JComboBox();
         txtMember = new javax.swing.JTextField();
         btnCreateMember = new javax.swing.JButton();
-        btnElection = new javax.swing.JButton();
         btnConnect = new javax.swing.JButton();
         lblMsg = new javax.swing.JLabel();
 
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Join to a Group");
+        setResizable(false);
 
         jLabel4.setText("Host");
 
@@ -130,17 +204,10 @@ public class NewMember extends javax.swing.JDialog {
 
         jLabel1.setText("Group");
 
-        btnCreateMember.setText("Create");
+        btnCreateMember.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/proceed.png"))); // NOI18N
         btnCreateMember.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCreateMemberActionPerformed(evt);
-            }
-        });
-
-        btnElection.setText("Start Election");
-        btnElection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnElectionActionPerformed(evt);
             }
         });
 
@@ -148,22 +215,20 @@ public class NewMember extends javax.swing.JDialog {
         panelMem.setLayout(panelMemLayout);
         panelMemLayout.setHorizontalGroup(
             panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelMemLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelMemLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelMemLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnCreateMember))
                     .addGroup(panelMemLayout.createSequentialGroup()
                         .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
                             .addComponent(jLabel2))
                         .addGap(31, 31, 31)
-                        .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtMember)
-                            .addComponent(cmbGroup, 0, 186, Short.MAX_VALUE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelMemLayout.createSequentialGroup()
-                        .addComponent(btnElection)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnCreateMember, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cmbGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtMember))))
                 .addContainerGap())
         );
         panelMemLayout.setVerticalGroup(
@@ -177,21 +242,19 @@ public class NewMember extends javax.swing.JDialog {
                 .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtMember, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(panelMemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnCreateMember)
-                    .addComponent(btnElection))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCreateMember, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
-        btnConnect.setText("Connect");
+        btnConnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/connect.png"))); // NOI18N
         btnConnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnConnectActionPerformed(evt);
             }
         });
 
-        lblMsg.setText("specify the host+port you need to connect and click \"Connect\"");
+        lblMsg.setText("specify the host+port and click \"Connect\"");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -199,9 +262,11 @@ public class NewMember extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(panelMem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblMsg, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
+                        .addGap(56, 56, 56))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5))
@@ -210,131 +275,46 @@ public class NewMember extends javax.swing.JDialog {
                             .addComponent(cmbHost, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cmbPort, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lblMsg, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addComponent(btnConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(panelMem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(cmbHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(cmbPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnConnect))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4)
+                            .addComponent(cmbHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(cmbPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(btnConnect, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblMsg)
                 .addGap(12, 12, 12)
-                .addComponent(panelMem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addComponent(panelMem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
 private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
-    String host = cmbHost.getSelectedItem().toString().trim();
-    int port = -1;
-    if (host.isEmpty()) {
-        int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid host specified : " + host + "\nDo you want to use localhost?", "Invalid Host", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-        if (res == JOptionPane.YES_OPTION) {
-            host = "localhost";
-        }
-    }
-    try {
-        port = Integer.parseInt(cmbPort.getSelectedItem().toString().trim());
-    } catch (Exception e) {
-        int res = JOptionPane.showConfirmDialog(NewMember.this, "Invalid port number specified : " + port + "\nDo you want to use the default port (1099)?", "Invalid Port", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-        if (res == JOptionPane.YES_OPTION) {
-            port = 1099;
-        }
-    }
-    checkConnection(host, port);
-    if (gs != null) {
-        panelMem.setVisible(true);
-        cmbGroup.removeAllItems();
-        for (String key : gs.keySet()) {
-            cmbGroup.addItem(key);
-        }
-    } else {
-        panelMem.setVisible(false);
-    }
-
+    connect();
 }//GEN-LAST:event_btnConnectActionPerformed
 
 private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateMemberActionPerformed
-    groupName = cmbGroup.getSelectedItem().toString().trim();
-    String memName = txtMember.getText();
-    if (memName.isEmpty()) {
-        int res = JOptionPane.showConfirmDialog(NewMember.this, "Member name can not be empty", "Invalid Member", JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE);
-    } else {
-        try {
-            ArrayList<String> params = new ArrayList<String>();
-            params.add(groupName);
-            params.add(memName);
-
-            setMember(new Member(memName, null));
-            stub = (IMember) UnicastRemoteObject.exportObject(getMember(), 0);
-            Message msg = new Message(groupName, getMember(), params, IMessage.TYPE_MESSAGE.JOINREQUEST);
-
-
-
-            if (gs.get(groupName) <= 0) {
-                setMember(igm.sendRequest(msg));
-                srv.rebind(getMember().getParentGroup().getGroupName(), stub);
-            } else {
-                imem = srv.regMemLookUp(groupName);
-                setMember(imem.sendRequest(msg));
-            }
-
-            //getMember().getElection().addNeighbour(getMember(), false);
-            System.out.println("Member created....mem count: " + getMember().getParentGroup().getMemberCount()+" ID: "+getMember().getIdentifier());
-
-        } catch (RemoteException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotBoundException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
-    }
-
+    createMember();
 }//GEN-LAST:event_btnCreateMemberActionPerformed
-
-    private void btnElectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnElectionActionPerformed
-//        try {
-                    try {
-                        if (getMember().getParentGroup().getMemberCount() > 1) {
-                            Message emessage = new Message(getMember().getParentGroup().getGroupName(), getMember().getMembers().indexOf(getMember()), getMember().getIdentifier(), IMessage.TYPE_MESSAGE.ELECTION);
-                            System.out.println(getMember().getName()+" Starting the election...");
-                            getMember().setElectionParticipant(true);
-                            getMember().callElection(emessage);   
-                            
-                            if(getMember().isGroupLeader()){
-                                System.out.println("HURAAAYYY.....AM THE LEADER");
-                                srv.rebind(getMember().getParentGroup().getGroupName(), stub);
-                                
-                            }
-                            
-                        }else{
-                            System.out.println("You have no neighbours..So you're the leader! "+getMember().getName());
-                        }
-                    } catch (RemoteException ex) {
-                        Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-//                    for(IMember m:getMember().getMembers()) System.out.println(m.getName()+"->"+m.getNeighbour(getMember().getMembers().indexOf(m)).getName()+" "+m.getNeighbour(getMember().getMembers().indexOf(m)).getIdentifier());
-//        } catch (RemoteException ex) {
-//            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }//GEN-LAST:event_btnElectionActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnCreateMember;
-    private javax.swing.JButton btnElection;
     private javax.swing.JComboBox cmbGroup;
     private javax.swing.JComboBox cmbHost;
     private javax.swing.JComboBox cmbPort;
@@ -348,7 +328,26 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
     // End of variables declaration//GEN-END:variables
 
     public static void main(String[] args) throws RemoteException {
+        try {
+            UIManager.setLookAndFeel(new NimbusLookAndFeel());
+            new NewMember(null, true).setVisible(true);
+        } catch (Exception ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        new NewMember(null, true).setVisible(true);
+    }
+
+    /**
+     * @return the registry
+     */
+    public Registry getRegistry() {
+        return registry;
+    }
+
+    /**
+     * @param registry the registry to set
+     */
+    public void setRegistry(Registry registry) {
+        this.registry = registry;
     }
 }

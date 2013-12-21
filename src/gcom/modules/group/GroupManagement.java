@@ -4,14 +4,12 @@
  */
 package gcom.modules.group;
 
-import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
+import gcom.interfaces.MESSAGE_TYPE;
 import gui.GComWindow;
-import gui.member.NewMember;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +21,6 @@ import java.util.logging.Logger;
 public class GroupManagement implements IGroupManagement {
 
     private static HashMap<String, Group> groups;
-    private static String defaultGroupIdPrefix = "G";
     public static final int DEFAULT_MAX_MEMBERS = 1000;
     private static GComWindow gCom;
 
@@ -54,33 +51,6 @@ public class GroupManagement implements IGroupManagement {
         }
     }
 
-//    public void addMember(String groupId, Member member) throws GroupManagementException {
-//        if (!groups.containsKey(groupId)) {
-//            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
-//        } else {
-//            Group group = groups.get(groupId);
-//            group.addMember(member);
-//        }
-//    }
-//
-//    public Member getMember(String groupId, String memberId) throws GroupManagementException {
-//        if (!groups.containsKey(groupId)) {
-//            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
-//        } else {
-//            Group group = groups.get(groupId);
-//            return group.getMember(memberId);
-//        }
-//    }
-
-    public void removeMember(String groupId, String memberId) throws GroupManagementException {
-        if (!groups.containsKey(groupId)) {
-            throw new GroupManagementException("Invalid GroupID : " + groupId + " doeas not exist.");
-        } else {
-            Group group = groups.get(groupId);
-            group.removeMember(memberId);
-        }
-    }
-
     public static void sendMessage(String groupId, Message message) throws GroupManagementException {
         if (groups.containsKey(groupId)) {
             Group group = groups.get(groupId);
@@ -104,36 +74,30 @@ public class GroupManagement implements IGroupManagement {
 
     public IMember sendRequest(gcom.modules.group.Message message) throws RemoteException {
 
-        Group parent = groups.get(message.getParams().get(0));        
+        Group parent = groups.get(message.getParams().get(0));
         IMember m = message.getSource();
-        try {       
+        try {
             parent.addMember(m);
-            
             m.addMember(m);
-            
-            
+
         } catch (GroupManagementException ex) {
             Logger.getLogger(GroupManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
-            m.setParentGroup(parent);            
-            //updateStatus(m, IMessage.TYPE_MESSAGE.UPDATESTATUS);        
-            m.setGroupLeader(true);
-
-       
-        
+        m.setParentGroup(parent);
+        m.setGroupLeader(true);
         return m;
 
     }
 
     public void updateStatus(IMessage message) throws RemoteException, GroupManagementException {
-        if (message.getMessageType() == IMessage.TYPE_MESSAGE.UPDATESTATUS) {
+        if (message.getMessageType() == MESSAGE_TYPE.UPDATE_STATUS) {
             gCom.updateStatus(message.getParams());
         } else {
             throw new GroupManagementException("Invalid message type.");
         }
     }
 
-    public void updateStatus(Member member, IMessage.TYPE_MESSAGE type) throws RemoteException, GroupManagementException {
+    public void updateStatus(Message member, MESSAGE_TYPE type) throws RemoteException, GroupManagementException {
         gCom.updateStatus(member, type);
     }
 }

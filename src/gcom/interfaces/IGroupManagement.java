@@ -4,9 +4,8 @@
  */
 package gcom.interfaces;
 
-import gcom.modules.group.Group;
 import gcom.modules.group.GroupManagementException;
-import gcom.modules.group.Member;
+import gcom.modules.group.Message;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -23,5 +22,5 @@ public interface IGroupManagement extends Remote {
 
     public void updateStatus(IMessage message) throws RemoteException, GroupManagementException;
 
-    public void updateStatus(Member member, IMessage.TYPE_MESSAGE type) throws RemoteException, GroupManagementException;
+    public void updateStatus(Message message, MESSAGE_TYPE type) throws RemoteException, GroupManagementException;
 }

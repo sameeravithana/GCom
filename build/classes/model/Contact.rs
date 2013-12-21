@@ -1,2 +1,0 @@
-model.Contact
-model.Status

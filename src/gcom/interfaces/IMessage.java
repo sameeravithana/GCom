@@ -12,24 +12,20 @@ import java.util.ArrayList;
  *
  * @author samtube405
  */
-public interface IMessage extends Serializable{
-    public static enum TYPE_MESSAGE {
-		APPLICATION, JOINREQUEST, PARTREQUEST, PARTRESPONSE,
-		REJECT, WELCOME, GOTMEMBER, LOSTMEMBER,
-		ELECTION, ELECTED, CLOSE,UPDATESTATUS
-	};
+public interface IMessage extends Serializable {
+
     public String getMessage();
-    
-    public TYPE_MESSAGE getMessageType();
-    
+
+    public MESSAGE_TYPE getMessageType();
+
     public String getGroupName();
 
     public IMember getSource();
-    
+
     public void setDestination(Member destination);
-    
+
     public Member getDestination();
-    
+
     public ArrayList<String> getParams();
-    
+
 }

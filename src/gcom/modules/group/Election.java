@@ -5,50 +5,31 @@
 package gcom.modules.group;
 
 import gcom.interfaces.IMember;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
  * @author Praneeth
  */
-public class Election implements Remote{
+public class Election {
 
-    private IMember initiater;
-    private LinkedList<IMember> members;   
-    
+    private Member initiater;
+    private ArrayList<Member> members;
+    private boolean[] participation;
+    private int electionSize;
 
-    public Election(IMember initiater) throws RemoteException {
-        //addNeighbour(initiater);
-        members=new LinkedList<IMember>();
+    public Election(Member initiater) {
+        Group group = initiater.getParentGroup();
+        HashMap<String, IMember> membersList = group.getMembersList();
+
+        // make the initiater 1st in the list
+        //membersList.remove(initiater);
+        //membersList.add(0, initiater);
+        electionSize = membersList.size();
+        participation = new boolean[electionSize];
     }
 
-    public void addNeighbour(IMember member) throws RemoteException{
-        if(!members.contains(member)){
-            getMembers().add(member);            
-        }       
-        printJoinOrder();
-    }
-    
-    public void printJoinOrder() throws RemoteException{
-        System.out.print("Joined order: ");
-        for(IMember m:this.getMembers())
-            System.out.print(m.getName()+"->");
-        System.out.println("");
-    }
-
-    /**
-     * @return the members
-     */
-    public LinkedList<IMember> getMembers() {
-        return members;
-    }
-
-    /**
-     * @param members the members to set
-     */
-    public void setMembers(LinkedList<IMember> members) {
-        this.members = members;
+    public void startElection() {
     }
 }
