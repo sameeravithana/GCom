@@ -64,5 +64,11 @@ public interface IMember extends Remote,Serializable{
      public int getIdentifier() throws RemoteException;
              
      public void setIdentifier(int identifier) throws RemoteException;
+     
+     public void multicastCausal(Message message) throws RemoteException;
+     
+     public void delivercasual(Message message) throws RemoteException;
+     
+     public void getAcknowledgement(Message message) throws RemoteException;
     
 }

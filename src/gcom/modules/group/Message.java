@@ -8,6 +8,7 @@ import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
 import gcom.interfaces.MESSAGE_TYPE;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -23,8 +24,9 @@ public class Message implements IMessage {
     private int position;
     ArrayList<String> params;
     private MESSAGE_TYPE type;
+    private HashMap<String,Integer> vectorClock;
 
-    public Message(String group_name, Member source, String message, MESSAGE_TYPE type) {
+    public Message(String group_name, IMember source, String message, MESSAGE_TYPE type) {
         this.group_name = group_name;
         this.source = source;
         this.message = message;
@@ -44,6 +46,16 @@ public class Message implements IMessage {
         this.messageID = message;
         this.type = type;
     }
+    
+     public Message(String group_name, IMember source, HashMap<String,Integer> vectorClock, String message, MESSAGE_TYPE type) {
+        this.group_name = group_name;
+        this.source = source;
+        this.vectorClock = vectorClock;
+        this.message = message;        
+        this.type = type;
+    }
+    
+    
 
     public String getMessage() {
         return this.message;
@@ -113,6 +125,27 @@ public class Message implements IMessage {
      */
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    /**
+     * @return the vectorClock
+     */
+    public HashMap<String,Integer> getVectorClock() {
+        return vectorClock;
+    }
+
+    /**
+     * @param vectorClock the vectorClock to set
+     */
+    public void setVectorClock(HashMap<String,Integer> vectorClock) {
+        this.vectorClock = vectorClock;
+    }
+
+    /**
+     * @param source the source to set
+     */
+    public void setSource(IMember source) {
+        this.source = source;
     }
 
 }

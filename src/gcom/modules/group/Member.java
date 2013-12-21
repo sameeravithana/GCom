@@ -12,6 +12,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,17 +26,21 @@ public class Member extends JLabel implements IMember {
 
     private String name;
     private int identifier;
-    private Group parentGroup;
+    private Group parentGroup;//*HashMap member
     private boolean isElectionParticipant = false;
     private boolean isGroupLeader;
-    private LinkedList<IMember> members;
+    private LinkedList<IMember> members;//*
+    private HashMap<String,Integer> vectorClock;//*
     private Election election;
     private RMIServer srv;
+    private LinkedList<Message> holdingQueue;
 
     public Member(String name, Group parent) throws RemoteException {
         this.parentGroup = parent;
         this.name = name;
         members = new LinkedList<IMember>();
+        holdingQueue = new LinkedList<Message>();
+        setVectorClock(new HashMap<String,Integer>());
         identifier = new Random().nextInt(100) + 1;
         //election = new Election(this);
     }
@@ -276,4 +281,85 @@ public class Member extends JLabel implements IMember {
         System.out.println("#NEW LEADER: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
         this.getNeighbour(position).voteElection(emessage);
     }
+    
+    public void multicastCausal(Message message) throws RemoteException{
+        System.out.println(message.getType()+" "+message.getMessage()+" ");
+        initVectorClock();        
+        updateVectorCell(this.getName());        
+        message.setVectorClock(this.getVectorClock());
+        HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+        for (String key : membersList.keySet()) {
+            IMember m = membersList.get(key);
+            m.delivercasual(message);
+            System.out.print(key+" ");
+        }
+        System.out.print(" multicasted\n");
+        
+    }
+    
+    public void delivercasual(Message message) throws RemoteException{
+        boolean flga = false;
+        holdingQueue.add(message);
+        System.out.println("Message hold: "+message.getMessage());
+        this.releaseMessages(message);
+        
+    }
+    
+    public void releaseMessages(Message message) throws RemoteException{
+        if(getVectorClock().get(getName())==getVectorClock().get(message.getSource().getName()) && compareClock(message.getVectorClock())){
+            holdingQueue.remove(message);
+            System.out.println("Message released: "+message.getMessage());
+            Message rmessage=new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), "Acknowledgement", MESSAGE_TYPE.ACKNOWLEDGEMENT);
+            message.getSource().getAcknowledgement(rmessage);
+        }
+    }
+    
+    private boolean compareClock(HashMap<String, Integer> vectorClock) {
+        boolean flag=true;
+        for(String memName:this.getVectorClock().keySet()){
+            if(!(memName.equals(this.getName()))){
+                Integer k1 = this.getVectorClock().get(memName);
+                Integer k2 = vectorClock.get(memName);
+                if(k1>k2){
+                    flag &=false;
+                    return flag;
+                }
+            }
+        }
+        return flag;
+    }
+    
+    public void getAcknowledgement(Message message) throws RemoteException{
+        System.out.println(message.getType()+" From "+message.getSource().getName());
+    }
+    
+    public void initVectorClock() throws RemoteException{        
+        HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+        for (String key : membersList.keySet()) {
+            IMember m = membersList.get(key);
+            getVectorClock().put(m.getName(), 0);
+        }        
+    }
+    
+    public void updateVectorCell(String memName){        
+        Integer pi = getVectorClock().get(memName);
+        pi+=1;
+        getVectorClock().put(memName, pi);
+    }
+
+    /**
+     * @return the vectorClock
+     */
+    public HashMap<String,Integer> getVectorClock() {
+        return vectorClock;
+    }
+
+    /**
+     * @param vectorClock the vectorClock to set
+     */
+    public void setVectorClock(HashMap<String,Integer> vectorClock) {
+        this.vectorClock = vectorClock;
+    }
+
+    
 }

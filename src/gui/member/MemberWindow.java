@@ -285,7 +285,7 @@ public class MemberWindow extends javax.swing.JFrame {
 
     private void lstContactsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstContactsMouseClicked
         if (evt.getClickCount() == 2 && lstContacts.getSelectedIndex() != -1) {
-            SingleChat c = new SingleChat(this, false, ((JLabel) lstContacts.getSelectedValue()).getText());
+            SingleChat c = new SingleChat(this, false, ((JLabel) lstContacts.getSelectedValue()).getText(),memberContainer.getStub());
             c.setVisible(true);
         }
     }//GEN-LAST:event_lstContactsMouseClicked

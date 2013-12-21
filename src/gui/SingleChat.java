@@ -10,7 +10,14 @@
  */
 package gui;
 
+import gcom.interfaces.IMember;
+import gcom.interfaces.MESSAGE_TYPE;
+import gcom.modules.group.Message;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**
@@ -23,10 +30,12 @@ public class SingleChat extends javax.swing.JFrame {
      * Creates new form SingleChat
      */
     private String contact;
+    private IMember member;
 
-    public SingleChat(java.awt.Frame parent, boolean modal, String contact) {
+    public SingleChat(java.awt.Frame parent, boolean modal, String contact, IMember member) {
         initComponents();
         this.contact = contact;
+        this.member = member;
         txtHistory.setBackground(this.getBackground());
         lblContactName.setText(contact);
         setTitle(contact);
@@ -78,6 +87,11 @@ public class SingleChat extends javax.swing.JFrame {
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 txtChatFocusLost(evt);
+            }
+        });
+        txtChat.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtChatKeyPressed(evt);
             }
         });
         jScrollPane2.setViewportView(txtChat);
@@ -147,6 +161,21 @@ public class SingleChat extends javax.swing.JFrame {
             txtChat.setForeground(Color.GRAY);
         }
     }//GEN-LAST:event_txtChatFocusLost
+
+    private void txtChatKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtChatKeyPressed
+        if(evt.getKeyCode()== KeyEvent.VK_ENTER){
+            String msg=txtChat.getText();
+            Message message;
+            try {
+                message = new Message(member.getParentGroup().getGroupName(), member, null, msg, MESSAGE_TYPE.CAUSAL_MULTICAST);
+                member.multicastCausal(message);
+                txtHistory.setText(msg+"\n");
+                txtChat.setText("");
+            } catch (RemoteException ex) {
+                Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_txtChatKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel2;
