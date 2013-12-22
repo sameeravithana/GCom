@@ -172,7 +172,6 @@ public class NewGroup extends javax.swing.JDialog {
 private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
     if (!txtGroupName.getText().trim().isEmpty()) {
         String groupType = cmbGroupType.getSelectedItem().toString();
-        System.out.println(txtGroupName.getText());
         GroupDef gd = new GroupDef(txtGroupName.getText(), cmbGroupType.getSelectedItem().toString(), cmbComType.getSelectedItem().toString(), cmbMsgOrd.getSelectedItem().toString());
         try {
             group = GroupManagement.createGroup(gd);

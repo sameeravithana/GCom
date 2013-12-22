@@ -12,9 +12,11 @@ package gui.member;
 
 import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
+import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gui.GComWindow;
 import java.rmi.RemoteException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,33 +35,63 @@ public class DebugWindow extends javax.swing.JFrame {
     private IMember member;
     private MemberWindow memWindow;
     private String memName;
-    private MemberContainer memContainer;
+    //private Member member;
     private DefaultTableModel dtm;
+    private IMember stub;
+    private boolean isMessageHoldEnabled = true;
+    private LinkedList<Message> holdback, messages;
 
-    public DebugWindow(MemberWindow memWindow, MemberContainer memberContainer) {
+    public DebugWindow(MemberWindow memWindow, Member member, IMember stub) {
+        this.stub = stub;
         initComponents();
-        this.memContainer = memberContainer;
+        this.member = member;
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
-        this.member = memberContainer.getMember();
         this.memWindow = memWindow;
         try {
             memName = member.getName();
-            setTitle("Debug : " + memName);
-        } catch (RemoteException ex) {
+            setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
+        } catch (Exception ex) {
             Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-        try {
-            updateMemberTable();
-        } catch (RemoteException ex) {
-            Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+//        try {
+//            updateMemberTable();
+//        } catch (RemoteException ex) {
+//            Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    }
+
+    public void messageReceived(Message message) throws RemoteException {
+        if (isMessageHoldEnabled) {
+            holdback = member.getHoldingQueue();
+            fillHoldingQueue(holdback);
+            updateStatus("Multicast message received from " + message.getSource().getName());
+        }
+        //JOptionPane.showMessageDialog(this, message.getMessage());
+    }
+
+    public void messageReleased(Message message) throws RemoteException {
+        holdback = member.getHoldingQueue();
+        fillHoldingQueue(holdback);
+        updateStatus("Message from " + message.getSource().getName() + " released.");
+        //JOptionPane.showMessageDialog(this, message.getMessage());
+    }
+
+    private void fillHoldingQueue(LinkedList<Message> holdback) throws RemoteException {
+        dtm = (DefaultTableModel) tblHoldMessages.getModel();
+        while (dtm.getRowCount() > 0) {
+            dtm.removeRow(0);
+        }
+        for (Message message : holdback) {
+            Object row[] = new Object[]{message.getSource().getName(), message.getDestination().getName(), message.getMessageID(), message.getMessage(), new Date()};
+            dtm.addRow(row);
         }
     }
 
     public void updateStatus(String message) {
-        txtLog.setText(txtLog.getText() + "\n" + message);
+        txtLog.setText(txtLog.getText() + message + "\n");
     }
 
-    private void updateMemberTable() throws RemoteException {
+    public void updateMemberTable() throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         while (dtm.getRowCount() > 0) {
             dtm.removeRow(0);
@@ -93,12 +125,12 @@ public class DebugWindow extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         chkHold = new javax.swing.JCheckBox();
         jScrollPane3 = new javax.swing.JScrollPane();
-        tblMembers1 = new javax.swing.JTable();
+        tblHoldMessages = new javax.swing.JTable();
         jButton2 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btnRelease = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
-        tblMembers2 = new javax.swing.JTable();
+        tblMessages = new javax.swing.JTable();
         jButton3 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
 
@@ -188,21 +220,22 @@ public class DebugWindow extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Message Queue"));
 
+        chkHold.setSelected(true);
         chkHold.setText("Hold Messages");
 
-        tblMembers1.setModel(new javax.swing.table.DefaultTableModel(
+        tblHoldMessages.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Receiver", "Msg.ID", "Message", "Timestamp"
+                "Sender", "Receiver", "Msg.ID", "Message", "Timestamp"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                true, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -213,16 +246,21 @@ public class DebugWindow extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(tblMembers1);
-        if (tblMembers1.getColumnModel().getColumnCount() > 0) {
-            tblMembers1.getColumnModel().getColumn(1).setPreferredWidth(10);
-            tblMembers1.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tblMembers1.getColumnModel().getColumn(3).setPreferredWidth(5);
+        jScrollPane3.setViewportView(tblHoldMessages);
+        if (tblHoldMessages.getColumnModel().getColumnCount() > 0) {
+            tblHoldMessages.getColumnModel().getColumn(2).setPreferredWidth(10);
+            tblHoldMessages.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblHoldMessages.getColumnModel().getColumn(4).setPreferredWidth(5);
         }
 
         jButton2.setText("Shuffle");
 
-        jButton4.setText("Release");
+        btnRelease.setText("Release");
+        btnRelease.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReleaseActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -232,11 +270,11 @@ public class DebugWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnRelease, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(chkHold)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -253,23 +291,23 @@ public class DebugWindow extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton4)))
+                        .addComponent(btnRelease)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        tblMembers2.setModel(new javax.swing.table.DefaultTableModel(
+        tblMessages.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Receiver", "Msg.ID", "Message", "Timestamp"
+                "Sender", "Receiver", "Msg.ID", "Message", "Timestamp"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                true, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -280,11 +318,11 @@ public class DebugWindow extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane5.setViewportView(tblMembers2);
-        if (tblMembers2.getColumnModel().getColumnCount() > 0) {
-            tblMembers2.getColumnModel().getColumn(1).setPreferredWidth(10);
-            tblMembers2.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tblMembers2.getColumnModel().getColumn(3).setPreferredWidth(5);
+        jScrollPane5.setViewportView(tblMessages);
+        if (tblMessages.getColumnModel().getColumnCount() > 0) {
+            tblMessages.getColumnModel().getColumn(2).setPreferredWidth(10);
+            tblMessages.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblMessages.getColumnModel().getColumn(4).setPreferredWidth(5);
         }
 
         jButton3.setText("Shuffle");
@@ -297,11 +335,11 @@ public class DebugWindow extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
@@ -323,10 +361,10 @@ public class DebugWindow extends javax.swing.JFrame {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -382,30 +420,46 @@ public class DebugWindow extends javax.swing.JFrame {
 
     private void btnElectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnElectActionPerformed
         try {
-            if (memContainer.getMember().getParentGroup().getMemberCount() > 1) {
-                Message emessage = new Message(memContainer.getMember().getParentGroup().getGroupName(), memContainer.getMember().getMembers().indexOf(memContainer.getMember()), memContainer.getMember().getIdentifier(), MESSAGE_TYPE.ELECTION);
-                System.out.println(memContainer.getMember().getName() + " Starting the election...");
-                memContainer.getMember().setElectionParticipant(true);
-                memContainer.getMember().callElection(emessage);
-                if (memContainer.getMember().isGroupLeader()) {
+            if (member.getParentGroup().getMemberCount() > 1) {
+                Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
+                System.out.println(member.getName() + " Starting the election...");
+                member.setElectionParticipant(true);
+                member.callElection(emessage);
+                if (member.isGroupLeader()) {
+                    updateStatus("This process was selected as the group leader.");
                     System.out.println("HURAAAYYY.....AM THE LEADER");
-                    memWindow.getServer().rebind(memContainer.getMember().getParentGroup().getGroupName(), memContainer.getStub());
+                    memWindow.getServer().rebind(member.getParentGroup().getGroupName(), stub);
+                } else {
+                    updateStatus(" was selected as the group leader.");
                 }
             } else {
-                System.out.println("You have no neighbours..So you're the leader! " + memContainer.getMember().getName());
+                updateStatus("This process was selected as the group leader.");
+                System.out.println("You have no neighbours..So you're the leader! " + member.getName());
             }
         } catch (RemoteException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnElectActionPerformed
 
+    private void btnReleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReleaseActionPerformed
+        int row = tblHoldMessages.getSelectedRow();
+        if (row != -1) {
+            try {
+                member.releaseMessages(holdback.get(row));
+                fillHoldingQueue(holdback);
+            } catch (RemoteException ex) {
+                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_btnReleaseActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnElect;
     private javax.swing.JButton btnElect1;
+    private javax.swing.JButton btnRelease;
     private javax.swing.JCheckBox chkHold;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -418,9 +472,37 @@ public class DebugWindow extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable tblHoldMessages;
     private javax.swing.JTable tblMembers;
-    private javax.swing.JTable tblMembers1;
-    private javax.swing.JTable tblMembers2;
+    private javax.swing.JTable tblMessages;
     private javax.swing.JTextArea txtLog;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the member
+     */
+    public IMember getMember() {
+        return member;
+    }
+
+    /**
+     * @param member the member to set
+     */
+    public void setMember(IMember member) {
+        this.member = member;
+    }
+
+    /**
+     * @return the isMessageHoldEnabled
+     */
+    public boolean isIsMessageHoldEnabled() {
+        return isMessageHoldEnabled;
+    }
+
+    /**
+     * @param isMessageHoldEnabled the isMessageHoldEnabled to set
+     */
+    public void setIsMessageHoldEnabled(boolean isMessageHoldEnabled) {
+        this.isMessageHoldEnabled = isMessageHoldEnabled;
+    }
 }

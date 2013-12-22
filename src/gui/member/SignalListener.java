@@ -1,0 +1,61 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package gui.member;
+
+import gcom.interfaces.IMember;
+import gcom.modules.group.Message;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class SignalListener implements PropertyChangeListener {
+
+    private MemberWindow memWindow;
+
+    public SignalListener(MemberWindow memWindow) {
+        this.memWindow = memWindow;
+    }
+
+    public SignalListener() {
+    }
+
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("Signal")) {
+            try {
+                memWindow.updateMembers((IMember) evt.getNewValue());
+            } catch (RemoteException ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (evt.getPropertyName().equals("ElectionFinished")) {
+            try {
+                memWindow.electionCompleted((IMember) evt.getNewValue());
+            } catch (RemoteException ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (evt.getPropertyName().equals("MessageReceived")) {
+            try {
+                memWindow.messageReceived((Message) evt.getNewValue());
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (evt.getPropertyName().equals("MessageReleased")) {
+            try {
+                memWindow.messageReleased((Message) evt.getNewValue());
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (evt.getPropertyName().equals("AckReceived")) {
+            try {
+                memWindow.ackReceived((Message) evt.getNewValue());
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+}

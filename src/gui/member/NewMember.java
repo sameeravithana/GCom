@@ -38,16 +38,17 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
  * @author ens13pps
  */
 public class NewMember extends javax.swing.JDialog {
-
+    
     private Registry registry;
     private HashMap<String, Integer> gs;
     private IGroupManagement igm;
     private IMember imem;
+    private Member member;
     private RMIServer srv;
     private String groupName;
-
+    
     private MemberContainer memContainer;
-
+    
     private String statusLog = "";
 
     /**
@@ -63,17 +64,18 @@ public class NewMember extends javax.swing.JDialog {
         panelMem.setVisible(false);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
         memContainer = new MemberContainer();
+        
     }
-
+    
     private void checkConnection(String host, int port) {
-
+        
         try {
             srv = new RMIServer(host, port);
             registry = srv.start();
             igm = srv.regLookUp("IGroupManagement");
             gs = igm.getGroupDetails();
             
-            statusLog += "Connection to " + host + " from " + port + " successful.";
+            statusLog += "Connection to " + host + " from " + port + " successful.\n";
             
             lblMsg.setText("Connection to " + host + " from " + port + " successful.");
             lblMsg.setForeground(Color.black);
@@ -86,9 +88,9 @@ public class NewMember extends javax.swing.JDialog {
         } catch (NotBoundException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
     }
-
+    
     private void connect() throws HeadlessException {
         String host = cmbHost.getSelectedItem().toString().trim();
         int port = -1;
@@ -117,7 +119,7 @@ public class NewMember extends javax.swing.JDialog {
             panelMem.setVisible(false);
         }
     }
-
+    
     private void createMember() throws HeadlessException {
         groupName = cmbGroup.getSelectedItem().toString().trim();
         String memName = txtMember.getText();
@@ -128,16 +130,20 @@ public class NewMember extends javax.swing.JDialog {
                 ArrayList<String> params = new ArrayList<String>();
                 params.add(groupName);
                 params.add(memName);
-
-                memContainer.setMember(new Member(memName, null));
-
-                IMember stub = (IMember) UnicastRemoteObject.exportObject(memContainer.getMember(), 0);
-                Message msg = new Message(groupName, memContainer.getMember(), params, MESSAGE_TYPE.JOIN_REQUEST);
-
+                member = new Member(memName, null);
+                
+                memContainer.setMember(member);
+                
+                IMember stub = (IMember) UnicastRemoteObject.exportObject(member, 0);
+                Message msg = new Message(groupName, member, params, MESSAGE_TYPE.JOIN_REQUEST);
+                
+                MemberWindow memWindow = new MemberWindow(member, stub);
+                member.addPropertyChangeListener(new SignalListener(memWindow));
+                
                 memContainer.setStub(stub);
-
-                statusLog += "\nMember," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") added to Group " + groupName;
-
+                
+                statusLog += "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") added to Group " + groupName;
+                
                 if (gs.get(groupName) <= 0) {
                     memContainer.setMember(igm.sendRequest(msg));
                     srv.rebind(groupName, stub);
@@ -147,13 +153,14 @@ public class NewMember extends javax.swing.JDialog {
                     memContainer.setMember(imem.sendRequest(msg));
                 }
                 statusLog += ".";
-
+                
                 setVisible(false);
-                MemberWindow memWindow = new MemberWindow(memContainer);
-                memWindow.initialize(memContainer, statusLog);
+                memWindow.setMember(member);
+                memWindow.setMemContainer(memContainer);
+                memWindow.initialize(member, statusLog);
                 memWindow.setServer(srv);
                 memWindow.setVisible(true);
-
+                
             } catch (RemoteException ex) {
                 Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NotBoundException ex) {
@@ -334,7 +341,7 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
         } catch (Exception ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
     }
 
     /**

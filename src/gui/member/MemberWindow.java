@@ -13,7 +13,8 @@ package gui.member;
 import gcom.RMIServer;
 import gcom.interfaces.IMember;
 import gcom.modules.group.Group;
-import gui.SingleChat;
+import gcom.modules.group.Member;
+import gcom.modules.group.Message;
 import java.awt.Color;
 import java.awt.Component;
 import java.rmi.RemoteException;
@@ -37,28 +38,31 @@ public class MemberWindow extends javax.swing.JFrame {
 
     //** Creates new form MemberWindow */
     private ArrayList<String> contacts;
-    private IMember member;
+    private Member member;
+    private IMember stub;
     String memName;
     private Group group;
     private DebugWindow debug;
-    private MemberContainer memberContainer;
+    // private Member member;
     private RMIServer server;
+    private MemberContainer memContainer;
 
-    public MemberWindow(MemberContainer memberContainer) {
+    public MemberWindow(Member member, IMember stub) {
         initComponents();
+        this.stub = stub;
     }
 
-    public void initialize(MemberContainer memberContainer, String statusLog) {
+    public void initialize(Member member, String statusLog) {
         // setLocationRelativeTo(null);
         try {
-            this.memberContainer = memberContainer;
-            this.member = memberContainer.getMember();
-            debug = new DebugWindow(this, memberContainer);
+            this.member = member;
+            debug = new DebugWindow(this, member, stub);
             debug.updateStatus(statusLog);
+            debug.updateMemberTable();
             this.group = member.getParentGroup();
             this.memName = member.getName();
             lblMemberName.setText(member.getName());
-        } catch (RemoteException ex) {
+        } catch (Exception ex) {
             lblMemberName.setText("Unknown");
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -92,6 +96,62 @@ public class MemberWindow extends javax.swing.JFrame {
 
     public void debugWindowClosed() {
         mnuDebug.setSelected(false);
+    }
+
+    public void updateMembers(IMember member) throws RemoteException {
+        System.out.println("Member name " + member.getName());
+
+        Group parentGroup = member.getParentGroup();
+        this.group = parentGroup;
+
+        try {
+            contacts = getContacts();
+            fillContacts(contacts);
+            String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") added to Group " + member.getParentGroup().getGroupName();
+            debug.updateStatus(statusLog);
+            debug.updateMemberTable();
+        } catch (Exception e) {
+            System.out.println("Initially, No Parent for Leader.");
+        }
+
+    }
+
+    public void electionCompleted(IMember member) throws RemoteException {
+        String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") selected as the group leader in " + member.getParentGroup().getGroupName();
+        debug.updateStatus(statusLog);
+        debug.updateMemberTable();
+    }
+
+    private ArrayList<String> getContacts() {
+        ArrayList<String> c = new ArrayList<String>();
+        HashMap<String, IMember> membersList = group.getMembersList();
+        for (String m : membersList.keySet()) {
+            c.add(m);
+        }
+        c.remove(memName);
+        return c;
+    }
+
+    public void messageReceived(Message message) throws RemoteException {
+        debug.messageReceived(message);
+    }
+
+    public void messageReleased(Message message) throws RemoteException {
+        debug.messageReleased(message);
+    }
+
+    public void ackReceived(Message message) throws RemoteException {
+        String msg = "Acknowledgement received from " + message.getSource().getName();
+        debug.updateStatus(msg);
+    }
+
+    public void multicastChat(Message message) {
+        String msg = "Message multicasted to other " + member.getMembers().size() + " members";
+        String txt = "";
+        for (int i = 0; i < msg.length() / 2 + 1; i++) {
+            txt += "- ";
+        }
+        debug.updateStatus(txt + "\n" + msg);
     }
 
     /**
@@ -255,19 +315,6 @@ public class MemberWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private ArrayList<String> getContacts() {
-        ArrayList<String> c = new ArrayList<String>();
-        try {
-            HashMap<String, IMember> membersList = group.getMembersList();
-            for (String m : membersList.keySet()) {
-                c.add(m);
-            }
-            c.remove(memName);
-        } catch (Exception ex) {
-            Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return c;
-    }
 
     private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchFocusGained
         if (txtSearch.getText().trim().equalsIgnoreCase("Search Contacts")) {
@@ -285,7 +332,7 @@ public class MemberWindow extends javax.swing.JFrame {
 
     private void lstContactsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstContactsMouseClicked
         if (evt.getClickCount() == 2 && lstContacts.getSelectedIndex() != -1) {
-            SingleChat c = new SingleChat(this, false, ((JLabel) lstContacts.getSelectedValue()).getText());
+            SingleChat c = new SingleChat(this, false, ((JLabel) lstContacts.getSelectedValue()).getText(), memContainer.getStub());
             c.setVisible(true);
         }
     }//GEN-LAST:event_lstContactsMouseClicked
@@ -379,6 +426,34 @@ public class MemberWindow extends javax.swing.JFrame {
      */
     public void setServer(RMIServer server) {
         this.server = server;
+    }
+
+    /**
+     * @return the member
+     */
+    public Member getMember() {
+        return member;
+    }
+
+    /**
+     * @param member the member to set
+     */
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
+    /**
+     * @return the memContainer
+     */
+    public MemberContainer getMemContainer() {
+        return memContainer;
+    }
+
+    /**
+     * @param memContainer the memContainer to set
+     */
+    public void setMemContainer(MemberContainer memContainer) {
+        this.memContainer = memContainer;
     }
 
 }

@@ -16,7 +16,6 @@ import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.Group;
 import gcom.modules.group.GroupManagement;
-import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gnomezgrave.fisheye.packages.FishEyeDock;
 import java.awt.HeadlessException;

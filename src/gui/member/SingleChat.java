@@ -8,9 +8,18 @@
  *
  * Created on Dec 5, 2013, 7:28:30 PM
  */
-package gui;
+package gui.member;
 
+import gcom.interfaces.IMember;
+import gcom.interfaces.MESSAGE_TYPE;
+import gcom.modules.group.Member;
+import gcom.modules.group.Message;
+import gui.GComWindow;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**
@@ -23,13 +32,18 @@ public class SingleChat extends javax.swing.JFrame {
      * Creates new form SingleChat
      */
     private String contact;
+    private IMember member;
 
-    public SingleChat(java.awt.Frame parent, boolean modal, String contact) {
+    private MemberWindow memWindow;
+
+    public SingleChat(MemberWindow parent, boolean modal, String contact, IMember member) {
         initComponents();
+        this.memWindow = parent;
         this.contact = contact;
+        this.member = member;
         txtHistory.setBackground(this.getBackground());
         lblContactName.setText(contact);
-        setTitle(contact);
+        setTitle("Chat with " + contact);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
     }
 
@@ -60,8 +74,8 @@ public class SingleChat extends javax.swing.JFrame {
         jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         jSplitPane1.setResizeWeight(0.75);
 
-        txtHistory.setColumns(20);
         txtHistory.setEditable(false);
+        txtHistory.setColumns(20);
         txtHistory.setLineWrap(true);
         txtHistory.setRows(5);
         jScrollPane1.setViewportView(txtHistory);
@@ -78,6 +92,11 @@ public class SingleChat extends javax.swing.JFrame {
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 txtChatFocusLost(evt);
+            }
+        });
+        txtChat.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtChatKeyPressed(evt);
             }
         });
         jScrollPane2.setViewportView(txtChat);
@@ -97,8 +116,8 @@ public class SingleChat extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblContactName, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblContactName, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(87, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -127,8 +146,8 @@ public class SingleChat extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 398, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 413, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -147,6 +166,21 @@ public class SingleChat extends javax.swing.JFrame {
             txtChat.setForeground(Color.GRAY);
         }
     }//GEN-LAST:event_txtChatFocusLost
+
+    private void txtChatKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtChatKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String msg = txtChat.getText();
+            Message message;
+            try {
+                message = new Message(member.getParentGroup().getGroupName(), member, null, msg, MESSAGE_TYPE.CAUSAL_MULTICAST);
+                message.setDestination(member.getParentGroup().getMembersList().get(contact));
+                member.multicastCausal(message);
+                memWindow.multicastChat(message);
+            } catch (RemoteException ex) {
+                Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_txtChatKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel2;

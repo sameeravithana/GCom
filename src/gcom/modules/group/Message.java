@@ -8,6 +8,7 @@ import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
 import gcom.interfaces.MESSAGE_TYPE;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -17,14 +18,15 @@ public class Message implements IMessage {
 
     private String group_name;
     private IMember source;
-    private Member destination;
+    private IMember destination;
     private String message;
     private int messageID;
     private int position;
     ArrayList<String> params;
     private MESSAGE_TYPE type;
+    private HashMap<String, Integer> vectorClock;
 
-    public Message(String group_name, Member source, String message, MESSAGE_TYPE type) {
+    public Message(String group_name, IMember source, String message, MESSAGE_TYPE type) {
         this.group_name = group_name;
         this.source = source;
         this.message = message;
@@ -42,6 +44,14 @@ public class Message implements IMessage {
         this.group_name = group_name;
         this.position = pos;
         this.messageID = message;
+        this.type = type;
+    }
+
+    public Message(String group_name, IMember source, HashMap<String, Integer> vectorClock, String message, MESSAGE_TYPE type) {
+        this.group_name = group_name;
+        this.source = source;
+        this.vectorClock = vectorClock;
+        this.message = message;
         this.type = type;
     }
 
@@ -65,11 +75,11 @@ public class Message implements IMessage {
         return source;
     }
 
-    public void setDestination(Member destination) {
+    public void setDestination(IMember destination) {
         this.destination = destination;
     }
 
-    public Member getDestination() {
+    public IMember getDestination() {
         return this.destination;
     }
 
@@ -113,6 +123,27 @@ public class Message implements IMessage {
      */
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    /**
+     * @return the vectorClock
+     */
+    public HashMap<String, Integer> getVectorClock() {
+        return vectorClock;
+    }
+
+    /**
+     * @param vectorClock the vectorClock to set
+     */
+    public void setVectorClock(HashMap<String, Integer> vectorClock) {
+        this.vectorClock = vectorClock;
+    }
+
+    /**
+     * @param source the source to set
+     */
+    public void setSource(IMember source) {
+        this.source = source;
     }
 
 }

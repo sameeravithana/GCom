@@ -11,8 +11,6 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  *
@@ -26,6 +24,7 @@ public class Group implements Remote,Serializable,IGroup {
     private int maxMembers = 2000;
     private static int counter;
     private GroupDef gDef;
+    private IMember leader;
 
     public Group() {
         this("G-" + counter++);
@@ -156,5 +155,19 @@ public class Group implements Remote,Serializable,IGroup {
 
     public void send(Message message) {
         
+    }
+
+    /**
+     * @return the leader
+     */
+    public IMember getLeader() {
+        return leader;
+    }
+
+    /**
+     * @param leader the leader to set
+     */
+    public void setLeader(IMember leader) {
+        this.leader = leader;
     }
 }

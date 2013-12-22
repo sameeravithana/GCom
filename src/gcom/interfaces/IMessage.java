@@ -22,9 +22,9 @@ public interface IMessage extends Serializable {
 
     public IMember getSource();
 
-    public void setDestination(Member destination);
+    public void setDestination(IMember destination);
 
-    public Member getDestination();
+    public IMember getDestination();
 
     public ArrayList<String> getParams();
 
