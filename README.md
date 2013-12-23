@@ -1,4 +1,0 @@
-GCom
-====
-
-Group communication Middleware

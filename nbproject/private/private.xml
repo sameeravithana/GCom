@@ -4,15 +4,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/Group.java</file>
             <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/GroupManagement.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/MemberWindow.java</file>
             <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/Member.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/NewMember.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/SignalListener.java</file>
-            <file>file:/home/praneeth/git/GCom/src/gui/member/DebugWindow.java</file>
-            <file>file:/home/praneeth/git/GCom/src/gcom/RMIServer.java</file>
-            <file>file:/home/praneeth/git/GCom/src/gcom/interfaces/IGroupManagement.java</file>
+            <file>file:/home/praneeth/git/GCom/src/gcom/interfaces/IMember.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/GComWindow.java</file>
         </group>
     </open-files>

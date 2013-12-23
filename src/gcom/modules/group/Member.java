@@ -301,16 +301,20 @@ public class Member extends UnicastRemoteObject implements IMember {
         propertyChangeSupport.firePropertyChange("MessageReceived", signal - 1, message);
     }
 
-    public void releaseMessages(Message message) throws RemoteException {
+    public boolean releaseMessages(Message message) throws RemoteException {
         if (getVectorClock().get(getName()) == getVectorClock().get(message.getSource().getName()) && compareClock(message.getVectorClock())) {
             holdingQueue.remove(message);
             System.out.println("Message released: " + message.getMessage());
 
             propertyChangeSupport.firePropertyChange("MessageReleased", signal - 1, message);
 
-            Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), "Acknowledgement", MESSAGE_TYPE.ACKNOWLEDGEMENT);
+            Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
+            rmessage.setDestination(message.getDestination());
+            
             message.getSource().getAcknowledgement(rmessage);
+            return true;
         }
+        return false;
     }
 
     private boolean compareClock(HashMap<String, Integer> vectorClock) {
