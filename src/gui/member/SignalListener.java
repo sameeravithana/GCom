@@ -6,6 +6,7 @@
 package gui.member;
 
 import gcom.interfaces.IMember;
+import gcom.modules.group.Group;
 import gcom.modules.group.Message;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -52,6 +53,12 @@ public class SignalListener implements PropertyChangeListener {
         } else if (evt.getPropertyName().equals("AckReceived")) {
             try {
                 memWindow.ackReceived((Message) evt.getNewValue());
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (evt.getPropertyName().equals("MemberLeft")) {
+            try {
+                memWindow.updateMembers((Group) evt.getOldValue(), (IMember) evt.getNewValue());
             } catch (Exception ex) {
                 Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
             }

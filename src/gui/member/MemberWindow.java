@@ -11,13 +11,19 @@
 package gui.member;
 
 import gcom.RMIServer;
+import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
+import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.Group;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.HeadlessException;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
@@ -40,16 +46,20 @@ public class MemberWindow extends javax.swing.JFrame {
     private ArrayList<String> contacts;
     private Member member;
     private IMember stub;
-    String memName;
+    private String memName;
     private Group group;
     private DebugWindow debug;
     // private Member member;
     private RMIServer server;
     private MemberContainer memContainer;
+    private HashMap<String, SingleChat> chatWindows;
+    private boolean isOffline;
 
-    public MemberWindow(Member member, IMember stub) {
+    public MemberWindow(Member member, IMember stub) throws RemoteException, AccessException, NotBoundException {
         initComponents();
         this.stub = stub;
+        chatWindows = new HashMap<String, SingleChat>();
+
     }
 
     public void initialize(Member member, String statusLog) {
@@ -73,11 +83,16 @@ public class MemberWindow extends javax.swing.JFrame {
         fillContacts(contacts);
         lstContacts.setCellRenderer(new MyListRenderer());
         cmbStatus.setRenderer(new MyListRenderer());
+        loadStatusEntries();
+    }
+
+    public void loadStatusEntries() {
         //Online, Away, Busy, Invisible
+        cmbStatus.removeAllItems();
         cmbStatus.addItem(new JLabel("Online", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/online.png")).getImage()), JLabel.LEFT));
-        cmbStatus.addItem(new JLabel("Away", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/away.png")).getImage()), JLabel.LEFT));
-        cmbStatus.addItem(new JLabel("Busy", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/busy.png")).getImage()), JLabel.LEFT));
-        cmbStatus.addItem(new JLabel("Invisible", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/invisible.png")).getImage()), JLabel.LEFT));
+        //cmbStatus.addItem(new JLabel("Away", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/away.png")).getImage()), JLabel.LEFT));
+        //cmbStatus.addItem(new JLabel("Busy", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/busy.png")).getImage()), JLabel.LEFT));
+        cmbStatus.addItem(new JLabel("Offline", new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/invisible.png")).getImage()), JLabel.LEFT));
     }
 
     private void fillContacts(ArrayList<String> contacts) {
@@ -111,15 +126,42 @@ public class MemberWindow extends javax.swing.JFrame {
             debug.updateStatus(statusLog);
             debug.updateMemberTable();
         } catch (Exception e) {
-            System.out.println("Initially, No Parent for Leader.");
+        }
+
+    }
+
+    public void updateMembers(Group group, IMember member) throws RemoteException {
+        System.out.println("Member name " + member.getName());
+
+        this.group = group;
+
+        try {
+            contacts = getContacts();
+            fillContacts(contacts);
+            String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") left the Group " + member.getParentGroup().getGroupName();
+            debug.updateStatus(statusLog);
+            debug.updateMemberTable();
+        } catch (Exception e) {
         }
 
     }
 
     public void electionCompleted(IMember member) throws RemoteException {
-        String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") selected as the group leader in " + member.getParentGroup().getGroupName();
-        debug.updateStatus(statusLog);
-        debug.updateMemberTable();
+
+        if (this.member.isGroupLeader()) {
+            //stub = (IMember) UnicastRemoteObject.exportObject(this.member, 0);
+            String statusLog = "This Process (" + member.getIdentifier() + ") selected as the group leader in " + member.getParentGroup().getGroupName();
+            debug.updateStatus(statusLog);
+            System.out.println("HURAAAYYY.....AM THE LEADER");
+
+            server.rebind(member.getParentGroup().getGroupName(), stub);
+
+        } else {
+            String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") selected as the group leader in " + member.getParentGroup().getGroupName();
+            debug.updateStatus(statusLog);
+        }
+        System.out.println("Elected : " + member.getName());
+        debug.updateLeaderInTable(member.getName());
     }
 
     private ArrayList<String> getContacts() {
@@ -137,6 +179,14 @@ public class MemberWindow extends javax.swing.JFrame {
     }
 
     public void messageReleased(Message message) throws RemoteException {
+        String dest = message.getDestination().getName();
+        System.out.println("Message " + message.getSource().getName() + " to " + dest + " released.");
+        if (dest.equals(memName)) {
+            SingleChat c = chatWindows.get(dest);
+            if (c != null) {
+                c.setVisible(true);
+            }
+        }
         debug.messageReleased(message);
     }
 
@@ -152,6 +202,59 @@ public class MemberWindow extends javax.swing.JFrame {
             txt += "- ";
         }
         debug.updateStatus(txt + "\n" + msg);
+    }
+
+    private void rejoin() throws HeadlessException {
+        String groupName = group.getGroupName();
+        try {
+            ArrayList<String> params = new ArrayList<String>();
+            params.add(groupName);
+            params.add(memName);
+            //member = new Member(memName, null);
+            member.setGroupLeader(false);
+            memContainer.setMember(member);
+
+            this.stub = (IMember) member;
+            Message msg = new Message(groupName, member, params, MESSAGE_TYPE.JOIN_REQUEST);
+
+            memContainer.setStub(stub);
+
+            String statusLog = "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") rejoined the Group " + groupName;
+            System.out.println("############### " + group.getMemberCount());
+            if (group.getMemberCount() < 1) {
+                IGroupManagement igm = server.regLookUp("IGroupManagement");
+                member.setGroupLeader(true);
+                memContainer.setMember(igm.sendRequest(msg));
+                server.rebind(groupName, stub);
+                statusLog += " as the Group Leader";
+            } else {
+                stub = server.regMemLookUp(groupName);
+                memContainer.setMember(stub.sendRequest(msg));
+            }
+            statusLog += ".";
+
+            setMember(member);
+            setMemContainer(memContainer);
+            initialize(member, statusLog);
+
+        } catch (RemoteException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void logout() throws NotBoundException, RemoteException {
+        Message msg = new Message(member.getParentGroup().getGroupName(), member, memName, MESSAGE_TYPE.MEMBER_LEAVES);
+        String groupName = member.getParentGroup().getGroupName();
+        IMember leader = server.regMemLookUp(groupName);
+        if (member.isGroupLeader()) {
+            server.unbind(groupName);
+
+        }
+        leader.sendRequest(msg);
+        lstContacts.setListData(new Vector());
+        debug.updateStatus("# LOGGED OUT. # " + group.getMemberCount());
     }
 
     /**
@@ -200,6 +303,11 @@ public class MemberWindow extends javax.swing.JFrame {
         lblMemberName.setText("Praneeth Nilanga Peiris");
 
         cmbStatus.setFont(new java.awt.Font("Dialog", 0, 12));
+        cmbStatus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbStatusActionPerformed(evt);
+            }
+        });
 
         lstContacts.setFont(new java.awt.Font("Dialog", 0, 14));
         lstContacts.setComponentPopupMenu(contactListPopUp);
@@ -332,7 +440,14 @@ public class MemberWindow extends javax.swing.JFrame {
 
     private void lstContactsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstContactsMouseClicked
         if (evt.getClickCount() == 2 && lstContacts.getSelectedIndex() != -1) {
-            SingleChat c = new SingleChat(this, false, ((JLabel) lstContacts.getSelectedValue()).getText(), memContainer.getStub());
+            String contactName = ((JLabel) lstContacts.getSelectedValue()).getText();
+            SingleChat c;
+            if (!chatWindows.containsKey(contactName)) {
+                c = new SingleChat(this, false, contactName, memContainer.getStub());
+                chatWindows.put(contactName, c);
+            } else {
+                c = chatWindows.get(contactName);
+            }
             c.setVisible(true);
         }
     }//GEN-LAST:event_lstContactsMouseClicked
@@ -365,10 +480,37 @@ public class MemberWindow extends javax.swing.JFrame {
 
         int response = JOptionPane.showConfirmDialog(MemberWindow.this, "Are you sure want to exit?", "Exit GCom", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
         if (response == JOptionPane.OK_OPTION) {
-            //member.logOut();
-            System.exit(0);
+            try {
+                logout();
+                System.exit(0);
+            } catch (AccessException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RemoteException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_formWindowClosing
+
+    private void cmbStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStatusActionPerformed
+        if (!isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Offline")) {
+            isOffline = true;
+            try {
+                logout();
+                System.out.println("LOGGED OUT");
+            } catch (NotBoundException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RemoteException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Online")) {
+            isOffline = false;
+            System.out.println("Re-joined");
+            rejoin();
+        }
+    }//GEN-LAST:event_cmbStatusActionPerformed
+
 //    /**
 //     * @param args the command line arguments
 //     */
@@ -454,6 +596,20 @@ public class MemberWindow extends javax.swing.JFrame {
      */
     public void setMemContainer(MemberContainer memContainer) {
         this.memContainer = memContainer;
+    }
+
+    /**
+     * @return the chatWindows
+     */
+    public HashMap<String, SingleChat> getChatWindows() {
+        return chatWindows;
+    }
+
+    /**
+     * @param chatWindows the chatWindows to set
+     */
+    public void setChatWindows(HashMap<String, SingleChat> chatWindows) {
+        this.chatWindows = chatWindows;
     }
 
 }

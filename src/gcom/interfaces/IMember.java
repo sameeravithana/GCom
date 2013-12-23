@@ -52,6 +52,8 @@ public interface IMember extends Remote, Serializable {
 
     public void addMember(IMember member) throws RemoteException;
 
+    public void removeMember(IMember member) throws RemoteException;
+
     public IMember getNeighbour(int pos) throws RemoteException;
 
     public void callElection(Message emessage) throws RemoteException;

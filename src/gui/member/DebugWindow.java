@@ -16,8 +16,10 @@ import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gui.GComWindow;
 import java.rmi.RemoteException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -96,9 +98,44 @@ public class DebugWindow extends javax.swing.JFrame {
         while (dtm.getRowCount() > 0) {
             dtm.removeRow(0);
         }
-        LinkedList<IMember> members = member.getMembers();
+        Collection<IMember> members = member.getParentGroup().getMembersList().values();
         for (IMember m : members) {
-            dtm.addRow(new Object[]{m.getName(), m.isGroupLeader() ? "Leader" : "Member", null, m.getIdentifier()});
+            dtm.addRow(new Object[]{m.getName(), (m.isGroupLeader() ? "Leader" : "Member"), null, m.getIdentifier()});
+        }
+    }
+
+    public void updateLeaderInTable(IMember leader) throws RemoteException {
+        dtm = (DefaultTableModel) tblMembers.getModel();
+        Vector<Object[]> rows = new Vector<Object[]>();
+        for (int i = 0; i < dtm.getRowCount(); i++) {
+            String role = "Member";
+
+            if (dtm.getValueAt(i, 0).toString().equals(leader.getName())) {
+                role = "Leader";
+            }
+            rows.add(new Object[]{dtm.getValueAt(i, 0), role, dtm.getValueAt(i, 2), dtm.getValueAt(i, 3)});
+        }
+        while (dtm.getRowCount() > 0) {
+            dtm.removeRow(0);
+        }
+        for (Object[] o : rows) {
+            dtm.addRow(o);
+        }
+    }
+
+    public void updateLeaderInTable(String leader) throws RemoteException {
+        dtm = (DefaultTableModel) tblMembers.getModel();
+        for (int i = 0; i < dtm.getRowCount(); i++) {
+
+            String role = "Member";
+
+            String tableValue = dtm.getValueAt(i, 0).toString();
+            // System.out.println("Election : " + tableValue + " " + leader);
+
+            if (tableValue.equals(leader)) {
+                role = "Leader";
+            }
+            dtm.setValueAt(role, i, 1);
         }
     }
 
@@ -171,6 +208,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblMembers.getTableHeader().setReorderingAllowed(false);
         jScrollPane2.setViewportView(tblMembers);
         if (tblMembers.getColumnModel().getColumnCount() > 0) {
             tblMembers.getColumnModel().getColumn(1).setPreferredWidth(10);
@@ -270,7 +308,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnRelease, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -419,20 +457,24 @@ public class DebugWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void btnElectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnElectActionPerformed
+
         try {
+            Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
             if (member.getParentGroup().getMemberCount() > 1) {
-                Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
+
                 System.out.println(member.getName() + " Starting the election...");
                 member.setElectionParticipant(true);
                 member.callElection(emessage);
-                if (member.isGroupLeader()) {
-                    updateStatus("This process was selected as the group leader.");
-                    System.out.println("HURAAAYYY.....AM THE LEADER");
-                    memWindow.getServer().rebind(member.getParentGroup().getGroupName(), stub);
-                } else {
-                    updateStatus(" was selected as the group leader.");
-                }
+
+//                if (member.isGroupLeader()) {
+//                    updateStatus("This process was selected as the group leader.");
+//                    System.out.println("HURAAAYYY.....AM THE LEADER");
+//                    memWindow.getServer().rebind(member.getParentGroup().getGroupName(), stub);
+//                } else {
+//                    updateStatus(" was selected as the group leader.");
+//                }
             } else {
+                member.callElection(emessage);
                 updateStatus("This process was selected as the group leader.");
                 System.out.println("You have no neighbours..So you're the leader! " + member.getName());
             }

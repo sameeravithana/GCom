@@ -16,7 +16,7 @@ import java.util.HashMap;
  *
  * @author praneeth
  */
-public class Group implements Remote,Serializable,IGroup {
+public class Group implements Remote, Serializable, IGroup {
 
     private String groupID;
     private HashMap<String, IMember> members;
@@ -43,12 +43,13 @@ public class Group implements Remote,Serializable,IGroup {
     public Group(GroupDef gDef) {
         this.gDef = gDef;
         members = new HashMap<String, IMember>();
+        this.groupID = gDef.getGroupName();
     }
 
     public void addMember(IMember member) throws GroupManagementException, RemoteException {
         String memberId = member.getName();
         if (members.containsKey(member.getName())) {
-            throw new GroupManagementException("Duplicate Member Id : Member id" + memberId + " already exists in " + groupID);
+            throw new GroupManagementException("Duplicate Member Id : Member id " + memberId + " already exists in " + groupID);
         } else {
 
             members.put(memberId, member);
@@ -134,7 +135,6 @@ public class Group implements Remote,Serializable,IGroup {
 //            send(m, message);
 //        }
 //    }
-
     @Override
     public void initiateElection(Member initiater) {
 //        HashMap<String, Member> membersList = getMembersList();
@@ -154,7 +154,7 @@ public class Group implements Remote,Serializable,IGroup {
     }
 
     public void send(Message message) {
-        
+
     }
 
     /**

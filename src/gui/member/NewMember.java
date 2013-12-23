@@ -14,6 +14,7 @@ import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
+import gcom.modules.group.GroupManagementException;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gui.GComWindow;
@@ -38,7 +39,7 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
  * @author ens13pps
  */
 public class NewMember extends javax.swing.JDialog {
-    
+
     private Registry registry;
     private HashMap<String, Integer> gs;
     private IGroupManagement igm;
@@ -46,9 +47,9 @@ public class NewMember extends javax.swing.JDialog {
     private Member member;
     private RMIServer srv;
     private String groupName;
-    
+
     private MemberContainer memContainer;
-    
+
     private String statusLog = "";
 
     /**
@@ -64,19 +65,19 @@ public class NewMember extends javax.swing.JDialog {
         panelMem.setVisible(false);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
         memContainer = new MemberContainer();
-        
+
     }
-    
+
     private void checkConnection(String host, int port) {
-        
+
         try {
             srv = new RMIServer(host, port);
             registry = srv.start();
             igm = srv.regLookUp("IGroupManagement");
             gs = igm.getGroupDetails();
-            
+
             statusLog += "Connection to " + host + " from " + port + " successful.\n";
-            
+
             lblMsg.setText("Connection to " + host + " from " + port + " successful.");
             lblMsg.setForeground(Color.black);
         } catch (AccessException ex) {
@@ -88,9 +89,9 @@ public class NewMember extends javax.swing.JDialog {
         } catch (NotBoundException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
-    
+
     private void connect() throws HeadlessException {
         String host = cmbHost.getSelectedItem().toString().trim();
         int port = -1;
@@ -119,8 +120,8 @@ public class NewMember extends javax.swing.JDialog {
             panelMem.setVisible(false);
         }
     }
-    
-    private void createMember() throws HeadlessException {
+
+    private void createMember() throws HeadlessException, GroupManagementException {
         groupName = cmbGroup.getSelectedItem().toString().trim();
         String memName = txtMember.getText();
         if (memName.isEmpty()) {
@@ -131,19 +132,19 @@ public class NewMember extends javax.swing.JDialog {
                 params.add(groupName);
                 params.add(memName);
                 member = new Member(memName, null);
-                
+                member.setSrv(srv);
                 memContainer.setMember(member);
-                
-                IMember stub = (IMember) UnicastRemoteObject.exportObject(member, 0);
+
+                IMember stub = (IMember) member;
                 Message msg = new Message(groupName, member, params, MESSAGE_TYPE.JOIN_REQUEST);
-                
+
                 MemberWindow memWindow = new MemberWindow(member, stub);
                 member.addPropertyChangeListener(new SignalListener(memWindow));
-                
+
                 memContainer.setStub(stub);
-                
+
                 statusLog += "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") added to Group " + groupName;
-                
+
                 if (gs.get(groupName) <= 0) {
                     memContainer.setMember(igm.sendRequest(msg));
                     srv.rebind(groupName, stub);
@@ -153,14 +154,14 @@ public class NewMember extends javax.swing.JDialog {
                     memContainer.setMember(imem.sendRequest(msg));
                 }
                 statusLog += ".";
-                
+                igm.addMember(member.getParentGroup(), member);
                 setVisible(false);
                 memWindow.setMember(member);
                 memWindow.setMemContainer(memContainer);
                 memWindow.initialize(member, statusLog);
                 memWindow.setServer(srv);
                 memWindow.setVisible(true);
-                
+
             } catch (RemoteException ex) {
                 Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NotBoundException ex) {
@@ -317,7 +318,13 @@ private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 }//GEN-LAST:event_btnConnectActionPerformed
 
 private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateMemberActionPerformed
-    createMember();
+        try {
+            createMember();
+        } catch (HeadlessException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (GroupManagementException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        }
 }//GEN-LAST:event_btnCreateMemberActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConnect;
@@ -341,7 +348,7 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
         } catch (Exception ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     /**

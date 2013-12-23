@@ -58,19 +58,19 @@ public class RMIServer {
         registry.bind(name, UnicastRemoteObject.exportObject(ro, 0));
     }
 
-    public void rebind(String name, RemoteObject ro) throws AccessException, RemoteException {
-        registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
-    }
+//    public void rebind(String name, RemoteObject ro) throws AccessException, RemoteException {
+//        registry.rebind(name, ro);
+//    }
 
     public void rebind(String name, IGroupManagement ro) throws AccessException, RemoteException {
         registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
     }
 
     public void rebind(String name, IMember ro) throws AccessException, RemoteException {
-        registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
+        registry.rebind(name, ro);
     }
 
-    public void unbind(String name, RemoteObject ro) throws AccessException, RemoteException, NotBoundException {
+    public void unbind(String name) throws AccessException, RemoteException, NotBoundException {
         registry.unbind(name);
     }
 

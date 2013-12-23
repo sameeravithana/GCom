@@ -84,6 +84,7 @@ public class GroupManagement implements IGroupManagement {
             Logger.getLogger(GroupManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
         m.setParentGroup(parent);
+        parent.setLeader(m);
         m.setGroupLeader(true);
         return m;
 
@@ -100,4 +101,13 @@ public class GroupManagement implements IGroupManagement {
     public void updateStatus(Message member, MESSAGE_TYPE type) throws RemoteException, GroupManagementException {
         gCom.updateStatus(member, type);
     }
+
+    public void updateGroup(Group group) throws RemoteException, GroupManagementException {
+        groups.put(group.getGroupName(), group);
+    }
+
+    public void addMember(Group group, IMember member) throws RemoteException, GroupManagementException {
+        gCom.addMember(group, member);
+    }
+
 }

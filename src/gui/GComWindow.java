@@ -118,6 +118,14 @@ public class GComWindow extends javax.swing.JFrame {
         }
     }
 
+    public void addMember(Group group, IMember member) throws RemoteException {
+        DefaultMutableTreeNode ch = new DefaultMutableTreeNode(member.getName(), true);
+        DefaultMutableTreeNode parent = nodes.get(group.getGroupName());
+        tm.insertNodeInto(ch, parent, parent.getChildCount());
+        
+        updateStatus("Member " + member.getName() + " added to group " + group.getGroupName());
+    }
+
     private void startTMIServer(boolean state) throws HeadlessException {
         if (state) {
             String input = null;
