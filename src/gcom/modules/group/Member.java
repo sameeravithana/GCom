@@ -459,4 +459,19 @@ public class Member extends UnicastRemoteObject implements IMember {
         this.srv = srv;
     }
 
+    public void killProcess() throws RemoteException {
+        HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+        for (String key : membersList.keySet()) {
+            IMember m = membersList.get(key);
+            if (!m.isGroupLeader()) {
+                m.kill();
+            }
+        }
+        propertyChangeSupport.firePropertyChange("Kill", null, null);
+    }
+
+    public void kill() throws RemoteException {
+        propertyChangeSupport.firePropertyChange("Kill", null, null);
+    }
+
 }

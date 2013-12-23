@@ -24,7 +24,6 @@ import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -38,7 +37,7 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
  *
  * @author ens13pps
  */
-public class NewMember extends javax.swing.JDialog {
+public class NewMember extends javax.swing.JFrame {
 
     private Registry registry;
     private HashMap<String, Integer> gs;
@@ -58,8 +57,7 @@ public class NewMember extends javax.swing.JDialog {
      * @param parent
      * @param modal
      */
-    public NewMember(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public NewMember() {
         initComponents();
         setLocationRelativeTo(null);
         panelMem.setVisible(false);
@@ -344,7 +342,7 @@ private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//G
     public static void main(String[] args) throws RemoteException {
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel());
-            new NewMember(null, true).setVisible(true);
+            new NewMember().setVisible(true);
         } catch (Exception ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }

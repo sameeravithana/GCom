@@ -81,4 +81,8 @@ public interface IMember extends Remote, Serializable {
     public LinkedList<Message> getHoldingQueue() throws RemoteException;
 
     public void setHoldingQueue(LinkedList<Message> holdingQueue) throws RemoteException;
+
+    public void killProcess() throws RemoteException;
+
+    public void kill() throws RemoteException;
 }

@@ -62,6 +62,12 @@ public class SignalListener implements PropertyChangeListener {
             } catch (Exception ex) {
                 Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }else if (evt.getPropertyName().equals("Kill")) {
+            try {
+                memWindow.killProcess();
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

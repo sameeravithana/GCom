@@ -28,4 +28,6 @@ public interface IGroupManagement extends Remote {
     public void updateStatus(IMessage message) throws RemoteException, GroupManagementException;
 
     public void updateStatus(Message message, MESSAGE_TYPE type) throws RemoteException, GroupManagementException;
+
+    //public void removeGroupMulticast(String groupName) throws RemoteException, GroupManagementException;
 }

@@ -612,6 +612,10 @@ public class MemberWindow extends javax.swing.JFrame {
         this.chatWindows = chatWindows;
     }
 
+    public void killProcess() {
+        System.exit(0);
+    }
+
 }
 
 class MyListRenderer extends DefaultListCellRenderer {

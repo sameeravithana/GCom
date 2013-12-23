@@ -85,6 +85,7 @@ public class GroupManagement implements IGroupManagement {
         }
         m.setParentGroup(parent);
         parent.setLeader(m);
+        groups.put(parent.getGroupName(), parent);
         m.setGroupLeader(true);
         return m;
 
@@ -108,6 +109,12 @@ public class GroupManagement implements IGroupManagement {
 
     public void addMember(Group group, IMember member) throws RemoteException, GroupManagementException {
         gCom.addMember(group, member);
+    }
+
+    public static void removeGroupMulticast(String groupName) throws RemoteException, GroupManagementException {
+        Group g = groups.get(groupName);
+        g.getLeader().killProcess();
+        groups.remove(g.getGroupName());
     }
 
 }
