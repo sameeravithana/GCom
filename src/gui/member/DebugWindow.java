@@ -168,8 +168,6 @@ public class DebugWindow extends javax.swing.JFrame {
         jPanel6 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblMessages = new javax.swing.JTable();
-        jButton3 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
 
         setTitle("Debug");
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -356,6 +354,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblMessages.getTableHeader().setReorderingAllowed(false);
         jScrollPane5.setViewportView(tblMessages);
         if (tblMessages.getColumnModel().getColumnCount() > 0) {
             tblMessages.getColumnModel().getColumn(2).setPreferredWidth(10);
@@ -363,33 +362,20 @@ public class DebugWindow extends javax.swing.JFrame {
             tblMessages.getColumnModel().getColumn(4).setPreferredWidth(5);
         }
 
-        jButton3.setText("Shuffle");
-
-        jButton5.setText("Release");
-
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+                .addGap(115, 115, 115))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jButton3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton5))
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -485,10 +471,15 @@ public class DebugWindow extends javax.swing.JFrame {
 
     private void btnReleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReleaseActionPerformed
         int row = tblHoldMessages.getSelectedRow();
+
         if (row != -1) {
+            Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3), tblHoldMessages.getValueAt(row, 4)};
             try {
-                member.releaseMessages(holdback.get(row));
-                fillHoldingQueue(holdback);
+                if (member.releaseMessages(holdback.get(row))) {
+                    dtm = (DefaultTableModel) tblMessages.getModel();
+                    dtm.addRow(r);
+                    fillHoldingQueue(holdback);
+                }
             } catch (RemoteException ex) {
                 Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -501,8 +492,6 @@ public class DebugWindow extends javax.swing.JFrame {
     private javax.swing.JButton btnRelease;
     private javax.swing.JCheckBox chkHold;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

@@ -23,7 +23,6 @@ import java.awt.HeadlessException;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
@@ -180,18 +179,27 @@ public class MemberWindow extends javax.swing.JFrame {
 
     public void messageReleased(Message message) throws RemoteException {
         String dest = message.getDestination().getName();
-        System.out.println("Message " + message.getSource().getName() + " to " + dest + " released.");
+        String src = message.getSource().getName();
+        System.out.println("Message " + message.getSource().getName() + " to " + src + " released.");
         if (dest.equals(memName)) {
-            SingleChat c = chatWindows.get(dest);
-            if (c != null) {
-                c.setVisible(true);
+            SingleChat c = chatWindows.get(src);
+            if (c == null) {
+                c = new SingleChat(this, false, src, member);
             }
+            c.setVisible(true);
+            c.recieveMessage(message);
+            debug.messageReleased(message);
         }
-        debug.messageReleased(message);
     }
 
     public void ackReceived(Message message) throws RemoteException {
-        String msg = "Acknowledgement received from " + message.getSource().getName();
+        String msg = "Acknowledgement received from " + message.getDestination().getName();
+        String name = ((IMember) message.getSource()).getName();
+        if (chatWindows.containsKey(name)) {
+            SingleChat get = chatWindows.get(name);
+            get.setVisible(true);
+            get.sendMessage(message);
+        }
         debug.updateStatus(msg);
     }
 

@@ -254,6 +254,7 @@ public class NewMember extends javax.swing.JFrame {
         );
 
         btnConnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/connect.png"))); // NOI18N
+        btnConnect.setToolTipText("Connect to RMI Server");
         btnConnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnConnectActionPerformed(evt);

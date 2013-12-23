@@ -12,7 +12,6 @@ package gui.member;
 
 import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
-import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gui.GComWindow;
 import java.awt.Color;
@@ -45,6 +44,20 @@ public class SingleChat extends javax.swing.JFrame {
         lblContactName.setText(contact);
         setTitle("Chat with " + contact);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
+    }
+
+    public void sendMessage(Message msg) {
+        updateChat("Me : " + msg.getMessage());
+        txtChat.setText("");
+    }
+
+    public void recieveMessage(Message msg) throws RemoteException {
+        updateChat(msg.getSource().getName() + " : " + msg.getMessage());
+        txtChat.setText("");
+    }
+
+    private void updateChat(String msg) {
+        txtHistory.setText(txtHistory.getText() + msg + "\n");
     }
 
     /**

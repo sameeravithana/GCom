@@ -233,6 +233,7 @@ public class GComWindow extends javax.swing.JFrame {
         jPanel1.add(dockPanel);
 
         btnServer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/server.png"))); // NOI18N
+        btnServer.setToolTipText("Start/Stop the RMI Server");
         btnServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnServerActionPerformed(evt);

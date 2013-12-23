@@ -1,0 +1,75 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{1}
+\contentsline {paragraph}{}{1}
+\contentsline {subparagraph}{}{1}
+\contentsline {paragraph}{Tools Used}{1}
+\contentsline {subparagraph}{}{1}
+\contentsline {section}{\numberline {2}System Overview}{1}
+\contentsline {paragraph}{}{1}
+\contentsline {subparagraph}{}{1}
+\contentsline {subparagraph}{}{1}
+\contentsline {section}{\numberline {3}Group management module}{2}
+\contentsline {paragraph}{}{2}
+\contentsline {subsection}{\numberline {3.1}Group memberships}{2}
+\contentsline {paragraph}{}{2}
+\contentsline {paragraph}{}{2}
+\contentsline {subsection}{\numberline {3.2}Group view}{3}
+\contentsline {paragraph}{}{3}
+\contentsline {subsection}{\numberline {3.3}Monitor}{3}
+\contentsline {paragraph}{}{3}
+\contentsline {subsubsection}{\numberline {3.3.1}Election}{3}
+\contentsline {paragraph}{}{3}
+\contentsline {paragraph}{}{3}
+\contentsline {subparagraph}{}{4}
+\contentsline {subsubsection}{\numberline {3.3.2}Partitioning}{4}
+\contentsline {paragraph}{}{4}
+\contentsline {section}{\numberline {4}Communication module}{4}
+\contentsline {paragraph}{}{4}
+\contentsline {paragraph}{}{4}
+\contentsline {paragraph}{}{4}
+\contentsline {paragraph}{}{4}
+\contentsline {paragraph}{}{5}
+\contentsline {paragraph}{}{5}
+\contentsline {paragraph}{}{5}
+\contentsline {paragraph}{}{5}
+\contentsline {section}{\numberline {5}Message Ordering module}{5}
+\contentsline {paragraph}{}{5}
+\contentsline {subsection}{\numberline {5.1}Unordered}{5}
+\contentsline {paragraph}{}{5}
+\contentsline {subsection}{\numberline {5.2}Causal}{5}
+\contentsline {paragraph}{}{5}
+\contentsline {subparagraph}{}{5}
+\contentsline {subparagraph}{}{6}
+\contentsline {section}{\numberline {6}Testing}{6}
+\contentsline {paragraph}{}{6}
+\contentsline {section}{\numberline {7}GCom Application}{7}
+\contentsline {paragraph}{}{7}
+\contentsline {subsection}{\numberline {7.1}GCom Window}{7}
+\contentsline {paragraph}{}{7}
+\contentsline {paragraph}{}{7}
+\contentsline {paragraph}{}{7}
+\contentsline {paragraph}{}{8}
+\contentsline {paragraph}{}{8}
+\contentsline {paragraph}{}{9}
+\contentsline {subsection}{\numberline {7.2}Client Window}{10}
+\contentsline {paragraph}{}{10}
+\contentsline {paragraph}{}{10}
+\contentsline {subsubsection}{\numberline {7.2.1}Member Window}{11}
+\contentsline {paragraph}{}{11}
+\contentsline {paragraph}{}{12}
+\contentsline {paragraph}{}{12}
+\contentsline {paragraph}{}{12}
+\contentsline {subsubsection}{\numberline {7.2.2}Debug Window}{14}
+\contentsline {paragraph}{}{14}
+\contentsline {paragraph}{}{14}
+\contentsline {paragraph}{}{14}
+\contentsline {paragraph}{}{14}
+\contentsline {paragraph}{}{14}
+\contentsline {paragraph}{}{14}
+\contentsline {subsection}{\numberline {7.3}GUI Updating}{15}
+\contentsline {paragraph}{}{15}
+\contentsline {paragraph}{}{15}
+\contentsline {section}{\numberline {8}Limitations}{16}
+\contentsline {section}{\numberline {9}Future Work}{17}
+\contentsline {paragraph}{}{17}
+\contentsline {section}{\numberline {A}Project plan}{17}

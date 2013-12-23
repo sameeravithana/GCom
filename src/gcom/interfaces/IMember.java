@@ -76,7 +76,7 @@ public interface IMember extends Remote, Serializable {
 
     public void getAcknowledgement(Message message) throws RemoteException;
 
-    public void releaseMessages(Message message) throws RemoteException;
+    public boolean releaseMessages(Message message) throws RemoteException;
 
     public LinkedList<Message> getHoldingQueue() throws RemoteException;
 
