@@ -19,10 +19,11 @@ import gcom.modules.group.GroupManagement;
 import gcom.modules.group.GroupManagementException;
 import gcom.modules.group.Message;
 import gnomezgrave.fisheye.packages.FishEyeDock;
-import gui.member.NewMember;
 import java.awt.HeadlessException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -339,7 +340,14 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     }//GEN-LAST:event_formWindowOpened
 
     private void mnuNewMemberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewMemberActionPerformed
-        new NewMember().setVisible(true);
+        try {
+            //new NewMember().setVisible(true);
+            //File currentDirectory = new File(new File(".").getAbsolutePath());
+            //System.out.println(currentDirectory.getAbsolutePath());
+            Runtime.getRuntime().exec("./member.sh");
+        } catch (IOException ex) {
+            Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_mnuNewMemberActionPerformed
 
     private void mnuRemoveGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuRemoveGroupActionPerformed
