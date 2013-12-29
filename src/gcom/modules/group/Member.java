@@ -47,7 +47,8 @@ public class Member extends UnicastRemoteObject implements IMember {
         holdingQueue = new LinkedList<Message>();
         setVectorClock(new HashMap<String, Integer>());
         propertyChangeSupport = new PropertyChangeSupport(this);
-        //election = new Election(this);
+
+        //initVectorClock();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -58,7 +59,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     public void memberAdded(IMember member) throws RemoteException {
-        signal = (int) signal + 1;
+        signal = (int) signal + 1;        
         propertyChangeSupport.firePropertyChange("Signal", signal - 1, member);
     }
 
@@ -133,6 +134,8 @@ public class Member extends UnicastRemoteObject implements IMember {
             if (!(key.equals(this.getName()) || key.equals(newmember.getName()))) {
                 m.addMember(newmember);
             }
+            
+            
             m.memberAdded(newmember);
 
         }
@@ -141,6 +144,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     public void updateGroup(Group parentGroup) throws RemoteException {
         this.parentGroup = parentGroup;
         System.out.println(this.getName() + " -> Update Group Message: New member count: " + this.parentGroup.getMemberCount());
+        
     }
 
     public void updateMembers(IMember member) throws RemoteException {
@@ -181,6 +185,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     public void addMember(IMember member) throws RemoteException {
         if (!this.getMembers().contains(member)) {
             this.getMembers().add(member);
+            this.uinitVectorClock(member);
         }
         //printJoinOrder();
     }
@@ -275,16 +280,19 @@ public class Member extends UnicastRemoteObject implements IMember {
         propertyChangeSupport.firePropertyChange("ElectionFinished", signal - 1, member);
     }
 
+///////////////////////// Causal Ordering
     public void multicastCausal(Message message) throws RemoteException {
         System.out.println(message.getType() + " " + message.getMessage() + " ");
-        initVectorClock();
+        //initVectorClock();
         updateVectorCell(this.getName());
         message.setVectorClock(this.getVectorClock());
         HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (String key : membersList.keySet()) {
-            IMember m = membersList.get(key);
-            m.deliverCausal(message);
-            System.out.print(key + " ");
+            //if (!key.equals(this.getName())) {
+                IMember m = membersList.get(key);
+                m.deliverCausal(message);
+                System.out.print(key + " ");
+            //}
         }
         System.out.print(" multicasted\n");
     }
@@ -302,15 +310,19 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     public boolean releaseMessages(Message message) throws RemoteException {
-        if (getVectorClock().get(getName()) == getVectorClock().get(message.getSource().getName()) && compareClock(message.getVectorClock())) {
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  "+this.getVectorClock().toString());
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Remote: "+message.getVectorClock().toString());
+        if ((getVectorClock().get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
             holdingQueue.remove(message);
             System.out.println("Message released: " + message.getMessage());
 
             propertyChangeSupport.firePropertyChange("MessageReleased", signal - 1, message);
 
             Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
-            rmessage.setDestination(message.getDestination());
-            
+            rmessage.setDestination(message.getSource());
+
+            int uvalue=getVectorClock().get(message.getSource().getName())+1;
+            getVectorClock().put(message.getSource().getName(), uvalue);
             message.getSource().getAcknowledgement(rmessage);
             return true;
         }
@@ -332,7 +344,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         return flag;
     }
 
-    public void getAcknowledgement(Message message) throws RemoteException {
+    public void getAcknowledgement(Message message) throws RemoteException {        
         propertyChangeSupport.firePropertyChange("AckReceived", signal - 1, message);
     }
 
@@ -342,6 +354,11 @@ public class Member extends UnicastRemoteObject implements IMember {
             IMember m = membersList.get(key);
             getVectorClock().put(m.getName(), 0);
         }
+    }
+    
+    public void uinitVectorClock(IMember newmember) throws RemoteException {       
+        this.getVectorClock().put(newmember.getName(), 0);   
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, this.getVectorClock().toString());
     }
 
     public void updateVectorCell(String memName) {
@@ -477,5 +494,4 @@ public class Member extends UnicastRemoteObject implements IMember {
     public void kill() throws RemoteException {
         propertyChangeSupport.firePropertyChange("Kill", null, null);
     }
-
 }

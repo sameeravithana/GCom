@@ -87,6 +87,7 @@ public class GroupManagement implements IGroupManagement {
         parent.setLeader(m);
         groups.put(parent.getGroupName(), parent);
         m.setGroupLeader(true);
+        m.initVectorClock();
         return m;
 
     }
