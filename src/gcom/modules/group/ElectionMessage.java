@@ -12,7 +12,6 @@ public class ElectionMessage {
 
     private Member sender;
     private Member currentLeader;
-    private int maxIdentifier;
 
     public ElectionMessage(Member sender) {
         this.sender = sender;

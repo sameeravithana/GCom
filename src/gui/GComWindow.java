@@ -17,12 +17,12 @@ import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.Group;
 import gcom.modules.group.GroupManagement;
 import gcom.modules.group.GroupManagementException;
+import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gnomezgrave.fisheye.packages.FishEyeDock;
 import java.awt.HeadlessException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
@@ -78,7 +78,8 @@ public class GComWindow extends javax.swing.JFrame {
     
     public void updateStatus(String newStatus) {
         txtLog.setText(txtLog.getText() + newStatus + "\n");
-        System.out.println(newStatus);
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Status Updated : ", newStatus);
+        //System.out.println(newStatus);
     }
     
     public void updateStatus(ArrayList<String> newStatus) {
@@ -342,9 +343,6 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
     private void mnuNewMemberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewMemberActionPerformed
         try {
-            //new NewMember().setVisible(true);
-            //File currentDirectory = new File(new File(".").getAbsolutePath());
-            //System.out.println(currentDirectory.getAbsolutePath());
             Runtime.getRuntime().exec("./member.sh");
         } catch (IOException ex) {
             Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);

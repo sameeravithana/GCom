@@ -38,6 +38,14 @@ public interface IMember extends Remote, Serializable {
 
     public String getName() throws RemoteException;
 
+    public LinkedList<IMember> getMembers() throws RemoteException;
+
+    public void addMember(IMember member) throws RemoteException;
+
+    public void removeMember(IMember member) throws RemoteException;
+
+    public IMember getNeighbour(int pos) throws RemoteException;
+
     public Election getElection() throws RemoteException;
 
     public void setElection(Election election) throws RemoteException;
@@ -45,16 +53,6 @@ public interface IMember extends Remote, Serializable {
     public boolean isElectionParticipant() throws RemoteException;
 
     public void setElectionParticipant(boolean isElectionParticipant) throws RemoteException;
-
-    public LinkedList<IMember> getMembers() throws RemoteException;
-
-    public void setMembers(LinkedList<IMember> members) throws RemoteException;
-
-    public void addMember(IMember member) throws RemoteException;
-
-    public void removeMember(IMember member) throws RemoteException;
-
-    public IMember getNeighbour(int pos) throws RemoteException;
 
     public void callElection(Message emessage) throws RemoteException;
 
@@ -81,9 +79,9 @@ public interface IMember extends Remote, Serializable {
     public LinkedList<Message> getHoldingQueue() throws RemoteException;
 
     public void setHoldingQueue(LinkedList<Message> holdingQueue) throws RemoteException;
-    
+
     public void initVectorClock() throws RemoteException;
-    
+
     public void uinitVectorClock(IMember newmember) throws RemoteException;
 
     public void killProcess() throws RemoteException;

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Arch Linux) (format=pdflatex 2013.12.23)  24 DEC 2013 00:29
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Arch Linux) (format=pdflatex 2013.12.23)  24 DEC 2013 00:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -787,13 +787,13 @@ LaTeX Font Info:    Font shape `OMS/pxr/m/n' in size <10> not available
 <GCom-1.png, id=40, 561.09625pt x 468.75125pt>
 File: GCom-1.png Graphic file (type png)
  <use GCom-1.png>
-Package pdftex.def Info: GCom-1.png used on input line 280.
+Package pdftex.def Info: GCom-1.png used on input line 289.
 (pdftex.def)             Requested size: 401.50146pt x 335.41924pt.
 
 <GCom-Port.png, id=42, 330.23375pt x 141.52875pt>
 File: GCom-Port.png Graphic file (type png)
  <use GCom-Port.png>
-Package pdftex.def Info: GCom-Port.png used on input line 290.
+Package pdftex.def Info: GCom-Port.png used on input line 299.
 (pdftex.def)             Requested size: 250.93842pt x 107.54784pt.
 
 
@@ -803,37 +803,37 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 File: GCom-NewGroup.png Graphic file (type png)
 
 <use GCom-NewGroup.png>
-Package pdftex.def Info: GCom-NewGroup.png used on input line 303.
+Package pdftex.def Info: GCom-NewGroup.png used on input line 312.
 (pdftex.def)             Requested size: 401.50146pt x 316.80092pt.
  [8 <./GCom-Port.png> <./GCom-NewGroup.png>]
 <GCome-Group.png, id=53, 302.12875pt x 216.81pt>
 File: GCome-Group.png Graphic file (type png)
  <use GCome-Group.png>
-Package pdftex.def Info: GCome-Group.png used on input line 313.
+Package pdftex.def Info: GCome-Group.png used on input line 322.
 (pdftex.def)             Requested size: 250.93842pt x 180.07465pt.
 
-Overfull \hbox (8.90219pt too wide) in paragraph at lines 321--322
+Overfull \hbox (8.90219pt too wide) in paragraph at lines 330--331
 [][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 <GCom-2.png, id=54, 613.29124pt x 465.74pt>
 File: GCom-2.png Graphic file (type png)
  <use GCom-2.png>
-Package pdftex.def Info: GCom-2.png used on input line 328.
+Package pdftex.def Info: GCom-2.png used on input line 337.
 (pdftex.def)             Requested size: 301.1261pt x 228.67653pt.
  [9 <./GCome-Group.png> <./GCom-2.png>] <GCom-RemoveGroup.png, id=60, 559.08875
 pt x 504.88625pt>
 File: GCom-RemoveGroup.png Graphic file (type png)
 
 <use GCom-RemoveGroup.png>
-Package pdftex.def Info: GCom-RemoveGroup.png used on input line 337.
+Package pdftex.def Info: GCom-RemoveGroup.png used on input line 346.
 (pdftex.def)             Requested size: 351.31378pt x 317.26338pt.
 
 <Client-CreateMember.png, id=61, 422.57875pt x 335.2525pt>
 File: Client-CreateMember.png Graphic file (type png)
 
 <use Client-CreateMember.png>
-Package pdftex.def Info: Client-CreateMember.png used on input line 351.
+Package pdftex.def Info: Client-CreateMember.png used on input line 360.
 (pdftex.def)             Requested size: 301.1261pt x 238.90569pt.
 
 
@@ -843,10 +843,10 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 <Client-Chats.png, id=66, 1197.47375pt x 455.7025pt>
 File: Client-Chats.png Graphic file (type png)
  <use Client-Chats.png>
-Package pdftex.def Info: Client-Chats.png used on input line 365.
+Package pdftex.def Info: Client-Chats.png used on input line 374.
 (pdftex.def)             Requested size: 491.8393pt x 187.16603pt.
 
-Overfull \hbox (2.73642pt too wide) in paragraph at lines 365--366
+Overfull \hbox (2.73642pt too wide) in paragraph at lines 374--375
  [] 
  []
 
@@ -854,7 +854,7 @@ Overfull \hbox (2.73642pt too wide) in paragraph at lines 365--366
 File: GCom-MembersAdded.png Graphic file (type png)
 
 <use GCom-MembersAdded.png>
-Package pdftex.def Info: GCom-MembersAdded.png used on input line 374.
+Package pdftex.def Info: GCom-MembersAdded.png used on input line 383.
 (pdftex.def)             Requested size: 351.31378pt x 242.00095pt.
 
 
@@ -863,14 +863,14 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 <Client-Search.png, id=68, 574.145pt x 445.665pt>
 File: Client-Search.png Graphic file (type png)
  <use Client-Search.png>
-Package pdftex.def Info: Client-Search.png used on input line 387.
+Package pdftex.def Info: Client-Search.png used on input line 396.
 (pdftex.def)             Requested size: 250.93842pt x 194.78075pt.
 
 [11 <./Client-CreateMember.png> <./Client-Chats.png>]
 <Client-Chat-1.png, id=75, 474.77374pt x 483.8075pt>
 File: Client-Chat-1.png Graphic file (type png)
  <use Client-Chat-1.png>
-Package pdftex.def Info: Client-Chat-1.png used on input line 397.
+Package pdftex.def Info: Client-Chat-1.png used on input line 406.
 (pdftex.def)             Requested size: 150.56305pt x 153.4263pt.
 
 
@@ -879,7 +879,7 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 <Client-Chat.png, id=76, 1371.1225pt x 770.88pt>
 File: Client-Chat.png Graphic file (type png)
  <use Client-Chat.png>
-Package pdftex.def Info: Client-Chat.png used on input line 406.
+Package pdftex.def Info: Client-Chat.png used on input line 415.
 (pdftex.def)             Requested size: 431.61407pt x 242.6638pt.
 
 
@@ -890,13 +890,13 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 File: DebugWindow-1.png Graphic file (type png)
 
 <use DebugWindow-1.png>
-Package pdftex.def Info: DebugWindow-1.png used on input line 420.
+Package pdftex.def Info: DebugWindow-1.png used on input line 429.
 (pdftex.def)             Requested size: 351.31378pt x 212.57324pt.
  <DebugWindow-2.png, id=87, 869.2475pt x 684.5575pt>
 File: DebugWindow-2.png Graphic file (type png)
 
 <use DebugWindow-2.png>
-Package pdftex.def Info: DebugWindow-2.png used on input line 436.
+Package pdftex.def Info: DebugWindow-2.png used on input line 445.
 (pdftex.def)             Requested size: 451.68915pt x 355.72125pt.
 
 
@@ -904,9 +904,9 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [14 <./DebugWindow-1.png>]
 LaTeX Font Info:    Font shape `T1/pxtt/m/it' in size <9> not available
-(Font)              Font shape `T1/pxtt/m/sl' tried instead on input line 461.
+(Font)              Font shape `T1/pxtt/m/sl' tried instead on input line 470.
  [15 <./DebugWindow-2.png>]
-Overfull \hbox (13.10223pt too wide) in paragraph at lines 490--491
+Overfull \hbox (13.10223pt too wide) in paragraph at lines 499--500
 [][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
@@ -927,7 +927,7 @@ pfb></usr/share/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></usr/share/tex
 mf-dist/fonts/type1/public/txfonts/t1xtt.pfb></usr/share/texmf-dist/fonts/type1
 /urw/palatino/uplb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/palatino/uplr8a
 .pfb></usr/share/texmf-dist/fonts/type1/urw/palatino/uplri8a.pfb>
-Output written on GCOM_REPORT.pdf (19 pages, 683296 bytes).
+Output written on GCOM_REPORT.pdf (19 pages, 683574 bytes).
 PDF statistics:
  135 PDF objects out of 1000 (max. 8388607)
  73 compressed objects within 1 object stream

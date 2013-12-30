@@ -104,6 +104,11 @@ public class DebugWindow extends javax.swing.JFrame {
         }
     }
 
+    /**
+     *
+     * @param leader
+     * @throws RemoteException
+     */
     public void updateLeaderInTable(IMember leader) throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         Vector<Object[]> rows = new Vector<Object[]>();
@@ -123,6 +128,11 @@ public class DebugWindow extends javax.swing.JFrame {
         }
     }
 
+    /**
+     *
+     * @param leader
+     * @throws RemoteException
+     */
     public void updateLeaderInTable(String leader) throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         for (int i = 0; i < dtm.getRowCount(); i++) {
@@ -447,22 +457,15 @@ public class DebugWindow extends javax.swing.JFrame {
         try {
             Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
             if (member.getParentGroup().getMemberCount() > 1) {
-
-                System.out.println(member.getName() + " Starting the election...");
+                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} starting the election.", member.getName());
+                //System.out.println(member.getName() + " Starting the election...");
                 member.setElectionParticipant(true);
                 member.callElection(emessage);
-
-//                if (member.isGroupLeader()) {
-//                    updateStatus("This process was selected as the group leader.");
-//                    System.out.println("HURAAAYYY.....AM THE LEADER");
-//                    memWindow.getServer().rebind(member.getParentGroup().getGroupName(), stub);
-//                } else {
-//                    updateStatus(" was selected as the group leader.");
-//                }
             } else {
                 member.callElection(emessage);
                 updateStatus("This process was selected as the group leader.");
-                System.out.println("You have no neighbours..So you're the leader! " + member.getName());
+                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} You have no neighbours..So you're the leader.", member.getName());
+                // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
             }
         } catch (RemoteException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);

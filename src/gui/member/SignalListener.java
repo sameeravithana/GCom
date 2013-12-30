@@ -26,7 +26,7 @@ public class SignalListener implements PropertyChangeListener {
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("Signal")) {
+        if (evt.getPropertyName().equals("MemberAdded")) {
             try {
                 memWindow.updateMembers((IMember) evt.getNewValue());
             } catch (RemoteException ex) {

@@ -23,13 +23,7 @@ public class Election {
         Group group = initiater.getParentGroup();
         HashMap<String, IMember> membersList = group.getMembersList();
 
-        // make the initiater 1st in the list
-        //membersList.remove(initiater);
-        //membersList.add(0, initiater);
         electionSize = membersList.size();
         participation = new boolean[electionSize];
-    }
-
-    public void startElection() {
     }
 }
