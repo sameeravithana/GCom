@@ -15,10 +15,13 @@ import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gui.GComWindow;
+import java.io.FileReader;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,6 +57,14 @@ public class DebugWindow extends javax.swing.JFrame {
             setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
         } catch (Exception ex) {
             Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Properties p = new Properties();
+        try {
+            p.load(new FileReader("client.properties"));
+            Boolean property = Boolean.valueOf(p.getProperty("autoRelease"));
+            chkHold.setSelected(property);
+        } catch (IOException ex) {
+            Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
 //        try {
 //            updateMemberTable();
@@ -146,6 +157,42 @@ public class DebugWindow extends javax.swing.JFrame {
                 role = "Leader";
             }
             dtm.setValueAt(role, i, 1);
+        }
+    }
+
+    public void startElection() {
+        try {
+            Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
+            if (member.getParentGroup().getMemberCount() > 1) {
+                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} starting the election.", member.getName());
+                //System.out.println(member.getName() + " Starting the election...");
+                member.setElectionParticipant(true);
+                member.callElection(emessage);
+            } else {
+                member.callElection(emessage);
+                updateStatus("This process was selected as the group leader.");
+                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} : You have no neighbours..So you're the leader.", member.getName());
+                // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void releaseMessage() {
+        int row = tblHoldMessages.getSelectedRow();
+
+        if (row != -1) {
+            Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3), tblHoldMessages.getValueAt(row, 4)};
+            try {
+                if (member.releaseMessages(holdback.get(row))) {
+                    dtm = (DefaultTableModel) tblMessages.getModel();
+                    dtm.addRow(r);
+                    fillHoldingQueue(holdback);
+                }
+            } catch (RemoteException ex) {
+                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -453,40 +500,21 @@ public class DebugWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void btnElectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnElectActionPerformed
-
-        try {
-            Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
-            if (member.getParentGroup().getMemberCount() > 1) {
-                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} starting the election.", member.getName());
-                //System.out.println(member.getName() + " Starting the election...");
-                member.setElectionParticipant(true);
-                member.callElection(emessage);
-            } else {
-                member.callElection(emessage);
-                updateStatus("This process was selected as the group leader.");
-                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} You have no neighbours..So you're the leader.", member.getName());
-                // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
+        new Thread() {
+            public void run() {
+                startElection();
             }
-        } catch (RemoteException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }.start();
+
     }//GEN-LAST:event_btnElectActionPerformed
 
     private void btnReleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReleaseActionPerformed
-        int row = tblHoldMessages.getSelectedRow();
-
-        if (row != -1) {
-            Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3), tblHoldMessages.getValueAt(row, 4)};
-            try {
-                if (member.releaseMessages(holdback.get(row))) {
-                    dtm = (DefaultTableModel) tblMessages.getModel();
-                    dtm.addRow(r);
-                    fillHoldingQueue(holdback);
-                }
-            } catch (RemoteException ex) {
-                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+        new Thread() {
+            public void run() {
+                releaseMessage();
             }
-        }
+        }.start();
+
     }//GEN-LAST:event_btnReleaseActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

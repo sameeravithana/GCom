@@ -20,11 +20,14 @@ import gcom.modules.group.Message;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.HeadlessException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,6 +74,7 @@ public class MemberWindow extends javax.swing.JFrame {
             this.group = member.getParentGroup();
             this.memName = member.getName();
             lblMemberName.setText(member.getName());
+
         } catch (Exception ex) {
             lblMemberName.setText("Unknown");
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -265,6 +269,36 @@ public class MemberWindow extends javax.swing.JFrame {
         debug.updateStatus("# LOGGED OUT. # " + group.getMemberCount());
     }
 
+    private void startChat() {
+        String contactName = ((JLabel) lstContacts.getSelectedValue()).getText();
+        SingleChat c;
+        if (!chatWindows.containsKey(contactName)) {
+            c = new SingleChat(this, false, contactName, memContainer.getStub());
+            chatWindows.put(contactName, c);
+        } else {
+            c = chatWindows.get(contactName);
+        }
+        c.setVisible(true);
+    }
+
+    private void changeStatus() throws HeadlessException {
+        if (!isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Offline")) {
+            isOffline = true;
+            try {
+                logout();
+                System.out.println("LOGGED OUT");
+            } catch (NotBoundException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RemoteException ex) {
+                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Online")) {
+            isOffline = false;
+            System.out.println("Re-joined");
+            rejoin();
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -448,17 +482,15 @@ public class MemberWindow extends javax.swing.JFrame {
 
     private void lstContactsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstContactsMouseClicked
         if (evt.getClickCount() == 2 && lstContacts.getSelectedIndex() != -1) {
-            String contactName = ((JLabel) lstContacts.getSelectedValue()).getText();
-            SingleChat c;
-            if (!chatWindows.containsKey(contactName)) {
-                c = new SingleChat(this, false, contactName, memContainer.getStub());
-                chatWindows.put(contactName, c);
-            } else {
-                c = chatWindows.get(contactName);
-            }
-            c.setVisible(true);
+            new Thread() {
+                public void run() {
+                    startChat();
+                }
+            }.start();
+
         }
     }//GEN-LAST:event_lstContactsMouseClicked
+
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         String txt = txtSearch.getText().trim();
@@ -502,21 +534,7 @@ public class MemberWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void cmbStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbStatusActionPerformed
-        if (!isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Offline")) {
-            isOffline = true;
-            try {
-                logout();
-                System.out.println("LOGGED OUT");
-            } catch (NotBoundException ex) {
-                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (RemoteException ex) {
-                Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else if (isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Online")) {
-            isOffline = false;
-            System.out.println("Re-joined");
-            rejoin();
-        }
+        changeStatus();
     }//GEN-LAST:event_cmbStatusActionPerformed
 
 //    /**

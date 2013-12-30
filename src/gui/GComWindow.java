@@ -42,7 +42,7 @@ import javax.swing.tree.DefaultTreeModel;
  * @author ens13pps
  */
 public class GComWindow extends javax.swing.JFrame {
-    
+
     private RMIServer server;
     private DefaultTreeModel tm;
     private DefaultMutableTreeNode root;
@@ -61,7 +61,7 @@ public class GComWindow extends javax.swing.JFrame {
         nodes = new HashMap<String, DefaultMutableTreeNode>();
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
     }
-    
+
     private void initializeDock() {
         FishEyeDock fd = new FishEyeDock(FishEyeDock.HORIZONTAL_ALIGNMENT, 10);
         fd.setImageZoomMode(FishEyeDock.ZOOM_MODE_SMOOTH);
@@ -75,20 +75,20 @@ public class GComWindow extends javax.swing.JFrame {
         fd.insert(new ImageIcon(GComWindow.class.getResource("/pics/settings.png")), "Settings", null);
         dockPanel.add(fd);
     }
-    
-    public void updateStatus(String newStatus) {
+
+    public synchronized void updateStatus(String newStatus) {
         txtLog.setText(txtLog.getText() + newStatus + "\n");
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Status Updated : ", newStatus);
         //System.out.println(newStatus);
     }
-    
-    public void updateStatus(ArrayList<String> newStatus) {
+
+    public synchronized void updateStatus(ArrayList<String> newStatus) {
     }
-    
-    public void updateStatus(Message msg, MESSAGE_TYPE type) throws RemoteException {
+
+    public synchronized void updateStatus(Message msg, MESSAGE_TYPE type) throws RemoteException {
         IMember member = msg.getSource();
         if (type == MESSAGE_TYPE.GROUP_CREATED) {
-            
+
             DefaultMutableTreeNode tn = new DefaultMutableTreeNode(member.getName());
             String parentName = member.getParentGroup().getGroupName();
             DefaultMutableTreeNode parent = nodes.get(parentName);
@@ -106,14 +106,14 @@ public class GComWindow extends javax.swing.JFrame {
             updateStatus(m);
         }
     }
-    
-    private void addGroupToTree(String child, DefaultMutableTreeNode parent) {
+
+    private synchronized void addGroupToTree(String child, DefaultMutableTreeNode parent) {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(child, true);
         tm.insertNodeInto(ch, parent, parent.getChildCount());
         nodes.put(child, ch);
     }
-    
-    private void addNewGroup() {
+
+    private synchronized void addNewGroup() {
         NewGroup ng = new NewGroup(GComWindow.this, true);
         ng.setVisible(true);
         Group createdGroup = ng.getCreatedGroup();
@@ -122,33 +122,34 @@ public class GComWindow extends javax.swing.JFrame {
             addGroupToTree(createdGroup.getGroupName(), root);
         }
     }
-    
-    public void addMember(Group group, IMember member) throws RemoteException {
+
+    public synchronized void addMember(Group group, IMember member) throws RemoteException {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(member.getName(), true);
         DefaultMutableTreeNode parent = nodes.get(group.getGroupName());
         tm.insertNodeInto(ch, parent, parent.getChildCount());
-        
+
         updateStatus("Member " + member.getName() + " added to group " + group.getGroupName());
     }
-    
-    private void startTMIServer(boolean state) throws HeadlessException {
+
+    private synchronized void startTMIServer(boolean state) throws HeadlessException {
         if (state) {
             String input = null;
             Object value = JOptionPane.showInputDialog(GComWindow.this, "Enter port number :", "Port", JOptionPane.DEFAULT_OPTION, new ImageIcon(GComWindow.class.getResource("/pics/port.png")), null, "1099");
             if (value != null && !(input = value.toString().trim()).isEmpty()) {
-                
+
                 try {
                     int port = Integer.parseInt(input);
                     server = new RMIServer(port);
                     server.start();
                     String msg = "RMI Registry Server started on port " + port;
-                    txtLog.setText(txtLog.getText() + msg + "\n");
-                    
+                    updateStatus(msg);
+
                     GroupManagement obj = new GroupManagement();
                     IGroupManagement stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);
                     server.rebind("IGroupManagement", stub);
                     msg = "Default stub binded:" + " IGroupManagement";
-                    txtLog.setText(txtLog.getText() + msg + "\n");
+                    updateStatus(msg);
+
                     mnuStartServer.setSelected(true);
                     btnServer.setSelected(true);
                 } catch (RemoteException e) {
@@ -166,10 +167,31 @@ public class GComWindow extends javax.swing.JFrame {
             try {
                 server.stop();
                 String msg = "RMI Registry Server stopped.";
-                txtLog.setText(txtLog.getText() + msg + "\n");
+                updateStatus(msg);
+                btnServer.setSelected(false);
+                mnuStartServer.setSelected(false);
             } catch (NoSuchObjectException ex) {
                 Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+                btnServer.setSelected(true);
                 mnuStartServer.setState(true);
+            }
+        }
+    }
+
+    private synchronized void removeGroup() {
+        DefaultMutableTreeNode dmt = (DefaultMutableTreeNode) trGComStructure.getSelectionPath().getLastPathComponent();
+        String group = dmt.getUserObject().toString();
+        if (nodes.containsKey(group)) {
+            try {
+                GroupManagement.removeGroupMulticast(group);
+                server.unbind(group);
+                tm.removeNodeFromParent(dmt);
+            } catch (RemoteException ex) {
+                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
+                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (GroupManagementException ex) {
+                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -316,7 +338,11 @@ public class GComWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 private void mnuStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuStartServerActionPerformed
-    startTMIServer(mnuStartServer.getState());
+    new Thread() {
+        public void run() {
+            startTMIServer(mnuStartServer.getState());
+        }
+    }.start();
 }//GEN-LAST:event_mnuStartServerActionPerformed
 
 private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuNewGroupActionPerformed
@@ -328,13 +354,18 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             int row = trGComStructure.getClosestRowForLocation(evt.getX(), evt.getY());
             trGComStructure.setSelectionRow(row);
             int[] selectionRows = trGComStructure.getSelectionRows();
-            
+
             treeMenu.show(evt.getComponent(), evt.getX(), evt.getY());
         }
     }//GEN-LAST:event_trGComStructureMouseClicked
 
     private void btnServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnServerActionPerformed
-        startTMIServer(btnServer.isSelected());
+        new Thread() {
+            public void run() {
+                startTMIServer(btnServer.isSelected());
+            }
+        }.start();
+
     }//GEN-LAST:event_btnServerActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
@@ -350,21 +381,12 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     }//GEN-LAST:event_mnuNewMemberActionPerformed
 
     private void mnuRemoveGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuRemoveGroupActionPerformed
-        DefaultMutableTreeNode dmt = (DefaultMutableTreeNode) trGComStructure.getSelectionPath().getLastPathComponent();
-        String group = dmt.getUserObject().toString();
-        if (nodes.containsKey(group)) {
-            try {
-                GroupManagement.removeGroupMulticast(group);
-                server.unbind(group);
-                tm.removeNodeFromParent(dmt);
-            } catch (RemoteException ex) {
-                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NotBoundException ex) {
-                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GroupManagementException ex) {
-                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+        new Thread() {
+            public void run() {
+                removeGroup();
             }
-        }
+        }.start();
+
     }//GEN-LAST:event_mnuRemoveGroupActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

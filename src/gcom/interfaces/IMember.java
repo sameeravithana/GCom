@@ -78,8 +78,6 @@ public interface IMember extends Remote, Serializable {
 
     public LinkedList<Message> getHoldingQueue() throws RemoteException;
 
-    public void setHoldingQueue(LinkedList<Message> holdingQueue) throws RemoteException;
-
     public void initVectorClock() throws RemoteException;
 
     public void uinitVectorClock(IMember newmember) throws RemoteException;
