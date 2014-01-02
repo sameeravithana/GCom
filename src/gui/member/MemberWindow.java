@@ -184,7 +184,7 @@ public class MemberWindow extends javax.swing.JFrame {
     public void messageReleased(Message message) throws RemoteException {
         String dest = message.getDestination().getName();
         String src = message.getSource().getName();
-        System.out.println("Message " + message.getSource().getName() + " to " + src + " released.");
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released : from {0} to {1}", new Object[]{src, dest});
         if (dest.equals(memName)) {
             SingleChat c = chatWindows.get(src);
             if (c == null) {
@@ -640,6 +640,10 @@ public class MemberWindow extends javax.swing.JFrame {
 
     public void killProcess() {
         System.exit(0);
+    }
+
+    public void vectorReceived(Object oldValue, Object newValue) {
+        debug.vectorReceived(oldValue, newValue);
     }
 
 }

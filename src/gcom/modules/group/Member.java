@@ -392,7 +392,9 @@ public class Member extends UnicastRemoteObject implements IMember {
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", this.getVectorClock().toString());
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Remote: {0}", message.getVectorClock().toString());
 
-        if ((getVectorClock().get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
+        boolean isReleased = false;
+
+        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
             holdingQueue.remove(message);
 
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());
@@ -403,12 +405,13 @@ public class Member extends UnicastRemoteObject implements IMember {
             Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
             rmessage.setDestination(message.getSource());
 
-            int uvalue = getVectorClock().get(message.getSource().getName()) + 1;
-            getVectorClock().put(message.getSource().getName(), uvalue);
+            int uvalue = vectorClock.get(message.getSource().getName()) + 1;
+            vectorClock.put(message.getSource().getName(), uvalue);
             message.getSource().getAcknowledgement(rmessage);
-            return true;
+            isReleased = true;
         }
-        return false;
+        propertyChangeSupport.firePropertyChange("VectorReceived", isReleased, new Object[]{vectorClock, message.getVectorClock()});
+        return isReleased;
     }
 
     private synchronized boolean compareClock(HashMap<String, Integer> vectorClock) {

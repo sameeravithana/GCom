@@ -19,7 +19,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Vector;
@@ -85,6 +87,7 @@ public class DebugWindow extends javax.swing.JFrame {
     public void messageReleased(Message message) throws RemoteException {
         holdback = member.getHoldingQueue();
         fillHoldingQueue(holdback);
+        messages.add(message);
         updateStatus("Message from " + message.getSource().getName() + " released.");
         //JOptionPane.showMessageDialog(this, message.getMessage());
     }
@@ -214,17 +217,21 @@ public class DebugWindow extends javax.swing.JFrame {
         btnElect = new javax.swing.JButton();
         btnElect1 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
+        jTabbedPane2 = new javax.swing.JTabbedPane();
         jScrollPane4 = new javax.swing.JScrollPane();
         jPanel4 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         chkHold = new javax.swing.JCheckBox();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblHoldMessages = new javax.swing.JTable();
-        jButton2 = new javax.swing.JButton();
+        btnShuffle = new javax.swing.JButton();
         btnRelease = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblMessages = new javax.swing.JTable();
+        jPanel5 = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        tblVectorClocks = new javax.swing.JTable();
 
         setTitle("Debug");
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -346,7 +353,12 @@ public class DebugWindow extends javax.swing.JFrame {
             tblHoldMessages.getColumnModel().getColumn(4).setPreferredWidth(5);
         }
 
-        jButton2.setText("Shuffle");
+        btnShuffle.setText("Shuffle");
+        btnShuffle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnShuffleActionPerformed(evt);
+            }
+        });
 
         btnRelease.setText("Release");
         btnRelease.addActionListener(new java.awt.event.ActionListener() {
@@ -367,7 +379,7 @@ public class DebugWindow extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnRelease, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(btnShuffle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(chkHold)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -382,7 +394,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jButton2)
+                        .addComponent(btnShuffle)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnRelease)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -458,15 +470,59 @@ public class DebugWindow extends javax.swing.JFrame {
 
         jScrollPane4.setViewportView(jPanel4);
 
+        jTabbedPane2.addTab("Messages", jScrollPane4);
+
+        tblVectorClocks.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Current Value", "Received Value", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane6.setViewportView(tblVectorClocks);
+        if (tblVectorClocks.getColumnModel().getColumnCount() > 0) {
+            tblVectorClocks.getColumnModel().getColumn(0).setPreferredWidth(150);
+            tblVectorClocks.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tblVectorClocks.getColumnModel().getColumn(2).setPreferredWidth(5);
+        }
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 720, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(13, Short.MAX_VALUE))
+        );
+
+        jTabbedPane2.addTab("Vector Clocks", jPanel5);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 749, Short.MAX_VALUE)
+            .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
+            .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("", new javax.swing.ImageIcon(getClass().getResource("/pics/messages.png")), jPanel1, "Messages"); // NOI18N
@@ -510,6 +566,7 @@ public class DebugWindow extends javax.swing.JFrame {
 
     private void btnReleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReleaseActionPerformed
         new Thread() {
+            @Override
             public void run() {
                 releaseMessage();
             }
@@ -517,26 +574,45 @@ public class DebugWindow extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnReleaseActionPerformed
 
+    private void btnShuffleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShuffleActionPerformed
+        new Thread() {
+            @Override
+            public void run() {
+                Collections.shuffle(holdback);
+                try {
+                    fillHoldingQueue(holdback);
+                } catch (RemoteException ex) {
+                    Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }.start();
+
+    }//GEN-LAST:event_btnShuffleActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnElect;
     private javax.swing.JButton btnElect1;
     private javax.swing.JButton btnRelease;
+    private javax.swing.JButton btnShuffle;
     private javax.swing.JCheckBox chkHold;
-    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTable tblHoldMessages;
     private javax.swing.JTable tblMembers;
     private javax.swing.JTable tblMessages;
+    private javax.swing.JTable tblVectorClocks;
     private javax.swing.JTextArea txtLog;
     // End of variables declaration//GEN-END:variables
 
@@ -566,5 +642,21 @@ public class DebugWindow extends javax.swing.JFrame {
      */
     public void setIsMessageHoldEnabled(boolean isMessageHoldEnabled) {
         this.isMessageHoldEnabled = isMessageHoldEnabled;
+    }
+
+    public void vectorReceived(Object oldValue, Object newValue) {
+        boolean isChanged = Boolean.valueOf(oldValue.toString());
+        Object[] vecs = (Object[]) newValue;
+        String msg = "Vector Clock Received : \n";
+        if (isChanged) {
+            msg += "\tCurrent vector clock; " + ((HashMap<String, Integer>) vecs[0]).keySet() + " is changed to ";
+        }
+        msg += "\t" + ((HashMap<String, Integer>) vecs[1]).keySet();
+        if (!isChanged) {
+            msg += "\n\tCurrent vector clock ; " + ((HashMap<String, Integer>) vecs[1]).keySet() + " is not changed.";
+        }
+        updateStatus(msg);
+        dtm = (DefaultTableModel) tblVectorClocks.getModel();
+        dtm.addRow(new Object[]{((HashMap<String, Integer>) vecs[0]).keySet(), ((HashMap<String, Integer>) vecs[1]).keySet(), isChanged ? "Changed" : "Not Changed"});
     }
 }
