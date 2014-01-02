@@ -11,11 +11,15 @@
 package gui.member;
 
 import gcom.interfaces.IMember;
+import gcom.interfaces.MESSAGE_ORDERING;
 import gcom.interfaces.MESSAGE_TYPE;
+import gcom.modules.group.GroupDef;
 import gcom.modules.group.Message;
 import gui.GComWindow;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,9 +36,9 @@ public class SingleChat extends javax.swing.JFrame {
      */
     private String contact;
     private IMember member;
-
+    
     private MemberWindow memWindow;
-
+    
     public SingleChat(MemberWindow parent, boolean modal, String contact, IMember member) {
         initComponents();
         this.memWindow = parent;
@@ -45,17 +49,17 @@ public class SingleChat extends javax.swing.JFrame {
         setTitle("Chat with " + contact);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
     }
-
+    
     public void sendMessage(Message msg) {
         updateChat("Me : " + msg.getMessage());
         txtChat.setText("");
     }
-
+    
     public void recieveMessage(Message msg) throws RemoteException {
         updateChat(msg.getSource().getName() + " : " + msg.getMessage());
         txtChat.setText("");
     }
-
+    
     private void updateChat(String msg) {
         txtHistory.setText(txtHistory.getText() + msg + "\n");
     }
@@ -187,9 +191,14 @@ public class SingleChat extends javax.swing.JFrame {
             try {
                 message = new Message(member.getParentGroup().getGroupName(), member, null, msg, MESSAGE_TYPE.CAUSAL_MULTICAST);
                 message.setDestination(member.getParentGroup().getMembersList().get(contact));
-                member.multicastCausal(message);
+                GroupDef groupDef = member.getParentGroup().getGroupDef();
+                if (groupDef.getOrdType() == MESSAGE_ORDERING.CAUSAL) {
+                    member.multicastMessages(message);
+                } else if (groupDef.getOrdType() == MESSAGE_ORDERING.UNORDERED) {
+                    member.multicastMembersList(message);
+                }
                 memWindow.multicastChat(message);
-            } catch (RemoteException ex) {
+            } catch (RemoteException | NotBoundException ex) {
                 Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

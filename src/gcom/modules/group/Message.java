@@ -6,6 +6,7 @@ package gcom.modules.group;
 
 import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
+import gcom.interfaces.MESSAGE_ORDERING;
 import gcom.interfaces.MESSAGE_TYPE;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,4 +147,13 @@ public class Message implements IMessage {
         this.source = source;
     }
 
+    public static MESSAGE_ORDERING getMessageOrderingMode(String mode) throws Exception {
+        if (mode.equalsIgnoreCase("unordered")) {
+            return MESSAGE_ORDERING.UNORDERED;
+        } else if (mode.equalsIgnoreCase("causal")) {
+            return MESSAGE_ORDERING.CAUSAL;
+        } else {
+            throw new Exception("Invalid Message Ordering Mode..");
+        }
+    }
 }

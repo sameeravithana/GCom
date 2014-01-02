@@ -170,4 +170,18 @@ public class Group implements Remote, Serializable, IGroup {
     public void setLeader(IMember leader) {
         this.leader = leader;
     }
+
+    /**
+     * @return the gDef
+     */
+    public GroupDef getGroupDef() {
+        return gDef;
+    }
+
+    /**
+     * @param gDef the gDef to set
+     */
+    public void setgDef(GroupDef gDef) {
+        this.gDef = gDef;
+    }
 }

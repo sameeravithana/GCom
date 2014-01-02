@@ -63,8 +63,8 @@ public class DebugWindow extends javax.swing.JFrame {
         Properties p = new Properties();
         try {
             p.load(new FileReader("client.properties"));
-            Boolean property = Boolean.valueOf(p.getProperty("autoRelease"));
-            chkHold.setSelected(property);
+            isMessageHoldEnabled = Boolean.valueOf(p.getProperty("autoRelease"));
+            chkHold.setSelected(isMessageHoldEnabled);
         } catch (IOException ex) {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -76,12 +76,14 @@ public class DebugWindow extends javax.swing.JFrame {
     }
 
     public void messageReceived(Message message) throws RemoteException {
+        updateStatus("Multicast message received from " + message.getSource().getName());
         if (isMessageHoldEnabled) {
             holdback = member.getHoldingQueue();
             fillHoldingQueue(holdback);
-            updateStatus("Multicast message received from " + message.getSource().getName());
+        } else {
+            member.releaseMessages(message);
+            updateStatus("Multicast message from " + message.getSource().getName() + " released.");
         }
-        //JOptionPane.showMessageDialog(this, message.getMessage());
     }
 
     public void messageReleased(Message message) throws RemoteException {

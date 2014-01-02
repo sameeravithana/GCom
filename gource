@@ -1,0 +1,1 @@
+gource --title "GCom Project" --logo ./src/pics/logo.png --logo-offset 700x30 --transparent -800x600 --user-image-dir ./ -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -crf 1 -threads 0 -bf 0 gource.mp4

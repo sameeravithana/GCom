@@ -75,11 +75,12 @@ public class Member extends UnicastRemoteObject implements IMember {
                 this.parentGroup.addMember(m);
                 this.addMember(m);
                 Logger.getLogger(Member.class.getName()).log(Level.INFO, "Leader added member : {0}", m.getName());
-                //System.out.println("LEADER ADDED MEMBER: " + m.getName());
                 m.setParentGroup(this.parentGroup);
                 updateMembers(m);
-                multicast(m);
-            } catch (GroupManagementException | NotBoundException ex) {
+                multicastMembersList(message);
+            } catch (GroupManagementException ex) {
+                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (message.getType() == MESSAGE_TYPE.MEMBER_LEAVES) {
@@ -145,10 +146,11 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws NotBoundException
      */
     @Override
-    public synchronized void multicast(final IMember newmember) throws RemoteException, AccessException, NotBoundException {
+    public synchronized void multicastMembersList(Message message) throws RemoteException, AccessException, NotBoundException {
+        final IMember newmember = message.getSource();
         final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (final String key : membersList.keySet()) {
-            // Create separate Threads for each multicast.
+            // Create separate Threads for each multicastMembersList.
             new Thread() {
                 @Override
                 public void run() {
@@ -335,28 +337,46 @@ public class Member extends UnicastRemoteObject implements IMember {
 
 ///////////////////////// Causal Ordering
     @Override
-    public synchronized void multicastCausal(final Message message) throws RemoteException {
-        System.out.println(message.getType() + " " + message.getMessage() + " ");
-        //initVectorClock();
-        updateVectorCell(this.getName());
-        message.setVectorClock(this.getVectorClock());
-        final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+    public synchronized void multicastMessages(final Message message) throws RemoteException {
+        MESSAGE_TYPE type = message.getType();
+        if (type == MESSAGE_TYPE.CAUSAL_MULTICAST) {
+            updateVectorCell(this.getName());
+            message.setVectorClock(this.getVectorClock());
+            final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
 
-        for (final String key : membersList.keySet()) {
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        IMember m = membersList.get(key);
-                        m.deliverCausal(message);
-                    } catch (RemoteException ex) {
-                        Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            for (final String key : membersList.keySet()) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            IMember m = membersList.get(key);
+                            m.deliver(message);
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-                }
-            }.start();
+                }.start();
 
+            }
+        } else if (type == MESSAGE_TYPE.UNORDERED_MULTICAST) {
+            final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+            for (final String key : membersList.keySet()) {
+                // Create separate Threads for each multicastMembersList.
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            IMember m = membersList.get(key);
+                            m.deliver(message);
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }.start();
+
+            }
         }
-        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted.", message.getMessage());
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted. : {0} : {1}", new Object[]{message.getMessage(), message.getType()});
         //System.out.print(" multicasted\n");
     }
 
@@ -366,7 +386,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public synchronized void deliverCausal(Message message) throws RemoteException {
+    public synchronized void deliver(Message message) throws RemoteException {
         holdingQueue.add(message);
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", message.getMessage());
         //System.out.println("Message hold: " + message.getMessage());

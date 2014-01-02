@@ -22,7 +22,7 @@ public interface IMember extends Remote, Serializable {
 
     public IMember sendRequest(Message message) throws RemoteException;
 
-    public void multicast(IMember newmember) throws RemoteException, AccessException, NotBoundException;
+    public void multicastMembersList(Message message) throws RemoteException, AccessException, NotBoundException;
 
     public void updateGroup(Group parentGroup) throws RemoteException;
 
@@ -68,9 +68,9 @@ public interface IMember extends Remote, Serializable {
 
     public void electionCompleted(IMember member) throws RemoteException;
 
-    public void multicastCausal(Message message) throws RemoteException;
+    public void multicastMessages(Message message) throws RemoteException;
 
-    public void deliverCausal(Message message) throws RemoteException;
+    public void deliver(Message message) throws RemoteException;
 
     public void getAcknowledgement(Message message) throws RemoteException;
 
