@@ -301,7 +301,6 @@ public class Member extends UnicastRemoteObject implements IMember {
             this.getParentGroup().setLeader(emessage.getSource());
             electionCompleted(emessage.getSource());
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : elected as new leader.", emessage.getSource().getName());
-            // System.out.println("*ELECTED MSG: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
             this.getNeighbour(position).voteElection(emessage);
         }
 
@@ -423,6 +422,7 @@ public class Member extends UnicastRemoteObject implements IMember {
             message.getSource().getAcknowledgement(rmessage);
             isReleased = true;
         }
+        
         propertyChangeSupport.firePropertyChange("VectorReceived", isReleased, new Object[]{vectorClock, message.getVectorClock()});
         return isReleased;
     }

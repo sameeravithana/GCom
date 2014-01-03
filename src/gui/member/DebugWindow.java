@@ -45,7 +45,7 @@ public class DebugWindow extends javax.swing.JFrame {
     //private Member member;
     private DefaultTableModel dtm;
     private IMember stub;
-    private boolean isMessageHoldEnabled = true;
+    private boolean autoRelease = false;
     private LinkedList<Message> holdback, messages;
 
     public DebugWindow(MemberWindow memWindow, Member member, IMember stub) {
@@ -64,8 +64,8 @@ public class DebugWindow extends javax.swing.JFrame {
         Properties p = new Properties();
         try {
             p.load(new FileReader("client.properties"));
-            isMessageHoldEnabled = Boolean.valueOf(p.getProperty("autoRelease"));
-            chkHold.setSelected(isMessageHoldEnabled);
+            autoRelease = Boolean.valueOf(p.getProperty("autoRelease"));
+            chkHold.setSelected(!autoRelease);
         } catch (IOException ex) {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -78,7 +78,7 @@ public class DebugWindow extends javax.swing.JFrame {
 
     public void messageReceived(Message message) throws RemoteException {
         updateStatus("Multicast message received from " + message.getSource().getName());
-        if (isMessageHoldEnabled) {
+        if (!autoRelease) {
             holdback = member.getHoldingQueue();
             fillHoldingQueue(holdback);
         } else {
@@ -634,21 +634,21 @@ public class DebugWindow extends javax.swing.JFrame {
     }
 
     /**
-     * @return the isMessageHoldEnabled
+     * @return the autoRelease
      */
     public boolean isIsMessageHoldEnabled() {
-        return isMessageHoldEnabled;
+        return autoRelease;
     }
 
     /**
-     * @param isMessageHoldEnabled the isMessageHoldEnabled to set
+     * @param isMessageHoldEnabled the autoRelease to set
      */
     public void setIsMessageHoldEnabled(boolean isMessageHoldEnabled) {
-        this.isMessageHoldEnabled = isMessageHoldEnabled;
+        this.autoRelease = isMessageHoldEnabled;
     }
 
-    public void vectorReceived(Object oldValue, Object newValue) {
-        boolean isChanged = Boolean.valueOf(oldValue.toString());
+    public void vectorReceived(Object changed, Object newValue) {
+        boolean isChanged = Boolean.valueOf(changed.toString());
         Object[] vecs = (Object[]) newValue;
         String msg = "Vector Clock Received : \n";
         Collection<Integer> OldVal = ((HashMap<String, Integer>) vecs[0]).values();
