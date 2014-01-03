@@ -407,8 +407,8 @@ public class Member extends UnicastRemoteObject implements IMember {
 
         boolean isReleased = false;
 
-        //if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
-        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1)) {
+        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message)) {
+        //if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1)) {
             holdingQueue.remove(message);
 
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());
@@ -443,13 +443,13 @@ public class Member extends UnicastRemoteObject implements IMember {
         }
     }
 
-    private boolean compareClock(HashMap<String, Integer> vectorClock) {
+    private boolean compareClock(Message message) throws RemoteException {
         boolean flag = true;
-        for (String memName : this.getVectorClock().keySet()) {
-            if (!(memName.equals(this.getName()))) {
+        for (String memName : message.getVectorClock().keySet()) {
+            if (!(memName.equals(message.getSource().getName()))) {
                 Integer k1 = this.getVectorClock().get(memName);
-                Integer k2 = vectorClock.get(memName);
-                if (k1 > k2) {
+                Integer k2 = message.getVectorClock().get(memName);
+                if (k1 < k2) {
                     flag &= false;
                     return flag;
                 }
