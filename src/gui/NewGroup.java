@@ -104,15 +104,9 @@ public class NewGroup extends javax.swing.JDialog {
 
         jLabel2.setText("Group Type");
 
-        cmbGroupType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Static", "Dynamic" }));
-
         jLabel3.setText("Com. Type");
 
-        cmbComType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Basic", "Reliable" }));
-
         jLabel4.setText("Msg. Ordering");
-
-        cmbMsgOrd.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Unordered", "Causal" }));
 
         btnOK.setText("OK");
         btnOK.addActionListener(new java.awt.event.ActionListener() {

@@ -56,7 +56,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void memberAdded(IMember member) throws RemoteException {
+    public void memberAdded(IMember member) throws RemoteException {
         propertyChangeSupport.firePropertyChange("MemberAdded", null, member);
     }
 
@@ -68,7 +68,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws AccessException
      */
     @Override
-    public  IMember sendRequest(Message message) throws RemoteException, AccessException {
+    public IMember sendRequest(Message message) throws RemoteException, AccessException {
         IMember m = message.getSource();
 
         if (message.getMessageType() == MESSAGE_TYPE.JOIN_REQUEST) {
@@ -146,7 +146,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws NotBoundException
      */
     @Override
-    public  void multicastMembersList(Message message) throws RemoteException, AccessException, NotBoundException {
+    public void multicastMembersList(Message message) throws RemoteException, AccessException, NotBoundException {
         final IMember newmember = message.getSource();
         final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (final String key : membersList.keySet()) {
@@ -177,7 +177,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  void updateGroup(Group parentGroup) throws RemoteException {
+    public void updateGroup(Group parentGroup) throws RemoteException {
         this.parentGroup = parentGroup;
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Group Updated : {0}", this.parentGroup.getMemberCount());
     }
@@ -188,7 +188,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  void updateMembers(final IMember member) throws RemoteException {
+    public void updateMembers(final IMember member) throws RemoteException {
         for (final IMember m : this.getMembers()) {
             new Thread() {
                 @Override
@@ -228,7 +228,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void addMember(IMember member) throws RemoteException {
+    public void addMember(IMember member) throws RemoteException {
         if (!this.getMembers().contains(member)) {
             this.getMembers().add(member);
             this.uinitVectorClock(member);
@@ -236,7 +236,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void removeMember(IMember member) throws RemoteException {
+    public void removeMember(IMember member) throws RemoteException {
         if (this.getMembers().contains(member)) {
             this.getMembers().remove(member);
             vectorClock.remove(member.getName());
@@ -259,7 +259,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void callElection(Message emessage) throws RemoteException {
+    public void callElection(Message emessage) throws RemoteException {
         LinkedList<IMember> llist = this.getMembers();
         int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
         MESSAGE_TYPE messageType = emessage.getMessageType();
@@ -271,7 +271,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void voteElection(Message emessage) throws RemoteException {
+    public void voteElection(Message emessage) throws RemoteException {
         LinkedList<IMember> llist = this.getMembers();
         int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
         if (emessage.getMessageType() == MESSAGE_TYPE.ELECTION) {
@@ -307,7 +307,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void stopElection(Message emessage) throws RemoteException {
+    public void stopElection(Message emessage) throws RemoteException {
         LinkedList<IMember> llist = this.getMembers();
         IMember leader = this.parentGroup.getMembersList().get(this.getName());
 
@@ -332,7 +332,7 @@ public class Member extends UnicastRemoteObject implements IMember {
 
 ///////////////////////// Causal Ordering
     @Override
-    public  void multicastMessages(final Message message) throws RemoteException {
+    public void multicastMessages(final Message message) throws RemoteException {
         MESSAGE_TYPE type = message.getType();
         if (type == MESSAGE_TYPE.CAUSAL_MULTICAST) {
             updateVectorCell(this.getName());
@@ -380,7 +380,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  void deliver(Message message) throws RemoteException {
+    public void deliver(Message message) throws RemoteException {
         holdingQueue.add(message);
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", message.getMessage());
         messageReceived(message);
@@ -390,7 +390,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      *
      * @param message
      */
-    public  void messageReceived(Message message) {
+    public void messageReceived(Message message) {
         propertyChangeSupport.firePropertyChange("MessageReceived", null, message);
     }
 
@@ -401,33 +401,49 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  boolean releaseMessages(Message message) throws RemoteException {
+    public boolean releaseMessages(Message message) throws RemoteException {
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", this.getVectorClock().toString());
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Remote: {0}", message.getVectorClock().toString());
 
         boolean isReleased = false;
 
-        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
+        //if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
+        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1)) {
             holdingQueue.remove(message);
 
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());
 
             propertyChangeSupport.firePropertyChange("MessageReleased", null, message);
 
-            Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
-            rmessage.setDestination(message.getSource());
-
             int uvalue = vectorClock.get(message.getSource().getName()) + 1;
             vectorClock.put(message.getSource().getName(), uvalue);
+
+            syncClock(message.getVectorClock());
+
+            Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
+            rmessage.setDestination(message.getSource());
             message.getSource().getAcknowledgement(rmessage);
+
             isReleased = true;
         }
-        
         propertyChangeSupport.firePropertyChange("VectorReceived", isReleased, new Object[]{vectorClock, message.getVectorClock()});
+
         return isReleased;
     }
 
-    private  boolean compareClock(HashMap<String, Integer> vectorClock) {
+    private void syncClock(HashMap<String, Integer> vectorClock) {
+        for (String memName : this.getVectorClock().keySet()) {
+            if (!(memName.equals(this.getName()))) {
+                Integer k1 = this.getVectorClock().get(memName);
+                Integer k2 = vectorClock.get(memName);
+                if (k1 < k2) {
+                    vectorClock.put(memName, k2);
+                }
+            }
+        }
+    }
+
+    private boolean compareClock(HashMap<String, Integer> vectorClock) {
         boolean flag = true;
         for (String memName : this.getVectorClock().keySet()) {
             if (!(memName.equals(this.getName()))) {
@@ -448,7 +464,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  void getAcknowledgement(Message message) throws RemoteException {
+    public void getAcknowledgement(Message message) throws RemoteException {
         propertyChangeSupport.firePropertyChange("AckReceived", null, message);
     }
 
@@ -457,7 +473,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  void initVectorClock() throws RemoteException {
+    public void initVectorClock() throws RemoteException {
         HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (String key : membersList.keySet()) {
             IMember m = membersList.get(key);
@@ -471,7 +487,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public  void uinitVectorClock(IMember newmember) throws RemoteException {
+    public void uinitVectorClock(IMember newmember) throws RemoteException {
         this.getVectorClock().put(newmember.getName(), 0);
         Logger.getLogger(Member.class.getName()).log(Level.INFO, this.getVectorClock().toString());
     }
@@ -508,7 +524,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @param parentGroup the parentGroup to set
      */
     @Override
-    public  void setParentGroup(Group parentGroup) {
+    public void setParentGroup(Group parentGroup) {
         this.parentGroup = parentGroup;
         election = new Election(this);
     }
@@ -524,7 +540,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     /**
      * @param id the id to set
      */
-    public  void setName(String id) {
+    public void setName(String id) {
         this.name = id;
     }
 
@@ -540,7 +556,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @param identifier the identifier to set
      */
     @Override
-    public  void setIdentifier(int identifier) {
+    public void setIdentifier(int identifier) {
         this.identifier = identifier;
     }
 
@@ -556,7 +572,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @param isElectionParticipant the isElectionParticipant to set
      */
     @Override
-    public  void setElectionParticipant(boolean isElectionParticipant) {
+    public void setElectionParticipant(boolean isElectionParticipant) {
         this.isElectionParticipant = isElectionParticipant;
     }
 
@@ -572,7 +588,7 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @param isGroupLeader the isGroupLeader to set
      */
     @Override
-    public  void setGroupLeader(boolean isGroupLeader) {
+    public void setGroupLeader(boolean isGroupLeader) {
         this.isGroupLeader = isGroupLeader;
     }
 
@@ -599,7 +615,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void killProcess() throws RemoteException {
+    public void killProcess() throws RemoteException {
         final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (final String key : membersList.keySet()) {
             new Thread() {
@@ -621,7 +637,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public  void kill() throws RemoteException {
+    public void kill() throws RemoteException {
         propertyChangeSupport.firePropertyChange("Kill", null, null);
     }
 }
