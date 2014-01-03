@@ -148,6 +148,7 @@ public class Message implements IMessage {
     }
 
     public static MESSAGE_ORDERING getMessageOrderingMode(String mode) throws Exception {
+        System.out.println(mode);
         if (mode.equalsIgnoreCase("unordered")) {
             return MESSAGE_ORDERING.UNORDERED;
         } else if (mode.equalsIgnoreCase("causal")) {

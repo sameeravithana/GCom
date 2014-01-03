@@ -44,21 +44,25 @@ public class NewGroup extends javax.swing.JDialog {
         cmb = new JComboBox[]{cmbGroupType, cmbComType, cmbMsgOrd};
         try {
             Properties p = new Properties();
-            p.load(new FileInputStream(NewGroup.class.getResource("../server.properties").getPath()));
+            p.load(new FileInputStream("server.properties"));
+            String groupType[] = p.getProperty("groupType").split(",");
 
-            HashMap<String, String[]> hm = new HashMap<String, String[]>();
-            int i = 0;
-            for (String k : p.stringPropertyNames()) {
-                String property = p.getProperty(k);
-                String[] split = property.split(",");
-                hm.put(k, split);
-                cmb[i].removeAllItems();
-                for (int j = 0; j < split.length; j++) {
-                    cmb[i].addItem(split[j]);
-                }
-                i++;
-
+            for (int i = 0; i < groupType.length; i++) {
+                cmbGroupType.addItem(groupType[i]);
             }
+
+            String comType[] = p.getProperty("comType").split(",");
+
+            for (int i = 0; i < groupType.length; i++) {
+                cmbComType.addItem(comType[i]);
+            }
+
+            String ordType[] = p.getProperty("ordType").split(",");
+
+            for (int i = 0; i < groupType.length; i++) {
+                cmbMsgOrd.addItem(ordType[i]);
+            }
+
         } catch (IOException ex) {
             Logger.getLogger(NewGroup.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -178,7 +182,7 @@ private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:e
         try {
             String groupType = cmbGroupType.getSelectedItem().toString();
             MESSAGE_ORDERING messageOrderingMode = Message.getMessageOrderingMode(cmbMsgOrd.getSelectedItem().toString());
-            GroupDef gd = new GroupDef(txtGroupName.getText(), cmbGroupType.getSelectedItem().toString(), cmbComType.getSelectedItem().toString(), messageOrderingMode);
+            GroupDef gd = new GroupDef(txtGroupName.getText(), groupType, cmbComType.getSelectedItem().toString(), messageOrderingMode);
             try {
                 group = GroupManagement.createGroup(gd);
                 setVisible(false);

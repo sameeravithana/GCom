@@ -76,16 +76,16 @@ public class GComWindow extends javax.swing.JFrame {
         dockPanel.add(fd);
     }
 
-    public synchronized void updateStatus(String newStatus) {
+    public  void updateStatus(String newStatus) {
         txtLog.setText(txtLog.getText() + newStatus + "\n");
-        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Status Updated : ", newStatus);
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Status Updated : {0}", newStatus);
         //System.out.println(newStatus);
     }
 
-    public synchronized void updateStatus(ArrayList<String> newStatus) {
+    public  void updateStatus(ArrayList<String> newStatus) {
     }
 
-    public synchronized void updateStatus(Message msg, MESSAGE_TYPE type) throws RemoteException {
+    public  void updateStatus(Message msg, MESSAGE_TYPE type) throws RemoteException {
         IMember member = msg.getSource();
         if (type == MESSAGE_TYPE.GROUP_CREATED) {
 
@@ -107,13 +107,13 @@ public class GComWindow extends javax.swing.JFrame {
         }
     }
 
-    private synchronized void addGroupToTree(String child, DefaultMutableTreeNode parent) {
+    private  void addGroupToTree(String child, DefaultMutableTreeNode parent) {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(child, true);
         tm.insertNodeInto(ch, parent, parent.getChildCount());
         nodes.put(child, ch);
     }
 
-    private synchronized void addNewGroup() {
+    private  void addNewGroup() {
         NewGroup ng = new NewGroup(GComWindow.this, true);
         ng.setVisible(true);
         Group createdGroup = ng.getCreatedGroup();
@@ -123,7 +123,7 @@ public class GComWindow extends javax.swing.JFrame {
         }
     }
 
-    public synchronized void addMember(Group group, IMember member) throws RemoteException {
+    public  void addMember(Group group, IMember member) throws RemoteException {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(member.getName(), true);
         DefaultMutableTreeNode parent = nodes.get(group.getGroupName());
         tm.insertNodeInto(ch, parent, parent.getChildCount());
@@ -131,7 +131,7 @@ public class GComWindow extends javax.swing.JFrame {
         updateStatus("Member " + member.getName() + " added to group " + group.getGroupName());
     }
 
-    private synchronized void startTMIServer(boolean state) throws HeadlessException {
+    private  void startTMIServer(boolean state) throws HeadlessException {
         if (state) {
             String input = null;
             Object value = JOptionPane.showInputDialog(GComWindow.this, "Enter port number :", "Port", JOptionPane.DEFAULT_OPTION, new ImageIcon(GComWindow.class.getResource("/pics/port.png")), null, "1099");
@@ -178,7 +178,7 @@ public class GComWindow extends javax.swing.JFrame {
         }
     }
 
-    private synchronized void removeGroup() {
+    private  void removeGroup() {
         DefaultMutableTreeNode dmt = (DefaultMutableTreeNode) trGComStructure.getSelectionPath().getLastPathComponent();
         String group = dmt.getUserObject().toString();
         if (nodes.containsKey(group)) {
