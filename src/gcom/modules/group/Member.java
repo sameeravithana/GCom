@@ -408,25 +408,44 @@ public class Member extends UnicastRemoteObject implements IMember {
 
         boolean isReleased = false;
 
-        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
+        //if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message.getVectorClock())) {
+        if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1)){
             holdingQueue.remove(message);
 
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());
 
             propertyChangeSupport.firePropertyChange("MessageReleased", null, message);
 
-            Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
-            rmessage.setDestination(message.getSource());
+            
 
             int uvalue = vectorClock.get(message.getSource().getName()) + 1;
             vectorClock.put(message.getSource().getName(), uvalue);
+            
+            syncClock(message.getVectorClock());
+            
+            Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
+            rmessage.setDestination(message.getSource());            
             message.getSource().getAcknowledgement(rmessage);
+            
             isReleased = true;
         }
-        propertyChangeSupport.firePropertyChange("VectorReceived", isReleased, new Object[]{vectorClock, message.getVectorClock()});
+        
+        
+        propertyChangeSupport.firePropertyChange("VectorReceived", isReleased, new Object[]{this.getVectorClock(), message.getVectorClock()});
         return isReleased;
     }
 
+    private  void syncClock(HashMap<String, Integer> vectorClock) {
+        for (String memName : this.getVectorClock().keySet()) {
+            if (!(memName.equals(this.getName()))) {
+                Integer k1 = this.getVectorClock().get(memName);
+                Integer k2 = vectorClock.get(memName);
+                if (k1 < k2) {
+                    vectorClock.put(memName, k2);
+                }
+            }
+        }
+    }
     private  boolean compareClock(HashMap<String, Integer> vectorClock) {
         boolean flag = true;
         for (String memName : this.getVectorClock().keySet()) {

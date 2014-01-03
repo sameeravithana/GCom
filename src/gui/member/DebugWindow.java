@@ -65,7 +65,7 @@ public class DebugWindow extends javax.swing.JFrame {
         try {
             p.load(new FileReader("client.properties"));
             isMessageHoldEnabled = Boolean.valueOf(p.getProperty("autoRelease"));
-            chkHold.setSelected(isMessageHoldEnabled);
+            chkHold.setSelected(!isMessageHoldEnabled);
         } catch (IOException ex) {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -78,7 +78,7 @@ public class DebugWindow extends javax.swing.JFrame {
 
     public void messageReceived(Message message) throws RemoteException {
         updateStatus("Multicast message received from " + message.getSource().getName());
-        if (isMessageHoldEnabled) {
+        if (!isMessageHoldEnabled) {
             holdback = member.getHoldingQueue();
             fillHoldingQueue(holdback);
         } else {
@@ -653,15 +653,15 @@ public class DebugWindow extends javax.swing.JFrame {
         String msg = "Vector Clock Received : \n";
         Collection<Integer> OldVal = ((HashMap<String, Integer>) vecs[0]).values();
         if (isChanged) {
-            msg += "\tCurrent vector clock; " + OldVal + " is changed to ";
+            msg += "\tCurrent vector clock; " + vecs[0] + " is changed to ";
         }
         Collection<Integer> newVal = ((HashMap<String, Integer>) vecs[1]).values();
         msg += "\t" + newVal;
         if (!isChanged) {
-            msg += "\n\tCurrent vector clock ; " + newVal + " is not changed.";
+            msg += "\n\tCurrent vector clock ; " + vecs[1] + " is not changed.";
         }
         updateStatus(msg);
         dtm = (DefaultTableModel) tblVectorClocks.getModel();
-        dtm.addRow(new Object[]{OldVal, newVal, isChanged ? "Changed" : "Not Changed"});
+        dtm.addRow(new Object[]{vecs[0], vecs[1], isChanged ? "Changed" : "Not Changed"});
     }
 }
