@@ -105,8 +105,6 @@ public class MemberWindow extends javax.swing.JFrame {
         for (int i = 0; i < contacts.size(); i++) {
             JLabel lb = new JLabel(contacts.get(i));
             lb.setIcon(new ImageIcon(new ImageIcon(MemberWindow.class.getResource("/pics/online.png")).getImage()));
-            System.out.println(contacts.get(i));
-            //lstContacts.add(j);
             v.add(lb);
         }
         lstContacts.setListData(v);
@@ -117,8 +115,7 @@ public class MemberWindow extends javax.swing.JFrame {
     }
 
     public void updateMembers(IMember member) throws RemoteException {
-        System.out.println("Member name " + member.getName());
-
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Member added : {0}", member.getName());
         Group parentGroup = member.getParentGroup();
         this.group = parentGroup;
 
@@ -134,8 +131,7 @@ public class MemberWindow extends javax.swing.JFrame {
     }
 
     public void updateMembers(Group group, IMember member) throws RemoteException {
-        System.out.println("Member name " + member.getName());
-
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Member added : {0}", member.getName());
         this.group = group;
 
         try {
@@ -155,15 +151,13 @@ public class MemberWindow extends javax.swing.JFrame {
             //stub = (IMember) UnicastRemoteObject.exportObject(this.member, 0);
             String statusLog = "This Process (" + member.getIdentifier() + ") selected as the group leader in " + member.getParentGroup().getGroupName();
             debug.updateStatus(statusLog);
-            System.out.println("HURAAAYYY.....AM THE LEADER");
-
             server.rebind(member.getParentGroup().getGroupName(), stub);
 
         } else {
             String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") selected as the group leader in " + member.getParentGroup().getGroupName();
             debug.updateStatus(statusLog);
         }
-        System.out.println("Elected : " + member.getName());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "{0} is elected as the leader.", member.getName());
         debug.updateLeaderInTable(member.getName());
     }
 
@@ -187,8 +181,10 @@ public class MemberWindow extends javax.swing.JFrame {
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released : from {0} to {1}", new Object[]{src, dest});
         if (dest.equals(memName)) {
             SingleChat c = chatWindows.get(src);
+            //System.out.println("SRC : " + src);
             if (c == null) {
                 c = new SingleChat(this, false, src, member);
+                chatWindows.put(src, c);
             }
             c.setVisible(true);
             c.recieveMessage(message);
@@ -232,7 +228,6 @@ public class MemberWindow extends javax.swing.JFrame {
             memContainer.setStub(stub);
 
             String statusLog = "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") rejoined the Group " + groupName;
-            System.out.println("############### " + group.getMemberCount());
             if (group.getMemberCount() < 1) {
                 IGroupManagement igm = server.regLookUp("IGroupManagement");
                 member.setGroupLeader(true);
@@ -286,7 +281,7 @@ public class MemberWindow extends javax.swing.JFrame {
             isOffline = true;
             try {
                 logout();
-                System.out.println("LOGGED OUT");
+                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "Logged out : {0}", member.getName());
             } catch (NotBoundException ex) {
                 Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RemoteException ex) {
@@ -294,8 +289,8 @@ public class MemberWindow extends javax.swing.JFrame {
             }
         } else if (isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Online")) {
             isOffline = false;
-            System.out.println("Re-joined");
             rejoin();
+            Logger.getLogger(MemberWindow.class.getName()).log(Level.INFO, "{0} Rejoined", member.getName());
         }
     }
 
@@ -522,6 +517,9 @@ public class MemberWindow extends javax.swing.JFrame {
         if (response == JOptionPane.OK_OPTION) {
             try {
                 logout();
+                for (String c : chatWindows.keySet()) {
+                    chatWindows.get(c).setVisible(false);
+                }
                 System.exit(0);
             } catch (AccessException ex) {
                 Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);

@@ -54,6 +54,7 @@ public class DebugWindow extends javax.swing.JFrame {
         this.member = member;
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
         this.memWindow = memWindow;
+        messages = new LinkedList<>();
         try {
             memName = member.getName();
             setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
@@ -650,15 +651,17 @@ public class DebugWindow extends javax.swing.JFrame {
         boolean isChanged = Boolean.valueOf(oldValue.toString());
         Object[] vecs = (Object[]) newValue;
         String msg = "Vector Clock Received : \n";
+        Collection<Integer> OldVal = ((HashMap<String, Integer>) vecs[0]).values();
         if (isChanged) {
-            msg += "\tCurrent vector clock; " + ((HashMap<String, Integer>) vecs[0]).keySet() + " is changed to ";
+            msg += "\tCurrent vector clock; " + OldVal + " is changed to ";
         }
-        msg += "\t" + ((HashMap<String, Integer>) vecs[1]).keySet();
+        Collection<Integer> newVal = ((HashMap<String, Integer>) vecs[1]).values();
+        msg += "\t" + newVal;
         if (!isChanged) {
-            msg += "\n\tCurrent vector clock ; " + ((HashMap<String, Integer>) vecs[1]).keySet() + " is not changed.";
+            msg += "\n\tCurrent vector clock ; " + newVal + " is not changed.";
         }
         updateStatus(msg);
         dtm = (DefaultTableModel) tblVectorClocks.getModel();
-        dtm.addRow(new Object[]{((HashMap<String, Integer>) vecs[0]).keySet(), ((HashMap<String, Integer>) vecs[1]).keySet(), isChanged ? "Changed" : "Not Changed"});
+        dtm.addRow(new Object[]{OldVal, newVal, isChanged ? "Changed" : "Not Changed"});
     }
 }

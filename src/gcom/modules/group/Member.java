@@ -8,6 +8,7 @@ import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
+import gui.member.NewMember;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.rmi.AccessException;
@@ -89,7 +90,6 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             final IMember source = membersList.get(message.getMessage());
 
-            //System.out.println("Member leaves : " + message.getMessage());
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Member Leaves : {0}", message.getMessage());
 
             try {
@@ -180,7 +180,6 @@ public class Member extends UnicastRemoteObject implements IMember {
     public  void updateGroup(Group parentGroup) throws RemoteException {
         this.parentGroup = parentGroup;
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Group Updated : {0}", this.parentGroup.getMemberCount());
-        //System.out.println(this.getName() + " -> Update Group Message: New member count: " + this.parentGroup.getMemberCount());
     }
 
     /**
@@ -244,8 +243,6 @@ public class Member extends UnicastRemoteObject implements IMember {
             propertyChangeSupport.firePropertyChange("MemberLeft", parentGroup, member);
         }
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Group Updated : Member Removed : {0}", members.size());
-        //System.out.println("Members size " + members.size());
-        //printJoinOrder();
     }
 
     @Override
@@ -268,8 +265,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         MESSAGE_TYPE messageType = emessage.getMessageType();
 
         if (messageType == MESSAGE_TYPE.ELECTION) {
-            //System.out.println("#CALL ELECTION: " + messageType + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessage());
-            // System.out.println("Neighbour " + this.getNeighbour(position).getName() + " ID: " + this.getNeighbour(position).getIdentifier());
+            Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : called an election.", getName());
             this.getNeighbour(position).voteElection(emessage);
         }
     }
@@ -281,8 +277,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         if (emessage.getMessageType() == MESSAGE_TYPE.ELECTION) {
             if (this.getIdentifier() <= emessage.getMessageID()) {
                 this.setElectionParticipant(true);
-                //System.out.println("*I FORWARD ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
-                //System.out.println("Neighbour " + this.getNeighbour(position).getName() + " ID: " + this.getNeighbour(position).getIdentifier());
+                Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : forwarded an election message.", getName());
                 if (emessage.getMessageID() == this.getNeighbour(position).getIdentifier()) {
                     this.getNeighbour(position).stopElection(emessage);
                 } else {
@@ -293,6 +288,7 @@ public class Member extends UnicastRemoteObject implements IMember {
                 if (!this.isElectionParticipant()) {
                     this.setElectionParticipant(true);
                     emessage.setMessageID(this.getIdentifier());
+                    Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : modified the election message.", getName());
                     //System.out.println("*I MODIFY ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
                     this.callElection(emessage);
                 }
@@ -304,6 +300,7 @@ public class Member extends UnicastRemoteObject implements IMember {
             this.setGroupLeader(false);
             this.getParentGroup().setLeader(emessage.getSource());
             electionCompleted(emessage.getSource());
+            Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : elected as new leader.", emessage.getSource().getName());
             // System.out.println("*ELECTED MSG: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
             this.getNeighbour(position).voteElection(emessage);
         }
@@ -325,7 +322,6 @@ public class Member extends UnicastRemoteObject implements IMember {
         emessage.setSource(leader);
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "New Leader Appointed : {0}[{1}] : {2}", new Object[]{getName(), getIdentifier(), emessage.getMessageID()});
 
-        //System.out.println("#NEW LEADER: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
         electionCompleted(leader);
         this.getNeighbour(position).voteElection(emessage);
     }
@@ -377,7 +373,6 @@ public class Member extends UnicastRemoteObject implements IMember {
             }
         }
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted. : {0} : {1}", new Object[]{message.getMessage(), message.getType()});
-        //System.out.print(" multicasted\n");
     }
 
     /**
@@ -389,7 +384,6 @@ public class Member extends UnicastRemoteObject implements IMember {
     public  void deliver(Message message) throws RemoteException {
         holdingQueue.add(message);
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", message.getMessage());
-        //System.out.println("Message hold: " + message.getMessage());
         messageReceived(message);
     }
 
@@ -419,7 +413,6 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());
 
-            //System.out.println("Message released: " + message.getMessage());
             propertyChangeSupport.firePropertyChange("MessageReleased", null, message);
 
             Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);

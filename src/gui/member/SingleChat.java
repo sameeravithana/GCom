@@ -47,6 +47,7 @@ public class SingleChat extends javax.swing.JFrame {
         txtHistory.setBackground(this.getBackground());
         lblContactName.setText(contact);
         setTitle("Chat with " + contact);
+        setLocationRelativeTo(parent);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
     }
     
@@ -186,19 +187,19 @@ public class SingleChat extends javax.swing.JFrame {
 
     private void txtChatKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtChatKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            String msg = txtChat.getText();
-            Message message;
             try {
+                String msg = txtChat.getText();
+                Message message;
                 message = new Message(member.getParentGroup().getGroupName(), member, null, msg, MESSAGE_TYPE.CAUSAL_MULTICAST);
                 message.setDestination(member.getParentGroup().getMembersList().get(contact));
                 GroupDef groupDef = member.getParentGroup().getGroupDef();
                 if (groupDef.getOrdType() == MESSAGE_ORDERING.CAUSAL) {
                     member.multicastMessages(message);
                 } else if (groupDef.getOrdType() == MESSAGE_ORDERING.UNORDERED) {
-                    member.multicastMembersList(message);
+                    member.multicastMessages(message);
                 }
                 memWindow.multicastChat(message);
-            } catch (RemoteException | NotBoundException ex) {
+            } catch (RemoteException ex) {
                 Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
