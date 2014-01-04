@@ -37,6 +37,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     private RMIServer srv;
     protected PropertyChangeSupport propertyChangeSupport;
     private LinkedList<Message> holdingQueue;
+    private static LinkedList<Message> receivedMessages;
     private HashMap<String, Integer> vectorClock;//*
 
     public Member(String name, Group parent) throws RemoteException {
@@ -45,6 +46,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         members = new LinkedList<IMember>();
         identifier = new Random().nextInt(100) + 1;
         holdingQueue = new LinkedList<Message>();
+        receivedMessages = new LinkedList<Message>();
         setVectorClock(new HashMap<String, Integer>());
         propertyChangeSupport = new PropertyChangeSupport(this);
 
@@ -84,7 +86,7 @@ public class Member extends UnicastRemoteObject implements IMember {
             } catch (NotBoundException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else if (message.getType() == MESSAGE_TYPE.MEMBER_LEAVES) {
+        } else if (message.getMessageOrderType() == MESSAGE_TYPE.MEMBER_LEAVES) {
 
             final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
 
@@ -289,7 +291,7 @@ public class Member extends UnicastRemoteObject implements IMember {
                     this.setElectionParticipant(true);
                     emessage.setMessageID(this.getIdentifier());
                     Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : modified the election message.", getName());
-                    //System.out.println("*I MODIFY ELECTION: " + emessage.getType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
+                    //System.out.println("*I MODIFY ELECTION: " + emessage.getMessageOrderType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
                     this.callElection(emessage);
                 }
             }
@@ -333,8 +335,11 @@ public class Member extends UnicastRemoteObject implements IMember {
 ///////////////////////// Causal Ordering
     @Override
     public void multicastMessages(final Message message) throws RemoteException {
-        MESSAGE_TYPE type = message.getType();
-        if (type == MESSAGE_TYPE.CAUSAL_MULTICAST) {
+        //MESSAGE_TYPE multicasttype = message.getMulticastType();
+        MESSAGE_TYPE messageOrderType = message.getMessageOrderType();
+
+
+        if (messageOrderType == MESSAGE_TYPE.CAUSAL) {
             updateVectorCell(this.getName());
             message.setVectorClock(this.getVectorClock());
             final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
@@ -353,7 +358,7 @@ public class Member extends UnicastRemoteObject implements IMember {
                 }.start();
 
             }
-        } else if (type == MESSAGE_TYPE.UNORDERED_MULTICAST) {
+        } else if (messageOrderType == MESSAGE_TYPE.UNORDERED) {
             final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
             for (final String key : membersList.keySet()) {
                 // Create separate Threads for each multicastMembersList.
@@ -371,7 +376,10 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             }
         }
-        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted. : {0} : {1}", new Object[]{message.getMessage(), message.getType()});
+
+
+
+        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted. : {0} : {1}", new Object[]{message.getMessage(), message.getMessageOrderType()});
     }
 
     /**
@@ -380,12 +388,37 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @throws RemoteException
      */
     @Override
-    public void deliver(Message message) throws RemoteException {
-        holdingQueue.add(message);
-        Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", message.getMessage());
-        messageReceived(message);
+    public synchronized void deliver(Message message) throws RemoteException {
+        if (message.getMulticastType() == MESSAGE_TYPE.RELIABLE) {
+            if (!isEntry(message)) {
+                receivedMessages.add(message);
+                
+                holdingQueue.add(message);
+                Logger.getLogger(Member.class.getName()).log(Level.INFO, "RDeliver Message:  {0}", message.getMessage());
+//                for(int i=0;i<receivedMessages.size();i++)
+//                    System.out.print(receivedMessages.get(i).getMessage()+" ");                
+//                System.out.println(receivedMessages.size()+"");
+                messageReceived(message);
+                
+                if (!message.getSource().getName().equals(this.getName())) {
+                    //message.setSource(this);
+                    this.multicastMessages(message);
+                }
+            }
+        } else if (message.getMulticastType() == MESSAGE_TYPE.BASIC) {
+            holdingQueue.add(message);
+            Logger.getLogger(Member.class.getName()).log(Level.INFO, "Local:  {0}", message.getMessage());
+            messageReceived(message);
+        }
     }
 
+    public boolean isEntry(Message message){
+        for(int i=0;i<receivedMessages.size();i++){
+//            System.out.println(receivedMessages.get(i).getMessage()+" "+message.getMessage());
+            if(receivedMessages.get(i).getMessage().equals(message.getMessage())) return true;
+        }
+        return false;
+    }
     /**
      *
      * @param message
@@ -408,7 +441,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         boolean isReleased = false;
 
         if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1) && compareClock(message)) {
-        //if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1)) {
+            //if ((vectorClock.get(message.getSource().getName()) == message.getVectorClock().get(message.getSource().getName()) - 1)) {
             holdingQueue.remove(message);
 
             Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());

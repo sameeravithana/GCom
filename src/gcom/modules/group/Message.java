@@ -6,7 +6,6 @@ package gcom.modules.group;
 
 import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
-import gcom.interfaces.MESSAGE_ORDERING;
 import gcom.interfaces.MESSAGE_TYPE;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,36 +23,39 @@ public class Message implements IMessage {
     private int messageID;
     private int position;
     ArrayList<String> params;
-    private MESSAGE_TYPE type;
+    private MESSAGE_TYPE multicastType;
+    private MESSAGE_TYPE orderType;
     private HashMap<String, Integer> vectorClock;
+    
 
     public Message(String group_name, IMember source, String message, MESSAGE_TYPE type) {
         this.group_name = group_name;
         this.source = source;
         this.message = message;
-        this.type = type;
+        this.orderType = type;
     }
 
     public Message(String group_name, IMember source, ArrayList<String> message, MESSAGE_TYPE type) {
         this.group_name = group_name;
         this.source = source;
         this.params = message;
-        this.type = type;
+        this.orderType = type;
     }
 
     public Message(String group_name, int pos, int message, MESSAGE_TYPE type) {
         this.group_name = group_name;
         this.position = pos;
         this.messageID = message;
-        this.type = type;
+        this.orderType = type;
     }
 
-    public Message(String group_name, IMember source, HashMap<String, Integer> vectorClock, String message, MESSAGE_TYPE type) {
+    public Message(String group_name, IMember source, HashMap<String, Integer> vectorClock, String message, MESSAGE_TYPE multicastType, MESSAGE_TYPE orderType) {
         this.group_name = group_name;
         this.source = source;
         this.vectorClock = vectorClock;
         this.message = message;
-        this.type = type;
+        this.multicastType = multicastType;
+        this.orderType = orderType;
     }
 
     public String getMessage() {
@@ -65,7 +67,7 @@ public class Message implements IMessage {
     }
 
     public MESSAGE_TYPE getMessageType() {
-        return this.getType();
+        return this.getMessageOrderType();
     }
 
     public String getGroupName() {
@@ -99,17 +101,17 @@ public class Message implements IMessage {
     }
 
     /**
-     * @return the type
+     * @return the orderType
      */
-    public MESSAGE_TYPE getType() {
-        return type;
+    public MESSAGE_TYPE getMessageOrderType() {
+        return orderType;
     }
 
     /**
-     * @param type the type to set
+     * @param orderType the orderType to set
      */
     public void setType(MESSAGE_TYPE type) {
-        this.type = type;
+        this.orderType = type;
     }
 
     /**
@@ -147,13 +149,30 @@ public class Message implements IMessage {
         this.source = source;
     }
 
-    public static MESSAGE_ORDERING getMessageOrderingMode(String mode) throws Exception {
+    public static MESSAGE_TYPE getMessageOrderingMode(String mode) throws Exception {
         if (mode.equalsIgnoreCase("unordered")) {
-            return MESSAGE_ORDERING.UNORDERED;
+            return MESSAGE_TYPE.UNORDERED;
         } else if (mode.equalsIgnoreCase("causal")) {
-            return MESSAGE_ORDERING.CAUSAL;
+            return MESSAGE_TYPE.CAUSAL;
         } else {
             throw new Exception("Invalid Message Ordering Mode..");
         }
+    }
+    
+    public static MESSAGE_TYPE getMulticastMode(String mode) throws Exception {
+        if (mode.equalsIgnoreCase("basic")) {
+            return MESSAGE_TYPE.BASIC;
+        } else if (mode.equalsIgnoreCase("reliable")) {
+            return MESSAGE_TYPE.RELIABLE;
+        } else {
+            throw new Exception("Invalid Message Ordering Mode..");
+        }
+    }
+
+    /**
+     * @return the multicastType
+     */
+    public MESSAGE_TYPE getMulticastType() {
+        return multicastType;
     }
 }

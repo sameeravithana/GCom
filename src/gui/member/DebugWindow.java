@@ -77,13 +77,13 @@ public class DebugWindow extends javax.swing.JFrame {
     }
 
     public void messageReceived(Message message) throws RemoteException {
-        updateStatus("Multicast message received from " + message.getSource().getName());
+        updateStatus(message.getMulticastType()+" Multicast message received from " + message.getSource().getName());
         if (!autoRelease) {
             holdback = member.getHoldingQueue();
             fillHoldingQueue(holdback);
         } else {
             member.releaseMessages(message);
-            updateStatus("Multicast message from " + message.getSource().getName() + " released.");
+            updateStatus(message.getMulticastType()+" Multicast message from " + message.getSource().getName() + " released.");
         }
     }
 

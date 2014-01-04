@@ -11,7 +11,6 @@
 package gui.member;
 
 import gcom.interfaces.IMember;
-import gcom.interfaces.MESSAGE_ORDERING;
 import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.GroupDef;
 import gcom.modules.group.Message;
@@ -190,15 +189,14 @@ public class SingleChat extends javax.swing.JFrame {
             try {
                 String msg = txtChat.getText();
                 Message message;
-                message = new Message(member.getParentGroup().getGroupName(), member, null, msg, MESSAGE_TYPE.CAUSAL_MULTICAST);
-                message.setDestination(member.getParentGroup().getMembersList().get(contact));
                 GroupDef groupDef = member.getParentGroup().getGroupDef();
-                if (groupDef.getOrdType() == MESSAGE_ORDERING.CAUSAL) {
-                    member.multicastMessages(message);
-                } else if (groupDef.getOrdType() == MESSAGE_ORDERING.UNORDERED) {
-                    member.multicastMessages(message);
-                }
+                message = new Message(member.getParentGroup().getGroupName(), member, null, msg, groupDef.getMultType(),groupDef.getOrdType());
+                message.setDestination(member.getParentGroup().getMembersList().get(contact));                
+                
+                
+                member.multicastMessages(message);
                 memWindow.multicastChat(message);
+                
             } catch (RemoteException ex) {
                 Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
             }

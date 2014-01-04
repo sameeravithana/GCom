@@ -4,7 +4,7 @@
  */
 package gcom.modules.group;
 
-import gcom.interfaces.MESSAGE_ORDERING;
+import gcom.interfaces.MESSAGE_TYPE;
 import java.io.Serializable;
 
 /**
@@ -15,16 +15,25 @@ public class GroupDef implements Serializable {
 
     private String groupName;
     private String groupType, comType;
-    MESSAGE_ORDERING ordType;
+    MESSAGE_TYPE ordType;
+    private MESSAGE_TYPE multType;
 
     public GroupDef() {
     }
 
-    public GroupDef(String groupName, String groupType, String comType, MESSAGE_ORDERING ordType) {
+    public GroupDef(String groupName, String groupType, String comType, MESSAGE_TYPE ordType) {
         this.groupName = groupName;
         this.groupType = groupType;
         this.comType = comType;
         this.ordType = ordType;
+    }
+    
+     public GroupDef(String groupName, String groupType, MESSAGE_TYPE multType, MESSAGE_TYPE ordType) {
+        this.groupName = groupName;
+        this.groupType = groupType;
+        this.comType = comType;
+        this.ordType = ordType;
+        this.multType = multType;
     }
 
     /**
@@ -72,14 +81,21 @@ public class GroupDef implements Serializable {
     /**
      * @return the ordType
      */
-    public MESSAGE_ORDERING getOrdType() {
+    public MESSAGE_TYPE getOrdType() {
         return ordType;
     }
 
     /**
      * @param ordType the ordType to set
      */
-    public void setOrdType(MESSAGE_ORDERING ordType) {
+    public void setOrdType(MESSAGE_TYPE ordType) {
         this.ordType = ordType;
+    }
+
+    /**
+     * @return the multType
+     */
+    public MESSAGE_TYPE getMultType() {
+        return multType;
     }
 }

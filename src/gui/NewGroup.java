@@ -10,7 +10,8 @@
  */
 package gui;
 
-import gcom.interfaces.MESSAGE_ORDERING;
+
+import gcom.interfaces.MESSAGE_TYPE;
 import gcom.modules.group.Group;
 import gcom.modules.group.GroupDef;
 import gcom.modules.group.GroupManagement;
@@ -18,7 +19,6 @@ import gcom.modules.group.GroupManagementException;
 import gcom.modules.group.Message;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -175,8 +175,11 @@ private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:e
     if (!txtGroupName.getText().trim().isEmpty()) {
         try {
             String groupType = cmbGroupType.getSelectedItem().toString();
-            MESSAGE_ORDERING messageOrderingMode = Message.getMessageOrderingMode(cmbMsgOrd.getSelectedItem().toString());
-            GroupDef gd = new GroupDef(txtGroupName.getText(), groupType, cmbComType.getSelectedItem().toString(), messageOrderingMode);
+            MESSAGE_TYPE messageMulticastMode = Message.getMulticastMode(cmbComType.getSelectedItem().toString());
+            MESSAGE_TYPE messageOrderingMode = Message.getMessageOrderingMode(cmbMsgOrd.getSelectedItem().toString());
+            
+            GroupDef gd = new GroupDef(txtGroupName.getText(), groupType, messageMulticastMode, messageOrderingMode);
+            
             try {
                 group = GroupManagement.createGroup(gd);
                 setVisible(false);
