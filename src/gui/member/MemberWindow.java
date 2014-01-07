@@ -20,14 +20,11 @@ import gcom.modules.group.Message;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.HeadlessException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,7 +77,7 @@ public class MemberWindow extends javax.swing.JFrame {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        setTitle(getTitle() + " : " + group.getGroupName());
+        setTitle(getTitle() + " : " + memName);
         setIconImage(new ImageIcon(MemberWindow.class.getResource("/pics/logo.png")).getImage());
         contacts = getContacts();
         fillContacts(contacts);
@@ -265,15 +262,20 @@ public class MemberWindow extends javax.swing.JFrame {
     }
 
     private void startChat() {
-        String contactName = ((JLabel) lstContacts.getSelectedValue()).getText();
-        SingleChat c;
-        if (!chatWindows.containsKey(contactName)) {
-            c = new SingleChat(this, false, contactName, memContainer.getStub());
-            chatWindows.put(contactName, c);
+        System.out.println("Mem Count : " + group.getMemberCount());
+        if (group.getGroupType() == Group.DYNAMIC_GROUP || group.isFilled()) {
+            String contactName = ((JLabel) lstContacts.getSelectedValue()).getText();
+            SingleChat c;
+            if (!chatWindows.containsKey(contactName)) {
+                c = new SingleChat(this, false, contactName, memContainer.getStub());
+                chatWindows.put(contactName, c);
+            } else {
+                c = chatWindows.get(contactName);
+            }
+            c.setVisible(true);
         } else {
-            c = chatWindows.get(contactName);
+            JOptionPane.showMessageDialog(this, "You cannot send messages until group is filled.", "Group is not stable.", JOptionPane.WARNING_MESSAGE);
         }
-        c.setVisible(true);
     }
 
     private void changeStatus() throws HeadlessException {

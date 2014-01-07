@@ -72,9 +72,13 @@ public class GroupManagement implements IGroupManagement {
         return getGroups();
     }
 
+    @Override
     public IMember sendRequest(gcom.modules.group.Message message) throws RemoteException {
 
         Group parent = groups.get(message.getParams().get(0));
+        if (parent.getGroupType() == Group.STATIC_GROUP && parent.isFilled()) {
+            return null;
+        }
         IMember m = message.getSource();
         try {
             parent.addMember(m);

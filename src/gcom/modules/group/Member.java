@@ -8,7 +8,6 @@ import gcom.RMIServer;
 import gcom.interfaces.IGroupManagement;
 import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
-import gui.member.NewMember;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.rmi.AccessException;
@@ -75,15 +74,17 @@ public class Member extends UnicastRemoteObject implements IMember {
 
         if (message.getMessageType() == MESSAGE_TYPE.JOIN_REQUEST) {
             try {
+                if (parentGroup.getGroupType() == Group.STATIC_GROUP && parentGroup.isFilled()) {
+                    return null;
+                }
                 this.parentGroup.addMember(m);
                 this.addMember(m);
                 Logger.getLogger(Member.class.getName()).log(Level.INFO, "Leader added member : {0}", m.getName());
+
                 m.setParentGroup(this.parentGroup);
                 updateMembers(m);
                 multicastMembersList(message);
-            } catch (GroupManagementException ex) {
-                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NotBoundException ex) {
+            } catch (GroupManagementException | NotBoundException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (message.getMessageOrderType() == MESSAGE_TYPE.MEMBER_LEAVES) {
@@ -142,8 +143,7 @@ public class Member extends UnicastRemoteObject implements IMember {
 
     /**
      *
-     * @param newmember
-     * @throws RemoteException
+     * @param message
      * @throws AccessException
      * @throws NotBoundException
      */
@@ -338,7 +338,6 @@ public class Member extends UnicastRemoteObject implements IMember {
         //MESSAGE_TYPE multicasttype = message.getMulticastType();
         MESSAGE_TYPE messageOrderType = message.getMessageOrderType();
 
-
         if (messageOrderType == MESSAGE_TYPE.CAUSAL) {
             updateVectorCell(this.getName());
             message.setVectorClock(this.getVectorClock());
@@ -377,8 +376,6 @@ public class Member extends UnicastRemoteObject implements IMember {
             }
         }
 
-
-
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted. : {0} : {1}", new Object[]{message.getMessage(), message.getMessageOrderType()});
     }
 
@@ -392,14 +389,14 @@ public class Member extends UnicastRemoteObject implements IMember {
         if (message.getMulticastType() == MESSAGE_TYPE.RELIABLE) {
             if (!isEntry(message)) {
                 receivedMessages.add(message);
-                
+
                 holdingQueue.add(message);
                 Logger.getLogger(Member.class.getName()).log(Level.INFO, "RDeliver Message:  {0}", message.getMessage());
 //                for(int i=0;i<receivedMessages.size();i++)
 //                    System.out.print(receivedMessages.get(i).getMessage()+" ");                
 //                System.out.println(receivedMessages.size()+"");
                 messageReceived(message);
-                
+
                 if (!message.getSource().getName().equals(this.getName())) {
                     //message.setSource(this);
                     this.multicastMessages(message);
@@ -412,13 +409,16 @@ public class Member extends UnicastRemoteObject implements IMember {
         }
     }
 
-    public boolean isEntry(Message message){
-        for(int i=0;i<receivedMessages.size();i++){
+    public boolean isEntry(Message message) {
+        for (int i = 0; i < receivedMessages.size(); i++) {
 //            System.out.println(receivedMessages.get(i).getMessage()+" "+message.getMessage());
-            if(receivedMessages.get(i).getMessage().equals(message.getMessage())) return true;
+            if (receivedMessages.get(i).getMessage().equals(message.getMessage())) {
+                return true;
+            }
         }
         return false;
     }
+
     /**
      *
      * @param message

@@ -12,6 +12,7 @@ package gui.member;
 
 import gcom.interfaces.IMember;
 import gcom.interfaces.MESSAGE_TYPE;
+import gcom.modules.group.Group;
 import gcom.modules.group.Member;
 import gcom.modules.group.Message;
 import gui.GComWindow;
@@ -28,6 +29,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -77,13 +79,13 @@ public class DebugWindow extends javax.swing.JFrame {
     }
 
     public void messageReceived(Message message) throws RemoteException {
-        updateStatus(message.getMulticastType()+" Multicast message received from " + message.getSource().getName());
+        updateStatus(message.getMulticastType() + " Multicast message received from " + message.getSource().getName());
         if (!autoRelease) {
             holdback = member.getHoldingQueue();
             fillHoldingQueue(holdback);
         } else {
             member.releaseMessages(message);
-            updateStatus(message.getMulticastType()+" Multicast message from " + message.getSource().getName() + " released.");
+            updateStatus(message.getMulticastType() + " Multicast message from " + message.getSource().getName() + " released.");
         }
     }
 
@@ -168,17 +170,22 @@ public class DebugWindow extends javax.swing.JFrame {
 
     public void startElection() {
         try {
-            Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
-            if (member.getParentGroup().getMemberCount() > 1) {
-                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} starting the election.", member.getName());
-                //System.out.println(member.getName() + " Starting the election...");
-                member.setElectionParticipant(true);
-                member.callElection(emessage);
+            if (member.getParentGroup().getGroupType() == Group.DYNAMIC_GROUP || member.getParentGroup().isFilled()) {
+                Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
+                if (member.getParentGroup().getMemberCount() > 1) {
+                    Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} starting the election.", member.getName());
+                    //System.out.println(member.getName() + " Starting the election...");
+                    member.setElectionParticipant(true);
+                    member.callElection(emessage);
+                } else {
+                    member.callElection(emessage);
+                    updateStatus("This process was selected as the group leader.");
+                    Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} : You have no neighbours..So you're the leader.", member.getName());
+                    // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
+                }
+
             } else {
-                member.callElection(emessage);
-                updateStatus("This process was selected as the group leader.");
-                Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} : You have no neighbours..So you're the leader.", member.getName());
-                // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
+                JOptionPane.showMessageDialog(this, "You cannot call for election until group is filled.", "Group is not stable.", JOptionPane.WARNING_MESSAGE);
             }
         } catch (RemoteException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);

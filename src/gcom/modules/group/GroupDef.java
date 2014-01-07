@@ -14,26 +14,26 @@ import java.io.Serializable;
 public class GroupDef implements Serializable {
 
     private String groupName;
-    private String groupType, comType;
-    MESSAGE_TYPE ordType;
-    private MESSAGE_TYPE multType;
+    private int groupType;
+    private MESSAGE_TYPE ordType;
+    private MESSAGE_TYPE comType;
+    private int maxMembers;
 
     public GroupDef() {
     }
 
-    public GroupDef(String groupName, String groupType, String comType, MESSAGE_TYPE ordType) {
+    public GroupDef(String groupName, String groupType, int membersCount, MESSAGE_TYPE comType, MESSAGE_TYPE ordType) throws GroupManagementException {
         this.groupName = groupName;
-        this.groupType = groupType;
-        this.comType = comType;
+        if (groupType.equalsIgnoreCase("static")) {
+            this.groupType = Group.STATIC_GROUP;
+        } else if (groupType.equalsIgnoreCase("dynamic")) {
+            this.groupType = Group.DYNAMIC_GROUP;
+        } else {
+            throw new GroupManagementException("Invalid group type : " + groupType);
+        }
         this.ordType = ordType;
-    }
-    
-     public GroupDef(String groupName, String groupType, MESSAGE_TYPE multType, MESSAGE_TYPE ordType) {
-        this.groupName = groupName;
-        this.groupType = groupType;
         this.comType = comType;
-        this.ordType = ordType;
-        this.multType = multType;
+        this.maxMembers = membersCount;
     }
 
     /**
@@ -53,28 +53,28 @@ public class GroupDef implements Serializable {
     /**
      * @return the groupType
      */
-    public String getGroupType() {
+    public int getGroupType() {
         return groupType;
     }
 
     /**
      * @param groupType the groupType to set
      */
-    public void setGroupType(String groupType) {
+    public void setGroupType(int groupType) {
         this.groupType = groupType;
     }
 
     /**
      * @return the comType
      */
-    public String getComType() {
+    public MESSAGE_TYPE getComType() {
         return comType;
     }
 
     /**
      * @param comType the comType to set
      */
-    public void setComType(String comType) {
+    public void setComType(MESSAGE_TYPE comType) {
         this.comType = comType;
     }
 
@@ -93,9 +93,23 @@ public class GroupDef implements Serializable {
     }
 
     /**
-     * @return the multType
+     * @return the comType
      */
     public MESSAGE_TYPE getMultType() {
-        return multType;
+        return comType;
+    }
+
+    /**
+     * @return the maxMembers
+     */
+    public int getMaxMembers() {
+        return maxMembers;
+    }
+
+    /**
+     * @param maxMembers the maxMembers to set
+     */
+    public void setMaxMembers(int maxMembers) {
+        this.maxMembers = maxMembers;
     }
 }

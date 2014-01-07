@@ -22,28 +22,25 @@ public class Group implements Remote, Serializable, IGroup {
     private HashMap<String, IMember> members;
     private CommunicationMode comMode;
     private int maxMembers = 2000;
-    private static int counter;
     private GroupDef gDef;
     private IMember leader;
 
-    public Group() {
-        this("G-" + counter++);
-    }
-
-    public Group(String groupID) {
-        this.groupID = groupID;
-        members = new HashMap<String, IMember>();
-    }
-
-    public Group(String groupID, int maxMembers) {
-        this(groupID);
-        this.maxMembers = maxMembers;
-    }
+    public static final int STATIC_GROUP = 1;
+    public static final int DYNAMIC_GROUP = 2;
 
     public Group(GroupDef gDef) {
         this.gDef = gDef;
         members = new HashMap<String, IMember>();
         this.groupID = gDef.getGroupName();
+        this.maxMembers = gDef.getMaxMembers();
+    }
+
+    public boolean isFilled() {
+        return getMemberCount() >= maxMembers;
+    }
+
+    public int getGroupType() {
+        return gDef.getGroupType();
     }
 
     public void addMember(IMember member) throws GroupManagementException, RemoteException {

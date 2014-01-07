@@ -78,14 +78,12 @@ public class NewMember extends javax.swing.JFrame {
 
             lblMsg.setText("Connection to " + host + " from " + port + " successful.");
             lblMsg.setForeground(Color.black);
-        } catch (AccessException ex) {
+        } catch (AccessException | NotBoundException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RemoteException ex) {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
             lblMsg.setText("Cannot Connect to " + host + " from " + port + ".");
             lblMsg.setForeground(Color.red);
-        } catch (NotBoundException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -144,15 +142,26 @@ public class NewMember extends javax.swing.JFrame {
                 statusLog += "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") added to Group " + groupName;
 
                 if (gs.get(groupName) <= 0) {
-                    memContainer.setMember(igm.sendRequest(msg));
+                    IMember res = igm.sendRequest(msg);
+
+                    memContainer.setMember(res);
                     srv.rebind(groupName, stub);
                     statusLog += " as the Group Leader";
                 } else {
                     imem = srv.regMemLookUp(groupName);
-                    memContainer.setMember(imem.sendRequest(msg));
+                    IMember res = imem.sendRequest(msg);
+
+                    if (res == null) {
+                        JOptionPane.showMessageDialog(this, "You cannot join to this group. It is already full.", "Group is not stable.", JOptionPane.WARNING_MESSAGE);
+                        System.exit(0);
+                    }
+
+                    memContainer.setMember(res);
                 }
                 statusLog += ".";
-                igm.addMember(member.getParentGroup(), member);
+                if (member.getParentGroup() != null) {
+                    igm.addMember(member.getParentGroup(), member);
+                }
                 setVisible(false);
                 memWindow.setMember(member);
                 memWindow.setMemContainer(memContainer);
@@ -317,13 +326,13 @@ private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 }//GEN-LAST:event_btnConnectActionPerformed
 
 private void btnCreateMemberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateMemberActionPerformed
-        try {
-            createMember();
-        } catch (HeadlessException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (GroupManagementException ex) {
-            Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    try {
+        createMember();
+    } catch (HeadlessException ex) {
+        Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (GroupManagementException ex) {
+        Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
+    }
 }//GEN-LAST:event_btnCreateMemberActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConnect;
