@@ -87,7 +87,11 @@ public class Member extends UnicastRemoteObject implements IMember {
                 multicastMembersList(message);
 
                 m.setVectorClock(this.vectorClock);
-            } catch (GroupManagementException | NotBoundException ex) {
+            } catch (GroupManagementException ex) {
+                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NotBoundException ex) {
+                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (message.getMessageOrderType() == MESSAGE_TYPE.MEMBER_LEAVES) {
@@ -129,15 +133,20 @@ public class Member extends UnicastRemoteObject implements IMember {
                     }
                 }
 
-            } catch (GroupManagementException | RemoteException ex) {
+            } catch (GroupManagementException ex) {
+                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RemoteException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
         try {
             IGroupManagement igm = srv.regLookUp("IGroupManagement");
             igm.updateGroup(parentGroup);
-        } catch (GroupManagementException | NotBoundException | RemoteException e) {
+        } catch (GroupManagementException e) {
+            Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, e);
+        } catch (NotBoundException e) {
+            Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, e);
+        } catch (RemoteException e) {
             Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, e);
         }
 
@@ -345,7 +354,7 @@ public class Member extends UnicastRemoteObject implements IMember {
             if (isInitReliable) {
                 updateVectorCell(this.getName());
                 message.setVectorClock(this.getVectorClock());
-                System.out.println(getVectorClock());
+                Logger.getLogger(Member.class.getName()).log(Level.INFO, "Vector clock received : ", this.getVectorClock());
             }
 
             final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
@@ -489,7 +498,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     private void syncClock(HashMap<String, Integer> vectorClock) {
-        for (String memName : this.getVectorClock().keySet()) {
+        for (String memName : vectorClock.keySet()) {
             if (!(memName.equals(this.getName()))) {
                 Integer k1 = this.getVectorClock().get(memName);
                 Integer k2 = vectorClock.get(memName);

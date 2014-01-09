@@ -45,7 +45,13 @@ public class SingleChat extends javax.swing.JFrame {
         this.member = member;
         txtHistory.setBackground(this.getBackground());
         lblContactName.setText(contact);
-        setTitle("Chat with " + contact);
+        String name = "";
+        try {
+            name = member.getName();
+        } catch (RemoteException ex) {
+            Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        setTitle("GCom Chat : " + name + " : Chat with " + contact);
         setLocationRelativeTo(parent);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
         txtChat.requestFocus();
@@ -86,6 +92,13 @@ public class SingleChat extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setLocationByPlatform(true);
         setResizable(false);
+        addWindowFocusListener(new java.awt.event.WindowFocusListener() {
+            public void windowGainedFocus(java.awt.event.WindowEvent evt) {
+                formWindowGainedFocus(evt);
+            }
+            public void windowLostFocus(java.awt.event.WindowEvent evt) {
+            }
+        });
 
         jSplitPane1.setDividerLocation(325);
         jSplitPane1.setDividerSize(2);
@@ -202,6 +215,10 @@ public class SingleChat extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_txtChatKeyPressed
+
+    private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
+        txtChat.requestFocus();
+    }//GEN-LAST:event_formWindowGainedFocus
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel2;

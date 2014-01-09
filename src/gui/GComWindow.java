@@ -221,8 +221,8 @@ public class GComWindow extends javax.swing.JFrame {
         mnuStartServer = new javax.swing.JCheckBoxMenuItem();
         mnuNewGroup = new javax.swing.JMenuItem();
         mnuNewMember = new javax.swing.JMenuItem();
-        mnuEdit = new javax.swing.JMenu();
         mnuAbout = new javax.swing.JMenu();
+        mnuAboutGCom = new javax.swing.JMenuItem();
 
         mnuRemoveGroup.setText("Remove Group");
         mnuRemoveGroup.addActionListener(new java.awt.event.ActionListener() {
@@ -296,10 +296,16 @@ public class GComWindow extends javax.swing.JFrame {
 
         mainMenu.add(mnuFile);
 
-        mnuEdit.setText("Edit");
-        mainMenu.add(mnuEdit);
-
         mnuAbout.setText("About");
+
+        mnuAboutGCom.setText("About GCom");
+        mnuAboutGCom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuAboutGComActionPerformed(evt);
+            }
+        });
+        mnuAbout.add(mnuAboutGCom);
+
         mainMenu.add(mnuAbout);
 
         setJMenuBar(mainMenu);
@@ -318,7 +324,7 @@ public class GComWindow extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 628, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 552, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -329,11 +335,9 @@ public class GComWindow extends javax.swing.JFrame {
                     .addComponent(btnServer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addGap(176, 176, 176))
-                    .addComponent(jScrollPane2))
-                .addGap(31, 31, 31))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1))
+                .addContainerGap())
         );
 
         pack();
@@ -391,6 +395,10 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
     }//GEN-LAST:event_mnuRemoveGroupActionPerformed
 
+    private void mnuAboutGComActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuAboutGComActionPerformed
+        new About(this, true).setVisible(true);
+    }//GEN-LAST:event_mnuAboutGComActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton btnServer;
     private javax.swing.JPanel dockPanel;
@@ -399,7 +407,7 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mnuAbout;
-    private javax.swing.JMenu mnuEdit;
+    private javax.swing.JMenuItem mnuAboutGCom;
     private javax.swing.JMenu mnuFile;
     private javax.swing.JMenuItem mnuNewGroup;
     private javax.swing.JMenuItem mnuNewMember;

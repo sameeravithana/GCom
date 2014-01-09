@@ -71,13 +71,12 @@ public class MemberWindow extends javax.swing.JFrame {
             this.group = member.getParentGroup();
             this.memName = member.getName();
             lblMemberName.setText(member.getName());
-
         } catch (Exception ex) {
             lblMemberName.setText("Unknown");
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        setTitle(getTitle() + " : " + memName);
+        setWindowTitle();
         setIconImage(new ImageIcon(MemberWindow.class.getResource("/pics/logo.png")).getImage());
         contacts = getContacts();
         fillContacts(contacts);
@@ -264,6 +263,15 @@ public class MemberWindow extends javax.swing.JFrame {
         leader.sendRequest(msg);
         lstContacts.setListData(new Vector());
         debug.updateStatus("# LOGGED OUT. # " + group.getMemberCount());
+        setWindowTitle();
+    }
+
+    private void setWindowTitle() {
+        if (isOffline) {
+            setTitle("GCom Chat : " + group.getGroupName() + " : " + memName + " (Offline)");
+        } else {
+            setTitle("GCom Chat : " + group.getGroupName() + " : " + memName + " (Online)");
+        }
     }
 
     private void startChat() {
@@ -325,7 +333,6 @@ public class MemberWindow extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         toolsMenu = new javax.swing.JMenu();
         mnuDebug = new javax.swing.JCheckBoxMenuItem();
-        mnuSingleChat = new javax.swing.JCheckBoxMenuItem();
         aboutMenu = new javax.swing.JMenu();
 
         refreshList.setMnemonic('r');
@@ -413,11 +420,6 @@ public class MemberWindow extends javax.swing.JFrame {
             }
         });
         toolsMenu.add(mnuDebug);
-
-        mnuSingleChat.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
-        mnuSingleChat.setSelected(true);
-        mnuSingleChat.setText("Single Window Chat");
-        toolsMenu.add(mnuSingleChat);
 
         mnuMainMenu.add(toolsMenu);
 
@@ -567,7 +569,6 @@ public class MemberWindow extends javax.swing.JFrame {
     private javax.swing.JList lstContacts;
     private javax.swing.JCheckBoxMenuItem mnuDebug;
     private javax.swing.JMenuBar mnuMainMenu;
-    private javax.swing.JCheckBoxMenuItem mnuSingleChat;
     private javax.swing.JMenuItem refreshList;
     private javax.swing.JMenu toolsMenu;
     private javax.swing.JTextField txtSearch;
