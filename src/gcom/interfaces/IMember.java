@@ -12,6 +12,7 @@ import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -88,4 +89,8 @@ public interface IMember extends Remote, Serializable {
     public void killProcess() throws RemoteException;
 
     public void kill() throws RemoteException;
+
+    public Date getJoined() throws RemoteException;
+
+    public void setJoined(Date joined) throws RemoteException;
 }

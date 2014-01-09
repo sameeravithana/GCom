@@ -14,6 +14,7 @@ import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
@@ -38,6 +39,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     private LinkedList<Message> holdingQueue;
     private static LinkedList<Message> receivedMessages;
     private HashMap<String, Integer> vectorClock;//*
+    private Date joined;
 
     public Member(String name, Group parent) throws RemoteException {
         this.parentGroup = parent;
@@ -705,5 +707,19 @@ public class Member extends UnicastRemoteObject implements IMember {
     @Override
     public void kill() throws RemoteException {
         propertyChangeSupport.firePropertyChange("Kill", null, null);
+    }
+
+    /**
+     * @return the joined
+     */
+    public Date getJoined() {
+        return joined;
+    }
+
+    /**
+     * @param joined the joined to set
+     */
+    public void setJoined(Date joined) {
+        this.joined = joined;
     }
 }

@@ -51,7 +51,7 @@ public class DebugWindow extends javax.swing.JFrame {
     private boolean autoRelease = false;
     private LinkedList<Message> holdback, messages;
     private SimpleDateFormat sd = new SimpleDateFormat("HH:mm:ss");
-
+    
     public DebugWindow(MemberWindow memWindow, Member member, IMember stub) {
         this.stub = stub;
         initComponents();
@@ -79,7 +79,7 @@ public class DebugWindow extends javax.swing.JFrame {
 //            Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
 //        }
     }
-
+    
     public void messageReceived(Message message) throws RemoteException {
         updateStatus(message.getMulticastType() + " Multicast message received from " + message.getSource().getName());
         if (!autoRelease) {
@@ -90,7 +90,7 @@ public class DebugWindow extends javax.swing.JFrame {
             updateStatus(message.getMulticastType() + " Multicast message from " + message.getSource().getName() + " released.");
         }
     }
-
+    
     public void messageReleased(Message message) throws RemoteException {
         holdback = member.getHoldingQueue();
         fillHoldingQueue(holdback);
@@ -101,7 +101,7 @@ public class DebugWindow extends javax.swing.JFrame {
         updateStatus("Message from " + message.getSource().getName() + " released.");
         //JOptionPane.showMessageDialog(this, message.getMessage());
     }
-
+    
     private void fillHoldingQueue(LinkedList<Message> holdback) throws RemoteException {
         dtm = (DefaultTableModel) tblHoldMessages.getModel();
         while (dtm.getRowCount() > 0) {
@@ -113,11 +113,11 @@ public class DebugWindow extends javax.swing.JFrame {
             dtm.addRow(row);
         }
     }
-
+    
     public void updateStatus(String message) {
         txtLog.setText(txtLog.getText() + message + "\n");
     }
-
+    
     public void updateMemberTable() throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         while (dtm.getRowCount() > 0) {
@@ -125,7 +125,7 @@ public class DebugWindow extends javax.swing.JFrame {
         }
         Collection<IMember> members = member.getParentGroup().getMembersList().values();
         for (IMember m : members) {
-            dtm.addRow(new Object[]{m.getName(), (m.isGroupLeader() ? "Leader" : "Member"), null, m.getIdentifier()});
+            dtm.addRow(new Object[]{m.getName(), (m.isGroupLeader() ? "Leader" : "Member"), sd.format(m.getJoined()), m.getIdentifier()});
         }
     }
 
@@ -139,7 +139,7 @@ public class DebugWindow extends javax.swing.JFrame {
         Vector<Object[]> rows = new Vector<Object[]>();
         for (int i = 0; i < dtm.getRowCount(); i++) {
             String role = "Member";
-
+            
             if (dtm.getValueAt(i, 0).toString().equals(leader.getName())) {
                 role = "Leader";
             }
@@ -161,9 +161,9 @@ public class DebugWindow extends javax.swing.JFrame {
     public void updateLeaderInTable(String leader) throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         for (int i = 0; i < dtm.getRowCount(); i++) {
-
+            
             String role = "Member";
-
+            
             String tableValue = dtm.getValueAt(i, 0).toString();
             // System.out.println("Election : " + tableValue + " " + leader);
 
@@ -173,7 +173,7 @@ public class DebugWindow extends javax.swing.JFrame {
             dtm.setValueAt(role, i, 1);
         }
     }
-
+    
     public void startElection() {
         try {
             if (member.getParentGroup().getGroupType() == Group.DYNAMIC_GROUP || member.getParentGroup().isFilled()) {
@@ -189,7 +189,7 @@ public class DebugWindow extends javax.swing.JFrame {
                     Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} : You have no neighbours..So you're the leader.", member.getName());
                     // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
                 }
-
+                
             } else {
                 JOptionPane.showMessageDialog(this, "You cannot call for election until group is filled.", "Group is not stable.", JOptionPane.WARNING_MESSAGE);
             }
@@ -197,10 +197,10 @@ public class DebugWindow extends javax.swing.JFrame {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     public void releaseMessage(Object... vals) {
         int row = tblHoldMessages.getSelectedRow();
-
+        
         if (row != -1) {
             try {
                 if (member.releaseMessages(holdback.get(row))) {
@@ -582,7 +582,7 @@ public class DebugWindow extends javax.swing.JFrame {
             @Override
             public void run() {
                 int row = tblHoldMessages.getSelectedRow();
-
+                
                 if (row != -1) {
                     Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3)};
                     releaseMessage(r);
@@ -661,7 +661,7 @@ public class DebugWindow extends javax.swing.JFrame {
     public void setIsMessageHoldEnabled(boolean isMessageHoldEnabled) {
         this.autoRelease = isMessageHoldEnabled;
     }
-
+    
     public void vectorReceived(Object changed, Object values) {
         boolean isChanged = Boolean.valueOf(changed.toString());
         Object[] vecs = (Object[]) values;
