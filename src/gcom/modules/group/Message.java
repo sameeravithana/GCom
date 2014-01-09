@@ -8,6 +8,7 @@ import gcom.interfaces.IMember;
 import gcom.interfaces.IMessage;
 import gcom.interfaces.MESSAGE_TYPE;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -26,9 +27,10 @@ public class Message implements IMessage {
     private MESSAGE_TYPE multicastType;
     private MESSAGE_TYPE orderType;
     private HashMap<String, Integer> vectorClock;
-    
+    private long timeStamp;
 
     public Message(String group_name, IMember source, String message, MESSAGE_TYPE type) {
+        timeStamp = new Date().getTime();
         this.group_name = group_name;
         this.source = source;
         this.message = message;
@@ -36,6 +38,7 @@ public class Message implements IMessage {
     }
 
     public Message(String group_name, IMember source, ArrayList<String> message, MESSAGE_TYPE type) {
+        timeStamp = new Date().getTime();
         this.group_name = group_name;
         this.source = source;
         this.params = message;
@@ -43,6 +46,7 @@ public class Message implements IMessage {
     }
 
     public Message(String group_name, int pos, int message, MESSAGE_TYPE type) {
+        timeStamp = new Date().getTime();
         this.group_name = group_name;
         this.position = pos;
         this.messageID = message;
@@ -50,6 +54,7 @@ public class Message implements IMessage {
     }
 
     public Message(String group_name, IMember source, HashMap<String, Integer> vectorClock, String message, MESSAGE_TYPE multicastType, MESSAGE_TYPE orderType) {
+        timeStamp = new Date().getTime();
         this.group_name = group_name;
         this.source = source;
         this.vectorClock = vectorClock;
@@ -158,7 +163,7 @@ public class Message implements IMessage {
             throw new Exception("Invalid Message Ordering Mode..");
         }
     }
-    
+
     public static MESSAGE_TYPE getMulticastMode(String mode) throws Exception {
         if (mode.equalsIgnoreCase("basic")) {
             return MESSAGE_TYPE.BASIC;
@@ -174,5 +179,12 @@ public class Message implements IMessage {
      */
     public MESSAGE_TYPE getMulticastType() {
         return multicastType;
+    }
+
+    /**
+     * @return the timeStamp
+     */
+    public long getTimeStamp() {
+        return timeStamp;
     }
 }

@@ -189,6 +189,10 @@ public class MemberWindow extends javax.swing.JFrame {
         }
     }
 
+    public void myOwnMessageReleased(Message message) throws RemoteException {
+        debug.messageReleased(message);
+    }
+
     public void ackReceived(Message message) throws RemoteException {
         String msg = "Acknowledgement received from " + message.getDestination().getName();
         String name = ((IMember) message.getSource()).getName();
@@ -227,8 +231,9 @@ public class MemberWindow extends javax.swing.JFrame {
             String statusLog = "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") rejoined the Group " + groupName;
             if (group.getMemberCount() < 1) {
                 IGroupManagement igm = server.regLookUp("IGroupManagement");
-                member.setGroupLeader(true);
-                memContainer.setMember(igm.sendRequest(msg));
+                IMember m = igm.sendRequest(msg);
+                m.setGroupLeader(true);
+                memContainer.setMember(m);
                 server.rebind(groupName, stub);
                 statusLog += " as the Group Leader";
             } else {
@@ -237,8 +242,8 @@ public class MemberWindow extends javax.swing.JFrame {
             }
             statusLog += ".";
 
-            setMember(member);
-            setMemContainer(memContainer);
+            //setMember(member);
+            //setMemContainer(memContainer);
             initialize(member, statusLog);
 
         } catch (RemoteException ex) {

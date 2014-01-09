@@ -324,10 +324,9 @@
                                 <Component class="javax.swing.JTable" name="tblHoldMessages">
                                   <Properties>
                                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                                      <Table columnCount="5" rowCount="0">
+                                      <Table columnCount="4" rowCount="0">
                                         <Column editable="true" title="Sender" type="java.lang.Object"/>
                                         <Column editable="false" title="Receiver" type="java.lang.String"/>
-                                        <Column editable="false" title="Msg.ID" type="java.lang.String"/>
                                         <Column editable="false" title="Message" type="java.lang.String"/>
                                         <Column editable="false" title="Timestamp" type="java.lang.Object"/>
                                       </Table>
@@ -340,11 +339,6 @@
                                           <Renderer/>
                                         </Column>
                                         <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                                          <Title/>
-                                          <Editor/>
-                                          <Renderer/>
-                                        </Column>
-                                        <Column maxWidth="-1" minWidth="-1" prefWidth="10" resizable="true">
                                           <Title/>
                                           <Editor/>
                                           <Renderer/>
@@ -419,10 +413,9 @@
                                 <Component class="javax.swing.JTable" name="tblMessages">
                                   <Properties>
                                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                                      <Table columnCount="5" rowCount="0">
+                                      <Table columnCount="4" rowCount="0">
                                         <Column editable="true" title="Sender" type="java.lang.Object"/>
                                         <Column editable="false" title="Receiver" type="java.lang.String"/>
-                                        <Column editable="false" title="Msg.ID" type="java.lang.String"/>
                                         <Column editable="false" title="Message" type="java.lang.String"/>
                                         <Column editable="false" title="Timestamp" type="java.lang.Object"/>
                                       </Table>
@@ -435,11 +428,6 @@
                                           <Renderer/>
                                         </Column>
                                         <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                                          <Title/>
-                                          <Editor/>
-                                          <Renderer/>
-                                        </Column>
-                                        <Column maxWidth="-1" minWidth="-1" prefWidth="10" resizable="true">
                                           <Title/>
                                           <Editor/>
                                           <Renderer/>

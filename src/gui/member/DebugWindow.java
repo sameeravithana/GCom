@@ -19,6 +19,7 @@ import gui.GComWindow;
 import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -49,6 +50,7 @@ public class DebugWindow extends javax.swing.JFrame {
     private IMember stub;
     private boolean autoRelease = false;
     private LinkedList<Message> holdback, messages;
+    private SimpleDateFormat sd = new SimpleDateFormat("HH:mm:ss");
 
     public DebugWindow(MemberWindow memWindow, Member member, IMember stub) {
         this.stub = stub;
@@ -93,6 +95,9 @@ public class DebugWindow extends javax.swing.JFrame {
         holdback = member.getHoldingQueue();
         fillHoldingQueue(holdback);
         messages.add(message);
+        dtm = (DefaultTableModel) tblMessages.getModel();
+        dtm.addRow(new Object[]{message.getSource().getName(), message.getDestination().getName(), message.getMessage(), new SimpleDateFormat("HH:mm:ss").format(new Date(message.getTimeStamp()))});
+        fillHoldingQueue(holdback);
         updateStatus("Message from " + message.getSource().getName() + " released.");
         //JOptionPane.showMessageDialog(this, message.getMessage());
     }
@@ -103,7 +108,8 @@ public class DebugWindow extends javax.swing.JFrame {
             dtm.removeRow(0);
         }
         for (Message message : holdback) {
-            Object row[] = new Object[]{message.getSource().getName(), message.getDestination().getName(), message.getMessageID(), message.getMessage(), new Date()};
+            String format = sd.format(new Date(message.getTimeStamp()));
+            Object row[] = new Object[]{message.getSource().getName(), message.getDestination().getName(), message.getMessage(), format};
             dtm.addRow(row);
         }
     }
@@ -192,15 +198,14 @@ public class DebugWindow extends javax.swing.JFrame {
         }
     }
 
-    public void releaseMessage() {
+    public void releaseMessage(Object... vals) {
         int row = tblHoldMessages.getSelectedRow();
 
         if (row != -1) {
-            Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3), tblHoldMessages.getValueAt(row, 4)};
             try {
                 if (member.releaseMessages(holdback.get(row))) {
                     dtm = (DefaultTableModel) tblMessages.getModel();
-                    dtm.addRow(r);
+                    dtm.addRow(vals);
                     fillHoldingQueue(holdback);
                 }
             } catch (RemoteException ex) {
@@ -338,14 +343,14 @@ public class DebugWindow extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Sender", "Receiver", "Msg.ID", "Message", "Timestamp"
+                "Sender", "Receiver", "Message", "Timestamp"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false, false
+                true, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -358,9 +363,8 @@ public class DebugWindow extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(tblHoldMessages);
         if (tblHoldMessages.getColumnModel().getColumnCount() > 0) {
-            tblHoldMessages.getColumnModel().getColumn(2).setPreferredWidth(10);
-            tblHoldMessages.getColumnModel().getColumn(3).setPreferredWidth(100);
-            tblHoldMessages.getColumnModel().getColumn(4).setPreferredWidth(5);
+            tblHoldMessages.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblHoldMessages.getColumnModel().getColumn(3).setPreferredWidth(5);
         }
 
         btnShuffle.setText("Shuffle");
@@ -385,7 +389,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnRelease, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -415,14 +419,14 @@ public class DebugWindow extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Sender", "Receiver", "Msg.ID", "Message", "Timestamp"
+                "Sender", "Receiver", "Message", "Timestamp"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false, false
+                true, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -436,9 +440,8 @@ public class DebugWindow extends javax.swing.JFrame {
         tblMessages.getTableHeader().setReorderingAllowed(false);
         jScrollPane5.setViewportView(tblMessages);
         if (tblMessages.getColumnModel().getColumnCount() > 0) {
-            tblMessages.getColumnModel().getColumn(2).setPreferredWidth(10);
-            tblMessages.getColumnModel().getColumn(3).setPreferredWidth(100);
-            tblMessages.getColumnModel().getColumn(4).setPreferredWidth(5);
+            tblMessages.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblMessages.getColumnModel().getColumn(3).setPreferredWidth(5);
         }
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -447,7 +450,7 @@ public class DebugWindow extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
                 .addGap(115, 115, 115))
         );
         jPanel6Layout.setVerticalGroup(
@@ -519,7 +522,7 @@ public class DebugWindow extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(211, Short.MAX_VALUE))
         );
 
         jTabbedPane2.addTab("Vector Clocks", jPanel5);
@@ -578,7 +581,12 @@ public class DebugWindow extends javax.swing.JFrame {
         new Thread() {
             @Override
             public void run() {
-                releaseMessage();
+                int row = tblHoldMessages.getSelectedRow();
+
+                if (row != -1) {
+                    Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3)};
+                    releaseMessage(r);
+                }
             }
         }.start();
 

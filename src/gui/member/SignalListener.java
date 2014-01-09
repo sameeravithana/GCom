@@ -51,7 +51,13 @@ public class SignalListener implements PropertyChangeListener {
             } catch (Exception ex) {
                 Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else if (evt.getPropertyName().equals("VectorReceived")) {
+        } else if (evt.getPropertyName().equals("MyOwnMessageReleased")) {
+            try {
+                memWindow.myOwnMessageReleased((Message) evt.getNewValue());
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else if (evt.getPropertyName().equals("VectorReceived")) {
             try {
                 memWindow.vectorReceived(evt.getOldValue(),evt.getNewValue());
             } catch (Exception ex) {

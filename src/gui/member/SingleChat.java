@@ -35,9 +35,9 @@ public class SingleChat extends javax.swing.JFrame {
      */
     private String contact;
     private IMember member;
-    
+
     private MemberWindow memWindow;
-    
+
     public SingleChat(MemberWindow parent, boolean modal, String contact, IMember member) {
         initComponents();
         this.memWindow = parent;
@@ -48,18 +48,19 @@ public class SingleChat extends javax.swing.JFrame {
         setTitle("Chat with " + contact);
         setLocationRelativeTo(parent);
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
+        txtChat.requestFocus();
     }
-    
+
     public void sendMessage(Message msg) {
         updateChat("Me : " + msg.getMessage());
         txtChat.setText("");
     }
-    
+
     public void recieveMessage(Message msg) throws RemoteException {
         updateChat(msg.getSource().getName() + " : " + msg.getMessage());
         txtChat.setText("");
     }
-    
+
     private void updateChat(String msg) {
         txtHistory.setText(txtHistory.getText() + msg + "\n");
     }
@@ -190,13 +191,12 @@ public class SingleChat extends javax.swing.JFrame {
                 String msg = txtChat.getText();
                 Message message;
                 GroupDef groupDef = member.getParentGroup().getGroupDef();
-                message = new Message(member.getParentGroup().getGroupName(), member, null, msg, groupDef.getMultType(),groupDef.getOrdType());
-                message.setDestination(member.getParentGroup().getMembersList().get(contact));                
-                
-                
-                member.multicastMessages(message);
+                message = new Message(member.getParentGroup().getGroupName(), member, null, msg, groupDef.getMultType(), groupDef.getOrdType());
+                message.setDestination(member.getParentGroup().getMembersList().get(contact));
+
+                member.multicastMessages(message, true);
                 memWindow.multicastChat(message);
-                
+
             } catch (RemoteException ex) {
                 Logger.getLogger(SingleChat.class.getName()).log(Level.SEVERE, null, ex);
             }

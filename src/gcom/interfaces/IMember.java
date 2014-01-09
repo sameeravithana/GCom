@@ -12,6 +12,7 @@ import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -68,7 +69,7 @@ public interface IMember extends Remote, Serializable {
 
     public void electionCompleted(IMember member) throws RemoteException;
 
-    public void multicastMessages(Message message) throws RemoteException;
+    public void multicastMessages(Message message, boolean isInitReliable) throws RemoteException;
 
     public void deliver(Message message) throws RemoteException;
 
@@ -79,6 +80,8 @@ public interface IMember extends Remote, Serializable {
     public LinkedList<Message> getHoldingQueue() throws RemoteException;
 
     public void initVectorClock() throws RemoteException;
+
+    public void setVectorClock(HashMap<String, Integer> vectorClock) throws RemoteException;
 
     public void uinitVectorClock(IMember newmember) throws RemoteException;
 

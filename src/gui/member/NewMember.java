@@ -112,6 +112,7 @@ public class NewMember extends javax.swing.JFrame {
             for (String key : gs.keySet()) {
                 cmbGroup.addItem(key);
             }
+            txtMember.requestFocus();
         } else {
             panelMem.setVisible(false);
         }
