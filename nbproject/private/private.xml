@@ -12,8 +12,11 @@
             <file>file:/home/praneeth/git/GCom/src/gui/member/SignalListener.java</file>
             <file>file:/home/praneeth/git/GCom/src/gcom/interfaces/IMember.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/DebugWindow.java</file>
+            <file>file:/home/praneeth/git/GCom/src/gcom/interfaces/IMessage.java</file>
+            <file>file:/home/praneeth/git/GCom/src/gui/About.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/SingleChat.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/GComWindow.java</file>
+            <file>file:/home/praneeth/git/GCom/nbproject/build-impl.xml</file>
         </group>
     </open-files>
 </project-private>

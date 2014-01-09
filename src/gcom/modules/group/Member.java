@@ -32,8 +32,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     private Group parentGroup;
     private boolean isElectionParticipant = false;
     private boolean isGroupLeader;
-    private final LinkedList<IMember> members;
-    private Election election;
+    private final LinkedList<IMember> members;    
     private RMIServer srv;
     protected PropertyChangeSupport propertyChangeSupport;
     private LinkedList<Message> holdingQueue;
@@ -219,21 +218,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         }
     }
 
-    /**
-     * @return the election
-     */
-    @Override
-    public Election getElection() {
-        return election;
-    }
-
-    /**
-     * @param election the election to set
-     */
-    @Override
-    public void setElection(Election election) {
-        this.election = election;
-    }
+    
 
     /**
      * @return the members
@@ -305,7 +290,6 @@ public class Member extends UnicastRemoteObject implements IMember {
                     this.setElectionParticipant(true);
                     emessage.setMessageID(this.getIdentifier());
                     Logger.getLogger(Member.class.getName()).log(Level.INFO, "{0} : modified the election message.", getName());
-                    //System.out.println("*I MODIFY ELECTION: " + emessage.getMessageOrderType() + " " + this.getName() + " [" + this.getIdentifier() + "] " + isElectionParticipant() + " EMSG_ID: " + emessage.getMessageID());
                     this.callElection(emessage);
                 }
             }
@@ -411,9 +395,7 @@ public class Member extends UnicastRemoteObject implements IMember {
 
                 holdingQueue.add(message);
                 Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Receieved :  {0}", message.getMessage());
-//                for(int i=0;i<receivedMessages.size();i++)
-//                    System.out.print(receivedMessages.get(i).getMessage()+" ");                
-//                System.out.println(receivedMessages.size()+"");
+
                 messageReceived(message);
 
                 if (!message.getSource().getName().equals(this.getName())) {
@@ -427,16 +409,14 @@ public class Member extends UnicastRemoteObject implements IMember {
             messageReceived(message);
         }
         if (message.getSource().getName().equals(getName())) {
-            System.out.println("I received my msg.");
             holdingQueue.remove(message);
-            Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Released:  {0}", message.getMessage());
+            Logger.getLogger(Member.class.getName()).log(Level.INFO, "My Message Released:  {0}", message.getMessage());
             propertyChangeSupport.firePropertyChange("MyOwnMessageReleased", null, message);
         }
     }
 
     public boolean isEntry(Message message) {
         for (int i = 0; i < receivedMessages.size(); i++) {
-//            System.out.println(receivedMessages.get(i).getMessage()+" "+message.getMessage());
             if (receivedMessages.get(i).getTimeStamp() == message.getTimeStamp() && receivedMessages.get(i).getMessage().equals(message.getMessage())) {
                 return true;
             }
@@ -592,9 +572,8 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @param parentGroup the parentGroup to set
      */
     @Override
-    public void setParentGroup(Group parentGroup) {
-        this.parentGroup = parentGroup;
-        election = new Election(this);
+    public void setParentGroup(Group parentGroup) {        this.parentGroup = parentGroup;
+        
     }
 
     /**

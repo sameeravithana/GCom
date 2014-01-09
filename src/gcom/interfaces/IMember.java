@@ -46,11 +46,7 @@ public interface IMember extends Remote, Serializable {
 
     public void removeMember(IMember member) throws RemoteException;
 
-    public IMember getNeighbour(int pos) throws RemoteException;
-
-    public Election getElection() throws RemoteException;
-
-    public void setElection(Election election) throws RemoteException;
+    public IMember getNeighbour(int pos) throws RemoteException;    
 
     public boolean isElectionParticipant() throws RemoteException;
 

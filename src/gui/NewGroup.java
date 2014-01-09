@@ -43,7 +43,7 @@ public class NewGroup extends javax.swing.JDialog {
         cmb = new JComboBox[]{cmbGroupType, cmbComType, cmbMsgOrd};
         try {
             Properties p = new Properties();
-            p.load(new FileInputStream("server.properties"));
+            p.load(new FileInputStream("./server.properties"));
             String groupType[] = p.getProperty("groupType").split(",");
 
             for (int i = 0; i < groupType.length; i++) {
@@ -115,7 +115,7 @@ public class NewGroup extends javax.swing.JDialog {
             }
         });
 
-        spnMemberCount.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(4), Integer.valueOf(2), null, Integer.valueOf(1)));
+        spnMemberCount.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(3), Integer.valueOf(2), null, Integer.valueOf(1)));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

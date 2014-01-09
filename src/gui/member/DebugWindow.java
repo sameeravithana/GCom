@@ -51,7 +51,7 @@ public class DebugWindow extends javax.swing.JFrame {
     private boolean autoRelease = false;
     private LinkedList<Message> holdback, messages;
     private SimpleDateFormat sd = new SimpleDateFormat("HH:mm:ss");
-    
+
     public DebugWindow(MemberWindow memWindow, Member member, IMember stub) {
         this.stub = stub;
         initComponents();
@@ -61,25 +61,27 @@ public class DebugWindow extends javax.swing.JFrame {
         messages = new LinkedList<Message>();
         try {
             memName = member.getName();
-            setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
         } catch (Exception ex) {
             Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
         Properties p = new Properties();
         try {
-            p.load(new FileReader("client.properties"));
+            p.load(new FileReader("./client.properties"));
             autoRelease = Boolean.valueOf(p.getProperty("autoRelease"));
             chkHold.setSelected(!autoRelease);
         } catch (IOException ex) {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        try {
-//            updateMemberTable();
-//        } catch (RemoteException ex) {
-//            Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
-    
+
+    public void initialize() {
+        try {
+            setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
+        } catch (RemoteException ex) {
+            Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void messageReceived(Message message) throws RemoteException {
         updateStatus(message.getMulticastType() + " Multicast message received from " + message.getSource().getName());
         if (!autoRelease) {
@@ -90,7 +92,7 @@ public class DebugWindow extends javax.swing.JFrame {
             updateStatus(message.getMulticastType() + " Multicast message from " + message.getSource().getName() + " released.");
         }
     }
-    
+
     public void messageReleased(Message message) throws RemoteException {
         holdback = member.getHoldingQueue();
         fillHoldingQueue(holdback);
@@ -101,7 +103,7 @@ public class DebugWindow extends javax.swing.JFrame {
         updateStatus("Message from " + message.getSource().getName() + " released.");
         //JOptionPane.showMessageDialog(this, message.getMessage());
     }
-    
+
     private void fillHoldingQueue(LinkedList<Message> holdback) throws RemoteException {
         dtm = (DefaultTableModel) tblHoldMessages.getModel();
         while (dtm.getRowCount() > 0) {
@@ -113,11 +115,11 @@ public class DebugWindow extends javax.swing.JFrame {
             dtm.addRow(row);
         }
     }
-    
+
     public void updateStatus(String message) {
         txtLog.setText(txtLog.getText() + message + "\n");
     }
-    
+
     public void updateMemberTable() throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         while (dtm.getRowCount() > 0) {
@@ -125,6 +127,7 @@ public class DebugWindow extends javax.swing.JFrame {
         }
         Collection<IMember> members = member.getParentGroup().getMembersList().values();
         for (IMember m : members) {
+            System.out.println(m.getName());
             dtm.addRow(new Object[]{m.getName(), (m.isGroupLeader() ? "Leader" : "Member"), sd.format(m.getJoined()), m.getIdentifier()});
         }
     }
@@ -139,7 +142,7 @@ public class DebugWindow extends javax.swing.JFrame {
         Vector<Object[]> rows = new Vector<Object[]>();
         for (int i = 0; i < dtm.getRowCount(); i++) {
             String role = "Member";
-            
+
             if (dtm.getValueAt(i, 0).toString().equals(leader.getName())) {
                 role = "Leader";
             }
@@ -161,11 +164,10 @@ public class DebugWindow extends javax.swing.JFrame {
     public void updateLeaderInTable(String leader) throws RemoteException {
         dtm = (DefaultTableModel) tblMembers.getModel();
         for (int i = 0; i < dtm.getRowCount(); i++) {
-            
+
             String role = "Member";
-            
+
             String tableValue = dtm.getValueAt(i, 0).toString();
-            // System.out.println("Election : " + tableValue + " " + leader);
 
             if (tableValue.equals(leader)) {
                 role = "Leader";
@@ -173,23 +175,21 @@ public class DebugWindow extends javax.swing.JFrame {
             dtm.setValueAt(role, i, 1);
         }
     }
-    
+
     public void startElection() {
         try {
             if (member.getParentGroup().getGroupType() == Group.DYNAMIC_GROUP || member.getParentGroup().isFilled()) {
                 Message emessage = new Message(member.getParentGroup().getGroupName(), member.getMembers().indexOf(member), member.getIdentifier(), MESSAGE_TYPE.ELECTION);
                 if (member.getParentGroup().getMemberCount() > 1) {
                     Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} starting the election.", member.getName());
-                    //System.out.println(member.getName() + " Starting the election...");
                     member.setElectionParticipant(true);
                     member.callElection(emessage);
                 } else {
                     member.callElection(emessage);
                     updateStatus("This process was selected as the group leader.");
                     Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "{0} : You have no neighbours..So you're the leader.", member.getName());
-                    // System.out.println("You have no neighbours..So you're the leader! " + member.getName());
                 }
-                
+
             } else {
                 JOptionPane.showMessageDialog(this, "You cannot call for election until group is filled.", "Group is not stable.", JOptionPane.WARNING_MESSAGE);
             }
@@ -197,10 +197,10 @@ public class DebugWindow extends javax.swing.JFrame {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public void releaseMessage(Object... vals) {
         int row = tblHoldMessages.getSelectedRow();
-        
+
         if (row != -1) {
             try {
                 if (member.releaseMessages(holdback.get(row))) {
@@ -230,7 +230,6 @@ public class DebugWindow extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         tblMembers = new javax.swing.JTable();
         btnElect = new javax.swing.JButton();
-        btnElect1 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -301,20 +300,15 @@ public class DebugWindow extends javax.swing.JFrame {
             }
         });
 
-        btnElect1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/pics/refresh.png"))); // NOI18N
-        btnElect1.setText("Recalc. Identifiers");
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnElect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnElect1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(btnElect, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -324,9 +318,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(btnElect)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnElect1)
-                        .addGap(0, 94, Short.MAX_VALUE))
+                        .addGap(0, 160, Short.MAX_VALUE))
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addGap(91, 91, 91))
         );
@@ -535,7 +527,7 @@ public class DebugWindow extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
+            .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 329, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("", new javax.swing.ImageIcon(getClass().getResource("/pics/messages.png")), jPanel1, "Messages"); // NOI18N
@@ -582,7 +574,7 @@ public class DebugWindow extends javax.swing.JFrame {
             @Override
             public void run() {
                 int row = tblHoldMessages.getSelectedRow();
-                
+
                 if (row != -1) {
                     Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3)};
                     releaseMessage(r);
@@ -609,7 +601,6 @@ public class DebugWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnElect;
-    private javax.swing.JButton btnElect1;
     private javax.swing.JButton btnRelease;
     private javax.swing.JButton btnShuffle;
     private javax.swing.JCheckBox chkHold;
@@ -661,7 +652,7 @@ public class DebugWindow extends javax.swing.JFrame {
     public void setIsMessageHoldEnabled(boolean isMessageHoldEnabled) {
         this.autoRelease = isMessageHoldEnabled;
     }
-    
+
     public void vectorReceived(Object changed, Object values) {
         boolean isChanged = Boolean.valueOf(changed.toString());
         Object[] vecs = (Object[]) values;

@@ -158,7 +158,7 @@ public class Group implements Remote, Serializable, IGroup {
      * @return the leader
      */
     public IMember getLeader() {
-        return leader;
+        return this.leader;
     }
 
     /**

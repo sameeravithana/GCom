@@ -117,9 +117,14 @@ public class GroupManagement implements IGroupManagement {
     }
 
     public static void removeGroupMulticast(String groupName) throws RemoteException, GroupManagementException {
-        Group g = groups.get(groupName);
-        g.getLeader().killProcess();
-        groups.remove(g.getGroupName());
+
+        try {
+            gCom.getServer().regMemLookUp(groupName).killProcess();
+        } catch (Exception e) {
+            Logger.getLogger(GroupManagement.class.getName()).log(Level.INFO, "Group Remove Success!", "");
+        }
+
+        groups.remove(groupName);
     }
 
 }
