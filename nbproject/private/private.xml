@@ -3,17 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/GroupManagement.java</file>
+            <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/Group.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/MemberWindow.java</file>
-            <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/Message.java</file>
-            <file>file:/home/praneeth/git/GCom/src/gcom/modules/group/Member.java</file>
+            <file>file:/home/praneeth/git/GCom/src/gui/NewGroup.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/NewMember.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/SignalListener.java</file>
             <file>file:/home/praneeth/git/GCom/src/gcom/interfaces/IMember.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/member/DebugWindow.java</file>
             <file>file:/home/praneeth/git/GCom/src/gcom/interfaces/IMessage.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/About.java</file>
-            <file>file:/home/praneeth/git/GCom/src/gui/member/SingleChat.java</file>
             <file>file:/home/praneeth/git/GCom/src/gui/GComWindow.java</file>
             <file>file:/home/praneeth/git/GCom/nbproject/build-impl.xml</file>
         </group>
