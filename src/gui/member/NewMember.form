@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.1" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <Properties>
@@ -8,7 +8,6 @@
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
-    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -39,8 +38,8 @@
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="cmbHost" max="32767" attributes="1"/>
-                          <Component id="cmbPort" max="32767" attributes="1"/>
+                          <Component id="cmbHost" pref="255" max="32767" attributes="1"/>
+                          <Component id="cmbPort" pref="255" max="32767" attributes="1"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="btnConnect" min="-2" pref="84" max="-2" attributes="0"/>
@@ -128,7 +127,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Group type="102" attributes="0">
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="303" max="32767" attributes="0"/>
                           <Component id="btnCreateMember" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
@@ -138,8 +137,8 @@
                           </Group>
                           <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="cmbGroup" max="32767" attributes="1"/>
-                              <Component id="txtMember" max="32767" attributes="1"/>
+                              <Component id="cmbGroup" pref="239" max="32767" attributes="1"/>
+                              <Component id="txtMember" pref="239" max="32767" attributes="1"/>
                           </Group>
                       </Group>
                   </Group>
@@ -161,7 +160,7 @@
                       <Component id="txtMember" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="btnCreateMember" pref="65" max="32767" attributes="0"/>
+                  <Component id="btnCreateMember" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>

@@ -127,7 +127,6 @@ public class DebugWindow extends javax.swing.JFrame {
         }
         Collection<IMember> members = member.getParentGroup().getMembersList().values();
         for (IMember m : members) {
-            System.out.println(m.getName());
             dtm.addRow(new Object[]{m.getName(), (m.isGroupLeader() ? "Leader" : "Member"), sd.format(m.getJoined()), m.getIdentifier()});
         }
     }
@@ -209,7 +208,7 @@ public class DebugWindow extends javax.swing.JFrame {
                     fillHoldingQueue(holdback);
                 }
             } catch (RemoteException ex) {
-                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, "Remote Exception.", "");
             }
         }
     }
@@ -562,6 +561,7 @@ public class DebugWindow extends javax.swing.JFrame {
 
     private void btnElectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnElectActionPerformed
         new Thread() {
+
             public void run() {
                 startElection();
             }
@@ -571,6 +571,7 @@ public class DebugWindow extends javax.swing.JFrame {
 
     private void btnReleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReleaseActionPerformed
         new Thread() {
+
             @Override
             public void run() {
                 int row = tblHoldMessages.getSelectedRow();
@@ -586,6 +587,7 @@ public class DebugWindow extends javax.swing.JFrame {
 
     private void btnShuffleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShuffleActionPerformed
         new Thread() {
+
             @Override
             public void run() {
                 Collections.shuffle(holdback);
@@ -598,7 +600,6 @@ public class DebugWindow extends javax.swing.JFrame {
         }.start();
 
     }//GEN-LAST:event_btnShuffleActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnElect;
     private javax.swing.JButton btnRelease;

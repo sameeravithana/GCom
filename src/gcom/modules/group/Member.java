@@ -32,7 +32,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     private Group parentGroup;
     private boolean isElectionParticipant = false;
     private boolean isGroupLeader;
-    private final LinkedList<IMember> members;    
+    private final LinkedList<IMember> members;
     private RMIServer srv;
     protected PropertyChangeSupport propertyChangeSupport;
     private LinkedList<Message> holdingQueue;
@@ -49,7 +49,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         receivedMessages = new LinkedList<Message>();
         setVectorClock(new HashMap<String, Integer>());
         propertyChangeSupport = new PropertyChangeSupport(this);
-
+        joined = new Date();
         //initVectorClock();
     }
 
@@ -206,6 +206,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     public void updateMembers(final IMember member) throws RemoteException {
         for (final IMember m : this.getMembers()) {
             new Thread() {
+
                 @Override
                 public void run() {
                     try {
@@ -217,8 +218,6 @@ public class Member extends UnicastRemoteObject implements IMember {
             }.start();
         }
     }
-
-    
 
     /**
      * @return the members
@@ -347,6 +346,7 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             for (final String key : membersList.keySet()) {
                 new Thread() {
+
                     @Override
                     public void run() {
                         try {
@@ -364,6 +364,7 @@ public class Member extends UnicastRemoteObject implements IMember {
             for (final String key : membersList.keySet()) {
                 // Create separate Threads for each multicastMembersList.
                 new Thread() {
+
                     @Override
                     public void run() {
                         try {
@@ -572,8 +573,9 @@ public class Member extends UnicastRemoteObject implements IMember {
      * @param parentGroup the parentGroup to set
      */
     @Override
-    public void setParentGroup(Group parentGroup) {        this.parentGroup = parentGroup;
-        
+    public void setParentGroup(Group parentGroup) {
+        this.parentGroup = parentGroup;
+
     }
 
     /**
@@ -666,6 +668,7 @@ public class Member extends UnicastRemoteObject implements IMember {
         final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (final String key : membersList.keySet()) {
             new Thread() {
+
                 @Override
                 public void run() {
                     try {

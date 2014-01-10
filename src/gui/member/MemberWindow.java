@@ -473,7 +473,6 @@ public class MemberWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-
     private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchFocusGained
         if (txtSearch.getText().trim().equalsIgnoreCase("Search Contacts")) {
             txtSearch.setText(null);
@@ -491,6 +490,7 @@ public class MemberWindow extends javax.swing.JFrame {
     private void lstContactsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstContactsMouseClicked
         if (evt.getClickCount() == 2 && lstContacts.getSelectedIndex() != -1) {
             new Thread() {
+
                 public void run() {
                     startChat();
                 }
@@ -498,7 +498,6 @@ public class MemberWindow extends javax.swing.JFrame {
 
         }
     }//GEN-LAST:event_lstContactsMouseClicked
-
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         String txt = txtSearch.getText().trim();
@@ -536,12 +535,14 @@ public class MemberWindow extends javax.swing.JFrame {
                 Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NotBoundException ex) {
                 Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            for (String c : chatWindows.keySet()) {
-                chatWindows.get(c).setVisible(false);
+            } finally {
+                for (String c : chatWindows.keySet()) {
+                    chatWindows.get(c).setVisible(false);
+                }
+                debug.setVisible(false);
+                System.exit(0);
             }
 
-            System.exit(0);
         }
     }//GEN-LAST:event_formWindowClosing
 
@@ -552,7 +553,6 @@ public class MemberWindow extends javax.swing.JFrame {
     private void mnuAboutGComActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuAboutGComActionPerformed
         new About(this, true).setVisible(true);
     }//GEN-LAST:event_mnuAboutGComActionPerformed
-
 //    /**
 //     * @param args the command line arguments
 //     */
@@ -663,7 +663,6 @@ public class MemberWindow extends javax.swing.JFrame {
     public void vectorReceived(Object oldValue, Object newValue) {
         debug.vectorReceived(oldValue, newValue);
     }
-
 }
 
 class MyListRenderer extends DefaultListCellRenderer {
