@@ -1,0 +1,116 @@
+\documentclass[a4,12pt]{article}
+\usepackage[margin=2cm]{geometry}
+%opening
+\title{GCom - Test Protocol}
+\author{ens13pps \& ens13sha}
+\date{}
+
+\begin{document}
+
+\maketitle
+\section*{Basic multi-cast with Unordered message ordering\\(Static : member count = 3)}
+
+\begin{itemize}\itemsep 5pt \parskip 2pt \parsep 2pt
+\item Member A joins (appointed as the leader)
+\item Member B joins
+\item Member C joins
+\item Member B calls an election (Explicit)
+\item Leader (e.g. C) leaves permanently (Automatic election)
+\item Member multicast “Hello I am Member X” - can’t do it
+\item Member call an election (explicit) - can’t do it
+\item Member D joins
+\item Member A multicasts “Hello I am Member A”
+\item Member B multicasts “Hello I am Member B”.
+\item Member D multicasts “Hello I am Member D”
+\item Automatically release own messages
+\item Member A releases the messages (regardless of the order)
+\item Member B releases the messages (regardless of the order)
+\item Member D releases the messages (regardless of the order)
+\item Remove Group
+\end{itemize}
+
+\newpage
+\section*{Reliable multi-cast with Unordered message ordering\\(Dynamic)}
+\begin{itemize}\itemsep 2pt \parskip 1pt \parsep 2pt
+\item Member A joins (appointed as the leader)
+\item Member B joins
+\item Member B multicasts “Hello I am Member B”
+\item Automatically release own messages (Member receives 2 Reliable messages - own and other)
+\item Leader leaves temporarily(offline)
+\item Automatic election : New Member pointed as leader (B)
+\item Member C joins
+\item Member C calls an election (Explicit)
+\item Member D joins
+\item Member D multicasts “Hello I am Member D” 
+\item Member A rejoins (online)
+\item Member C multicasts “Hello I am Member C” 
+\item Member A releases “Hello I am Member B” 
+\item Member A releases “Hello I am Member D” (no such message)
+\item Member A releases “Hello I am Member C” 
+\item Member B \& C  release “Hello I am Member D” 
+\end{itemize}
+
+\section*{Basic multi-cast with Causal message ordering\\(Dynamic))}
+\begin{itemize}\itemsep 1pt \parskip 1pt \parsep 2pt
+\item Member A joins (appointed as the leader)
+\item Member B joins
+\item Member C joins
+\item Member B multicasts “Hello I am Member B”
+\item Member A releases message got from B.
+\item Member A multicasts “Hello I am Member A”
+\item Member C tries to release “Hello I am Member A” - *impossible
+\item Member C shuffle messages \& try again to release “Hello I am \item Member A”
+\item Member C tries to release “Hello I am Member B” - *possible
+\item Member C tries to release “Hello I am Member A” - *possible
+\item Member B releases “Hello I am Member A”
+\item Member D joins
+\item Member C multicasts “Hello I am Member C”
+\item Member D tries to release “Hello I am Member C” (Consistent vector clock) - *possible
+\item Member B releases “Hello I am Member C” 
+\end{itemize}
+
+
+\section*{Reliable multicast with Causal message ordering(Dynamic))}
+\begin{itemize}\itemsep 1pt \parskip 1pt \parsep 2pt
+\item Member A joins (appointed as the leader)
+\item Member B joins
+\item Member C joins
+\item Member A leaves temporarily(offline)
+\item Member B multicasts “Hello I am Member B”
+\item Member A rejoins (online)
+\item Member A multicasts “Hello I am Member A”
+\item Member C tries to release “Hello I am Member A” - *possible
+\item Member C tries to release “Hello I am Member B” - *possible
+\item Member B releases “Hello I am Member A”
+\end{itemize}
+
+\section*{GCom chat application}
+\begin{itemize}\itemsep 1pt \parskip 1pt \parsep 2pt
+\item $[ auto\_release = true ]$
+\item Member Wimala joins
+\item Member Nimala joins
+\item Member Kamala joins
+\item Wimala says “HI Kamala” to Kamala
+\item Kamala says “HI Wimala” to Wimala
+\item Nimala says “HI Kamala” to Kamala
+\item Continue chat...
+\end{itemize}
+
+\section*{Extra Time:\\Reliable multicast with Causal message ordering (Dynamic)}
+\begin{itemize}\itemsep 2pt \parskip 2pt \parsep 2pt
+\item Member A joins (appointed as the leader)
+\item Member B joins
+\item Member C joins
+\item Member D joins
+\item Member B multicasts “Hello I am Member B”
+\item Member C multicasts “Hello I am Member C”
+\item Member A tries to release “Hello I am Member B”
+\item Member A multicasts “Hello I am Member A”
+\item Member D tries to release “Hello I am Member A” - *impossible
+\item Member D tries to release “Hello I am Member B” - *possible
+\item Member D tries to release “Hello I am Member A” - *possible (Without releasing C’s message)
+\item Member D releases “Hello I am Member C”
+\item Member B,C \& A release messages
+\end{itemize}
+
+\end{document}
