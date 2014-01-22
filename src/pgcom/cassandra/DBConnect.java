@@ -6,13 +6,16 @@ package pgcom.cassandra;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.Cluster.Builder;
+import com.datastax.driver.core.exceptions.InvalidQueryException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBConnect {
 
     private Cluster cluster;
     private Session session;
 
-    private DBConnect() {
+    public DBConnect() {
         String[] hosts = new String[]{"127.0.1.1", "127.0.1.2", "127.0.1.3"};
         addContactPoint(hosts);
         connectKeySpace("mykeyspace");
@@ -44,38 +47,53 @@ public class DBConnect {
 
     }
 
-    private void addContactPoint(String[] host) {
+    public DBConnect(String[] hosts) {
+        addContactPoint(hosts);
+    }
+
+    public void addContactPoint(String[] host) {
         Builder builder = Cluster.builder();
         builder.addContactPoints(host);
         this.cluster = builder.build();
     }
 
-    private void connectKeySpace(String keySpace) {
-        this.session = this.cluster.connect(keySpace);
+    public void connectKeySpace(String keySpace) {
+        try {
+            this.session = this.cluster.connect(keySpace);
+        } catch (InvalidQueryException iqex) {
+            Logger.getLogger(DBConnect.class.getName()).log(Level.WARNING, "{0} : KeySpace not found!", keySpace);
+        }
     }
 
-    private SimpleStatement prepareStatement(String query) {
+    public SimpleStatement prepareStatement(String query) {
         SimpleStatement toPrepare = new SimpleStatement(query);
         return toPrepare;
     }
 
-    private SimpleStatement setConsistencyLevel(SimpleStatement toPrepare, ConsistencyLevel level) {
+    public SimpleStatement setConsistencyLevel(SimpleStatement toPrepare, ConsistencyLevel level) {
         toPrepare.setConsistencyLevel(level);
         return toPrepare;
     }
 
-    private ResultSet executeQeuery(SimpleStatement toPrepare) {
-        PreparedStatement prepared = this.session.prepare(toPrepare);
-        ResultSet resultSet = this.session.execute(prepared.bind());
+    public ResultSet executeQeuery(SimpleStatement toPrepare) {
+        PreparedStatement prepared = this.getSession().prepare(toPrepare);
+        ResultSet resultSet = this.getSession().execute(prepared.bind());
         return resultSet;
     }
 
-    private ResultSet executeQeuery(String query) {
-        ResultSet resultSet = this.session.execute(query);
+    public ResultSet executeQeuery(String query) {
+        ResultSet resultSet = this.getSession().execute(query);
         return resultSet;
     }
 
     public static void main(String[] args) {
         DBConnect db = new DBConnect();
+    }
+
+    /**
+     * @return the session
+     */
+    public Session getSession() {
+        return session;
     }
 }

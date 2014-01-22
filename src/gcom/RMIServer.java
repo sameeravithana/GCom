@@ -17,6 +17,7 @@ import java.rmi.server.RemoteObject;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import pgcom.cassandra.DBConnect;
 
 /**
  *
@@ -28,10 +29,13 @@ public class RMIServer {
     String host;
     int port;
     boolean serverFlag = false;
+    DBConnect cdb;
 
-    public RMIServer(int port) {
+    public RMIServer(int port, DBConnect cdb) {
         this.port = port;
         this.serverFlag = true;
+        this.cdb = cdb;
+        initiateDB();
     }
 
     public RMIServer(String host, int port) throws RemoteException {
@@ -50,6 +54,15 @@ public class RMIServer {
         return registry;
     }
 
+    public void initiateDB() {
+        String query = "CREATE TABLE rmiserver (\n"
+                + "group_name text PRIMARY KEY,\n"
+                + "mem_stub text\n"               
+                + ")";
+
+        cdb.getSession().execute(query);
+    }
+
     public void stop() throws NoSuchObjectException {
         UnicastRemoteObject.unexportObject(this.registry, true);
     }
@@ -57,10 +70,6 @@ public class RMIServer {
     public void bind(String name, RemoteObject ro) throws AccessException, RemoteException, AlreadyBoundException {
         registry.bind(name, UnicastRemoteObject.exportObject(ro, 0));
     }
-
-//    public void rebind(String name, RemoteObject ro) throws AccessException, RemoteException {
-//        registry.rebind(name, ro);
-//    }
 
     public void rebind(String name, IGroupManagement ro) throws AccessException, RemoteException {
         registry.rebind(name, UnicastRemoteObject.exportObject(ro, 0));
@@ -88,13 +97,5 @@ public class RMIServer {
 
     public RemoteObject getReference(String name) throws AccessException, RemoteException, NotBoundException {
         return (RemoteObject) registry.lookup(name);
-    }
-
-    public static void main(String[] args) {
-        try {
-            LocateRegistry.getRegistry("dthdfgh", 0);
-        } catch (RemoteException ex) {
-            Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

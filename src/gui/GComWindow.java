@@ -37,18 +37,20 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import pgcom.cassandra.DBConnect;
 
 /**
  *
  * @author ens13pps
  */
 public class GComWindow extends javax.swing.JFrame {
-    
+
     private RMIServer server;
     private DefaultTreeModel tm;
     private DefaultMutableTreeNode root;
     private static HashMap<String, DefaultMutableTreeNode> nodes;
     private boolean isVisible;
+    private DBConnect cdb;
 
     /**
      * Creates new form GComWindow
@@ -61,8 +63,25 @@ public class GComWindow extends javax.swing.JFrame {
         GroupManagement.setGComWindow(this);
         nodes = new HashMap<String, DefaultMutableTreeNode>();
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
+
+        String[] hosts = new String[]{"127.0.1.1", "127.0.1.2", "127.0.1.3"};
+//        for (int host = 0; host < hosts.length; host++) {
+//            try {
+//                Runtime.getRuntime().exec("./cassandra/start.sh "+(host+1));
+//            } catch (IOException ex) {
+//                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+        cdb = new DBConnect(hosts); 
+        cdb.connectKeySpace("pgcomkeyspace");
+//        String query = "CREATE KEYSPACE pgcomkeyspace\n"
+//                + "WITH REPLICATION = { 'class' : 'SimpleStrategy',\n"
+//                + "'replication_factor' : 3 }";
+       
+
+
     }
-    
+
     private void initializeDock() {
         FishEyeDock fd = new FishEyeDock(FishEyeDock.HORIZONTAL_ALIGNMENT, 10);
         fd.setImageZoomMode(FishEyeDock.ZOOM_MODE_SMOOTH);
@@ -76,19 +95,19 @@ public class GComWindow extends javax.swing.JFrame {
         fd.insert(new ImageIcon(GComWindow.class.getResource("/pics/settings.png")), "Settings", null);
         dockPanel.add(fd);
     }
-    
+
     public void updateStatus(String newStatus) {
         txtLog.setText(txtLog.getText() + newStatus + "\n");
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Status Updated : {0}", newStatus);
     }
-    
+
     public void updateStatus(ArrayList<String> newStatus) {
     }
-    
+
     public void updateStatus(Message msg, MESSAGE_TYPE type) throws RemoteException {
         IMember member = msg.getSource();
         if (type == MESSAGE_TYPE.GROUP_CREATED) {
-            
+
             DefaultMutableTreeNode tn = new DefaultMutableTreeNode(member.getName());
             String parentName = member.getParentGroup().getGroupName();
             DefaultMutableTreeNode parent = nodes.get(parentName);
@@ -106,13 +125,13 @@ public class GComWindow extends javax.swing.JFrame {
             updateStatus(m);
         }
     }
-    
+
     private void addGroupToTree(String child, DefaultMutableTreeNode parent) {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(child, true);
         tm.insertNodeInto(ch, parent, parent.getChildCount());
         nodes.put(child, ch);
     }
-    
+
     private void addNewGroup() {
         NewGroup ng = new NewGroup(GComWindow.this, true);
         ng.setVisible(true);
@@ -123,34 +142,34 @@ public class GComWindow extends javax.swing.JFrame {
             addGroupToTree(createdGroup.getGroupName(), root);
         }
     }
-    
+
     public void addMember(Group group, IMember member) throws RemoteException {
         DefaultMutableTreeNode ch = new DefaultMutableTreeNode(member.getName(), true);
         DefaultMutableTreeNode parent = nodes.get(group.getGroupName());
         tm.insertNodeInto(ch, parent, parent.getChildCount());
-        
+
         updateStatus("Member " + member.getName() + " added to group " + group.getGroupName());
     }
-    
+
     private void startTMIServer(boolean state) throws HeadlessException {
         if (state) {
             String input = null;
             Object value = JOptionPane.showInputDialog(GComWindow.this, "Enter port number :", "Port", JOptionPane.DEFAULT_OPTION, new ImageIcon(GComWindow.class.getResource("/pics/port.png")), null, "1099");
             if (value != null && !(input = value.toString().trim()).isEmpty()) {
-                
+
                 try {
                     int port = Integer.parseInt(input);
-                    server = new RMIServer(port);
+                    server = new RMIServer(port,cdb);
                     server.start();
                     String msg = "RMI Registry Server started on port " + port;
                     updateStatus(msg);
-                    
+
                     GroupManagement obj = new GroupManagement();
                     IGroupManagement stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);
                     server.rebind("IGroupManagement", stub);
                     msg = "Default stub binded:" + " IGroupManagement";
                     updateStatus(msg);
-                    
+
                     mnuStartServer.setSelected(true);
                     btnServer.setSelected(true);
                 } catch (RemoteException e) {
@@ -178,7 +197,7 @@ public class GComWindow extends javax.swing.JFrame {
             }
         }
     }
-    
+
     private void removeGroup() {
         DefaultMutableTreeNode dmt = (DefaultMutableTreeNode) trGComStructure.getSelectionPath().getLastPathComponent();
         String group = dmt.getUserObject().toString();
@@ -360,7 +379,7 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             int row = trGComStructure.getClosestRowForLocation(evt.getX(), evt.getY());
             trGComStructure.setSelectionRow(row);
             int[] selectionRows = trGComStructure.getSelectionRows();
-            
+
             treeMenu.show(evt.getComponent(), evt.getX(), evt.getY());
         }
     }//GEN-LAST:event_trGComStructureMouseClicked
@@ -389,7 +408,7 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     private void mnuRemoveGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuRemoveGroupActionPerformed
 //        new Thread() {
 //            public void run() {
-                removeGroup();
+        removeGroup();
 //            }
 //        }.start();
 
@@ -398,7 +417,6 @@ private void mnuNewGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     private void mnuAboutGComActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuAboutGComActionPerformed
         new About(this, true).setVisible(true);
     }//GEN-LAST:event_mnuAboutGComActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton btnServer;
     private javax.swing.JPanel dockPanel;

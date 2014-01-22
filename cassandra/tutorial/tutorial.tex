@@ -1,0 +1,242 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[space=true]{accsupp}
+\usepackage{enumitem}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usepackage{url}
+
+% BEGIN: Ensure listings are copy-paste-able
+\newcommand{\pdfactualhex}[3]{\newcommand{#1}{%
+\BeginAccSupp{method=hex,ActualText=#2}#3\EndAccSupp{}}}
+
+\pdfactualhex{\pdfactualdspace}{2020}{\textperiodcentered\textperiodcentered}
+\pdfactualhex{\pdfactualsquote}{27}{'}
+\pdfactualhex{\pdfactualbtick}{60}{`}
+
+\lstset{literate={'}{\pdfactualsquote}1
+                 {`}{\pdfactualbtick}1
+                 {\ \ }{\pdfactualdspace}2}
+% END: Ensure listings are copy-paste-able
+
+\lstset{
+	basicstyle=\ttfamily,
+	language=SQL,
+	breaklines=true,
+	columns=fullflexible,
+	tabsize=4
+}
+
+\setlist[itemize]{itemsep=0pt,topsep=0pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+\newcommand\code[1]{\texttt{#1}}
+\newcommand\command[1]{\textbf{\texttt{#1}}}
+\newcommand\file[1]{\texttt{#1}}
+
+\newcounter{question}
+\newcommand{\question}{%
+	\stepcounter{question}%
+	\textbf{Q\thequestion. }}
+
+\sloppy
+
+\begin{document}
+
+\begin{center}
+	{\Large\bf Distributed Systems} \\[2mm]
+	{\large\bf Cassandra Tutorial} \\[2mm]
+	{Cristian Klein, Ewnetu Bayuh, Francisco Hernandez-Rodriguez} \\
+	{2013-12-12}
+\end{center}
+
+This tutorial will allow you to acquire hands-on experience with Cassandra, building on the concepts introduced during the lecture part. The exercises will help you understand the trade-offs between different replication strategies and consistency levels.
+
+At the core of the tutorial, we shall set up a Cassandra cluster. For your convenience, this tutorial has been designed to emulate a Cassandra cluster of 3 nodes on a single physical machine. This works by binding each Cassandra node to a different ``localhost'' IP address: Node 1 binds on 127.0.1.1, node 2 on 127.0.1.2 and node 3 on 127.0.1.3. Scripts are given to you for starting and stopping a node, so that you can focus on the rest of the tutorial.
+
+You will encounter some questions in this tutorial. Answering them is optional, however, is highlight advised to make sure you properly understood the tutorial. In case you encounter difficulties, do not hesitate to ask any teaching assistant for help.
+
+Note that the tutorial has been designed and tested for Linux. The tutorial is divided in three parts: setting up, Cassandra Query Language (CQL), understanding consistency levels.
+
+\section{Setting up}
+
+\textbf{NOTE:} The tutorial requires 30 MB of disk space. Make sure you have enough quota available in your home directory.
+
+We recommend you to use 4 terminal for this tutorial: 1 for the client (TermA) and 1 for each of the 3 nodes (TermB, TermC, TermD).
+
+\begin{enumerate}
+
+	\item Download the tutorial kit located at: \\
+		\url{http://www8.cs.umu.se/~cklein/teaching/cassandra-tutorial.tar.gz}
+
+	\item Decompress it in a convenient location, for example, your home directory.\\
+		\code{tar -xzvf cassandra-tutorial.tar.gz} \\
+		and change the current directory of \textbf{all} open terminals to it: \\
+		\code{cd cassandra-tutorial}
+
+	\item In separate terminals, start each node:\\
+		TermB: \code{./start.sh 1}\\
+		TermC: \code{./start.sh 2}\\
+		TermD: \code{./start.sh 3}\\
+		Note that, a node can be killed by typing CTRL+C in its terminal.
+
+	\item Check the status of the nodes:\\
+		TermA: \code{./apache-cassandra-2.0.1/bin/nodetool status} \\
+		The output of the command should indicate that all nodes are up and normal (UN).
+	
+\end{enumerate}
+
+\section{Cassandra Query Language}
+
+In this part of the tutorial, we focus on the Cassandra Query Language (CQL). All nodes are supposed to be up and all commands are issued in TermA.
+
+\begin{enumerate}
+	\item Cassandra requires Java 7. Therefore, we first have to make sure the \code{JAVA\_HOME} environment variable point to the right directory as follows:
+\begin{lstlisting}
+setenv JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
+\end{lstlisting}
+
+	\item Start CQL shell and connect it to the first node:\\
+		\code{./apache-cassandra-2.0.1/bin/cqlsh 127.0.1.1}
+
+	\item Create a new keyspace with replication factor 3:
+\begin{lstlisting}
+CREATE KEYSPACE mykeyspace
+	WITH REPLICATION = { 'class' : 'SimpleStrategy',
+	'replication_factor' : 3 };
+\end{lstlisting}
+
+	\item Use it as the active keyspace:
+\begin{lstlisting}
+USE mykeyspace;
+\end{lstlisting}
+
+	\item Create a new table:
+\begin{lstlisting}
+CREATE TABLE users (
+	user_id int PRIMARY KEY,
+	firstName text,
+	lastName text
+);
+\end{lstlisting}
+
+	\item Insert some data into the table. Use the following examples, but be creative and write your own commands:
+\begin{lstlisting}
+INSERT INTO users (user_id, firstName, lastName)
+	VALUES (1, 'John', 'Smith');
+INSERT INTO users (user_id, firstName, lastName)
+	VALUES (2, 'Jane', 'Smith');
+INSERT INTO users (user_id, firstName, lastName)
+	VALUES (3, 'Lars', 'Larsson');
+\end{lstlisting}
+
+	\item Update some data, using the following statement as example (again, be creative):
+\begin{lstlisting}
+UPDATE users SET firstName='Karl' where user_id = 1;
+\end{lstlisting}
+
+	\item To retrieve the data you entered so far, type:
+\begin{lstlisting}
+SELECT * FROM users;
+\end{lstlisting}
+
+	\item Now try different queries on your data:
+\begin{lstlisting}
+SELECT * FROM users WHERE user_id = 2;
+SELECT * FROM users WHERE lastName = 'Smith';
+\end{lstlisting}
+		\question Did all queries succeed? What was the query that gave the error? What error did you get?
+
+	\item To allow queries for other fields than the primary key, you need to add indexes as follows:
+\begin{lstlisting}
+CREATE INDEX ON users(firstName);
+\end{lstlisting}
+
+		Add indexes for both non-primary fields, first name and last name, and retry the queries you entered during the previous step.
+
+\end{enumerate}
+
+\section{Consistency Levels}
+
+In this part of the tutorial, we shall highlight the interaction between consistency levels and fault tolerance.
+
+\begin{enumerate}
+	\item Set consistency level to 3 in CQL shell, as follows:
+\begin{lstlisting}
+CONSISTENCY THREE;
+\end{lstlisting}
+
+	\item Let us assume that node 3 becomes inaccessible, either due to machine failure or network partitioning. Kill node 3 by pressing CTRL+C in TermD.
+
+	\item Run a few read (SELECT) and write (INSERT and UPDATE) queries from the previous steps.
+	
+	\question Did the queries succeed? What error did you get?
+
+	\item Set consistency level to 2:
+\begin{lstlisting}
+CONSISTENCY TWO;
+\end{lstlisting}
+		
+	\item Run a few read and write queries. Make sure you remember the changes that you have made (e.g., I added a new user ``Jenny'' and ``Jake'').
+	
+	\question Did the queries succeed?
+
+\end{enumerate}
+
+\begin{figure}[!t]
+\centering
+\scalebox{0.8}{
+\input{partitions.tex}}
+\caption{Diagram of network failure}
+\label{fig:partitions}
+\end{figure}
+
+Let us study how Cassandra behaves with respect to network partitions. Assume that in the previous steps, node 3 became inaccessible due to network partitioning, as shown in Figure~\ref{fig:partitions}. Since we issued commands to node 1, we essentially saw what happened in partition A. Now we shall look at the database from partition B's perspective.
+
+\begin{enumerate}
+	\item Exit CQLSH in TermA by typing \code{QUIT} and kill all the nodes by pressing CTRL+C in TermB and TermC.
+	\item Start node 3 in TermD and connect to it using the following command (note that the IP address is different than the previous invocation of CQLSH):
+\begin{lstlisting}
+./apache-cassandra-2.0.1/bin/cqlsh 127.0.1.3
+\end{lstlisting}
+	Note that since we restarted CQLSH, the consistency level is now ONE, the default.
+
+	\item Select the right keyspace (using the \code{USE} command) and list all users.
+	
+	\question Are all the users you previously inserted present? Does that database look like what you saw in partition A?
+
+	\item Start node 1 in TermB and list all users again.
+	
+	\question How about now? Are all users listed? What happened?	
+
+\end{enumerate}
+
+Let us now study how write conflicts are dealt with by Cassandra.
+
+\begin{enumerate}
+	\item Kill node 1.
+
+	\item Insert a new user with the ID 100. Note that, only node 3 is aware of this new user.
+
+	\item Exit CQLSH and kill node 3.
+
+	\item Start node 1 and connect CQLSH to it.
+	 
+	\item Insert a new user with the ID 100, but with a \textbf{different} first or last name.
+
+	\item Start node 3 and list all users.
+
+	\question What do you observe? Which version of the user with ID 100 is retained?
+\end{enumerate}
+
+Feel free to do more experiments by yourself. You can combine reading and writing to the database, setting different consistency levels, starting and killing Cassandra nodes, and observing the results.
+
+\clearpage
+{\bf\large Answer Sheet} \hfill Name: \rule{10em}{0.1mm}
+
+\end{document}
