@@ -4,7 +4,6 @@
  */
 package gcom.interfaces;
 
-import gcom.modules.group.Election;
 import gcom.modules.group.Group;
 import gcom.modules.group.Message;
 import java.io.Serializable;

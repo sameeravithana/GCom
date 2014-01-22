@@ -33,7 +33,7 @@ public class Member extends UnicastRemoteObject implements IMember {
     private boolean isElectionParticipant = false;
     private boolean isGroupLeader;
     private final LinkedList<IMember> members;
-    private RMIServer srv;
+    private transient RMIServer srv;
     protected PropertyChangeSupport propertyChangeSupport;
     private LinkedList<Message> holdingQueue;
     private static LinkedList<Message> receivedMessages;
@@ -125,7 +125,7 @@ public class Member extends UnicastRemoteObject implements IMember {
                         Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     //  }
-                    //}.start();
+                    //}.loadRMIEntries();
 
                 }
                 if (source.isGroupLeader()) {
@@ -181,7 +181,7 @@ public class Member extends UnicastRemoteObject implements IMember {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
 //                }
-//            }.start();
+//            }.loadRMIEntries();
 
         }
     }

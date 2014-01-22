@@ -125,7 +125,6 @@ public class MemberWindow extends javax.swing.JFrame {
             String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") added to Group " + member.getParentGroup().getGroupName();
             debug.updateStatus(statusLog);
             debug.updateMemberTable();
-            chatWindow.changeMemberCount(contacts.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -142,7 +141,6 @@ public class MemberWindow extends javax.swing.JFrame {
             String statusLog = "Member," + member.getName() + " (" + member.getIdentifier() + ") left the Group " + member.getParentGroup().getGroupName();
             debug.updateStatus(statusLog);
             debug.updateMemberTable();
-            chatWindow.changeMemberCount(contacts.size());
         } catch (Exception e) {
         }
         
@@ -164,7 +162,7 @@ public class MemberWindow extends javax.swing.JFrame {
         debug.updateLeaderInTable(member.getName());
     }
     
-    private ArrayList<String> getContacts() {
+    public ArrayList<String> getContacts() {
         ArrayList<String> c = new ArrayList<String>();
         HashMap<String, IMember> membersList = group.getMembersList();
         for (String m : membersList.keySet()) {

@@ -7,6 +7,7 @@ package gcom.interfaces;
 import gcom.modules.group.Group;
 import gcom.modules.group.GroupManagementException;
 import gcom.modules.group.Message;
+import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import java.util.HashMap;
  *
  * @author samtube405
  */
-public interface IGroupManagement extends Remote {
+public interface IGroupManagement extends Remote, Serializable {
 
     public HashMap<String, Integer> getGroupDetails() throws RemoteException;
 

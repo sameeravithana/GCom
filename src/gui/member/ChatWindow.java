@@ -19,9 +19,9 @@ import java.util.logging.Logger;
  * @author praneeth
  */
 public class ChatWindow extends javax.swing.JDialog {
-    
+
     private IMember member;
-    
+
     private MemberWindow memWindow;
 
     /**
@@ -38,20 +38,20 @@ public class ChatWindow extends javax.swing.JDialog {
         setTitle(memWindow.getMember().getName() + " : Group Chat");
         setLocationRelativeTo(memWindow);
     }
-    
+
     public void recieveMessage(Message message) throws RemoteException {
         updateChat(message.getSource().getName() + "\t : " + message.getMessage());
         focusChat(true);
     }
-    
+
     public void changeMemberCount(int count) {
         lblMemCount.setText(count + " Members Online");
     }
-    
+
     private void updateChat(String msg) {
         txtHistory.setText(txtHistory.getText() + msg + "\n");
     }
-    
+
     private void focusChat(boolean focus) {
         if (focus) {
             txtChat.setText(null);
@@ -61,7 +61,7 @@ public class ChatWindow extends javax.swing.JDialog {
             txtChat.setForeground(Color.GRAY);
         }
     }
-    
+
     private void focusChat() {
         if (txtChat.getText().trim().equalsIgnoreCase("Type your text here...")) {
             txtChat.setText(null);
@@ -97,6 +97,14 @@ public class ChatWindow extends javax.swing.JDialog {
                 formWindowGainedFocus(evt);
             }
             public void windowLostFocus(java.awt.event.WindowEvent evt) {
+            }
+        });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+            public void windowActivated(java.awt.event.WindowEvent evt) {
+                formWindowActivated(evt);
             }
         });
 
@@ -176,10 +184,10 @@ public class ChatWindow extends javax.swing.JDialog {
                 Message message;
                 GroupDef groupDef = member.getParentGroup().getGroupDef();
                 message = new Message(member.getParentGroup().getGroupName(), member, null, msg, groupDef.getMultType(), groupDef.getOrdType());
-                
+
                 member.multicastMessages(message, true);
                 memWindow.multicastChat(message);
-                
+
             } catch (RemoteException ex) {
                 Logger.getLogger(ChatWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -197,6 +205,14 @@ public class ChatWindow extends javax.swing.JDialog {
     private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
         txtChat.requestFocus();
     }//GEN-LAST:event_formWindowGainedFocus
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+
+    }//GEN-LAST:event_formWindowOpened
+
+    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+        changeMemberCount(memWindow.getContacts().size());
+    }//GEN-LAST:event_formWindowActivated
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;

@@ -33,6 +33,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import pgcom.cassandra.DBConnect;
 
 /**
  *
@@ -49,11 +50,16 @@ public class NewMember extends javax.swing.JFrame {
     private String groupName;
     private MemberContainer memContainer;
     private String statusLog = "";
+    private DBConnect cdb;
+    private final String[] ips;
 
     public NewMember() {
         initComponents();
         setLocationRelativeTo(null);
         panelMem.setVisible(false);
+        ips = new String[]{"127.0.1.1", "127.0.1.2", "127.0.1.3"};
+        cdb = new DBConnect(ips);
+        cdb.connectKeySpace("pgcomkeyspace");
         setIconImage(new ImageIcon(GComWindow.class.getResource("/pics/logo.png")).getImage());
         memContainer = new MemberContainer();
 
@@ -62,8 +68,8 @@ public class NewMember extends javax.swing.JFrame {
     private void checkConnection(String host, int port) {
 
         try {
-            srv = new RMIServer(host, port);
-            registry = srv.start();
+            srv = new RMIServer(host, port, cdb);
+            registry = srv.getRegistry();
             igm = srv.regLookUp("IGroupManagement");
             gs = igm.getGroupDetails();
 
