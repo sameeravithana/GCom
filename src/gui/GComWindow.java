@@ -68,11 +68,13 @@ public class GComWindow extends javax.swing.JFrame {
 //        for (int host = 0; host < hosts.length; host++) {
 //            try {
 //                new ProcessBuilder("sh", "./cassandra/start.sh", (host + 1) + "").loadRMIEntries();
+//                Runtime.getRuntime().exec("./cassandra/start.sh "+(host+1));
 //            } catch (IOException ex) {
 //                Logger.getLogger(GComWindow.class.getName()).log(Level.SEVERE, null, ex);
 //            }
 //        }
         cdb = new DBConnect(hosts);
+        cdb = new DBConnect(hosts); 
         cdb.connectKeySpace("pgcomkeyspace");
 //        String query = "CREATE KEYSPACE pgcomkeyspace\n"
 //                + "WITH REPLICATION = { 'class' : 'SimpleStrategy',\n"

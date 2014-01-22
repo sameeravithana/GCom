@@ -51,7 +51,7 @@ public class DBConnect {
         addContactPoint(hosts);
     }
 
-    private void addContactPoint(String[] host) {
+    public void addContactPoint(String[] host) {
         Builder builder = Cluster.builder();
         builder.addContactPoints(host);
         this.cluster = builder.build();
@@ -100,7 +100,11 @@ public class DBConnect {
     }
 
     public SimpleStatement prepareStatement(String query, Object... params) {
-        SimpleStatement toPrepare = new SimpleStatement(query, params);
+        return new SimpleStatement(query, params);
+    }
+
+    public SimpleStatement prepareStatement(String query) {
+        SimpleStatement toPrepare = new SimpleStatement(query);
         return toPrepare;
     }
 

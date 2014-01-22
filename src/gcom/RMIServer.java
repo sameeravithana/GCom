@@ -84,6 +84,7 @@ public class RMIServer implements Serializable {
         cdb.getSession().execute(query);
     }
 
+    
     public void stop() throws NoSuchObjectException {
         UnicastRemoteObject.unexportObject(this.registry, true);
     }
