@@ -98,7 +98,7 @@ public class DebugWindow extends javax.swing.JFrame {
         fillHoldingQueue(holdback);
         messages.add(message);
         dtm = (DefaultTableModel) tblMessages.getModel();
-        dtm.addRow(new Object[]{message.getSource().getName(), message.getDestination().getName(), message.getMessage(), new SimpleDateFormat("HH:mm:ss").format(new Date(message.getTimeStamp()))});
+        dtm.addRow(new Object[]{message.getSource().getName(), message.getMessage(), new SimpleDateFormat("HH:mm:ss").format(new Date(message.getTimeStamp()))});
         fillHoldingQueue(holdback);
         updateStatus("Message from " + message.getSource().getName() + " released.");
         //JOptionPane.showMessageDialog(this, message.getMessage());
@@ -111,7 +111,7 @@ public class DebugWindow extends javax.swing.JFrame {
         }
         for (Message message : holdback) {
             String format = sd.format(new Date(message.getTimeStamp()));
-            Object row[] = new Object[]{message.getSource().getName(), message.getDestination().getName(), message.getMessage(), format};
+            Object row[] = new Object[]{message.getSource().getName(), message.getMessage(), format};
             dtm.addRow(row);
         }
     }
@@ -334,14 +334,14 @@ public class DebugWindow extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Sender", "Receiver", "Message", "Timestamp"
+                "Sender", "Message", "Timestamp"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Object.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false
+                true, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -354,8 +354,8 @@ public class DebugWindow extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(tblHoldMessages);
         if (tblHoldMessages.getColumnModel().getColumnCount() > 0) {
-            tblHoldMessages.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tblHoldMessages.getColumnModel().getColumn(3).setPreferredWidth(5);
+            tblHoldMessages.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tblHoldMessages.getColumnModel().getColumn(2).setPreferredWidth(5);
         }
 
         btnShuffle.setText("Shuffle");
@@ -410,14 +410,14 @@ public class DebugWindow extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Sender", "Receiver", "Message", "Timestamp"
+                "Sender", "Message", "Timestamp"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Object.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false
+                true, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -431,8 +431,8 @@ public class DebugWindow extends javax.swing.JFrame {
         tblMessages.getTableHeader().setReorderingAllowed(false);
         jScrollPane5.setViewportView(tblMessages);
         if (tblMessages.getColumnModel().getColumnCount() > 0) {
-            tblMessages.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tblMessages.getColumnModel().getColumn(3).setPreferredWidth(5);
+            tblMessages.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tblMessages.getColumnModel().getColumn(2).setPreferredWidth(5);
         }
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -526,7 +526,7 @@ public class DebugWindow extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 329, Short.MAX_VALUE)
+            .addComponent(jTabbedPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("", new javax.swing.ImageIcon(getClass().getResource("/pics/messages.png")), jPanel1, "Messages"); // NOI18N
@@ -577,7 +577,7 @@ public class DebugWindow extends javax.swing.JFrame {
                 int row = tblHoldMessages.getSelectedRow();
 
                 if (row != -1) {
-                    Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2), tblHoldMessages.getValueAt(row, 3)};
+                    Object[] r = new Object[]{tblHoldMessages.getValueAt(row, 0), tblHoldMessages.getValueAt(row, 1), tblHoldMessages.getValueAt(row, 2)};
                     releaseMessage(r);
                 }
             }

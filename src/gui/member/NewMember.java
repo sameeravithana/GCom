@@ -50,12 +50,6 @@ public class NewMember extends javax.swing.JFrame {
     private MemberContainer memContainer;
     private String statusLog = "";
 
-    /**
-     * Creates new form NewMember
-     *
-     * @param parent
-     * @param modal
-     */
     public NewMember() {
         initComponents();
         setLocationRelativeTo(null);

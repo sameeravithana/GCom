@@ -102,11 +102,6 @@ public class About extends javax.swing.JDialog {
         jScrollPane1.setViewportView(txtDevs);
 
         lblUrl.setText("url");
-        lblUrl.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lblUrlActionPerformed(evt);
-            }
-        });
 
         txtDesc.setEditable(false);
         txtDesc.setColumns(20);
@@ -157,17 +152,6 @@ public class About extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void lblUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblUrlActionPerformed
-        Desktop desktop = Desktop.getDesktop();
-        if (desktop != null) {
-            try {
-                desktop.browse(url);
-            } catch (IOException ex) {
-                Logger.getLogger(About.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }//GEN-LAST:event_lblUrlActionPerformed
 
     /**
      * @param args the command line arguments
