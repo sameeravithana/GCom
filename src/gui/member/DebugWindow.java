@@ -89,7 +89,15 @@ public class DebugWindow extends javax.swing.JFrame {
             fillHoldingQueue(holdback);
         } else {
             member.releaseMessages(message);
+            releaseHoldback();
             updateStatus(message.getMulticastType() + " Multicast message from " + message.getSource().getName() + " released.");
+        }        
+    }
+    
+    //Try to release blocked messages
+    public void releaseHoldback() throws RemoteException{        
+        for(Message hmessage:member.getHoldingQueue()){
+            member.releaseMessages(hmessage);
         }
     }
 
@@ -206,6 +214,7 @@ public class DebugWindow extends javax.swing.JFrame {
                     dtm = (DefaultTableModel) tblMessages.getModel();
                     dtm.addRow(vals);
                     fillHoldingQueue(holdback);
+                    releaseHoldback();
                 }
             } catch (RemoteException ex) {
                 Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, "Remote Exception.", "");
