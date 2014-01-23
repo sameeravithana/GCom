@@ -107,7 +107,7 @@ public class MemberWindow extends javax.swing.JFrame {
     private List<Message> loadMessages() {
         List<Message> msg = new LinkedList<Message>();
 
-        PreparedStatement statement = cdb.getSession().prepare("select * from message where destination=? ALLOW FILTERING");
+        PreparedStatement statement = cdb.getSession().prepare("select * from message where tmp_dest=? ALLOW FILTERING");
         BoundStatement boundStatement = new BoundStatement(statement);
         List<Row> execute = cdb.getSession().execute(boundStatement.bind(memName)).all();
         for (Row row : execute) {
