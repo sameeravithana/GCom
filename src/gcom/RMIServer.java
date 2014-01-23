@@ -18,6 +18,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RemoteObject;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,11 +51,13 @@ public class RMIServer implements Serializable {
 
     public void createRegistry() throws RemoteException {
         registry = LocateRegistry.createRegistry(this.port);
-        loadRMIEntries();
+        //loadRMIEntries();
     }
 
     public Registry getRegistry() throws RemoteException {
-        return registry = LocateRegistry.getRegistry(this.host, this.port);
+        registry = LocateRegistry.getRegistry(this.host);
+
+        return registry;
     }
 
     public void loadRMIEntries() throws RemoteException {
@@ -78,32 +81,44 @@ public class RMIServer implements Serializable {
     private void initiateDB() {
         String query = "CREATE TABLE IF NOT EXISTS rmiserver (\n"
                 + "group_name text PRIMARY KEY,\n"
-                + "mem_stub text\n"
+                + "mem_stub blob\n"
                 + ")";
 
         cdb.getSession().execute(query);
+
+        query = "create table if not exists message(\n"
+                + "time_stamp bigint,\n"
+                + "sender text,\n"
+                + "destination text,\n"
+                + "tmp_dest text,\n"
+                + "msg blob,\n"
+                + "isRead boolean,\n"
+                + "primary key(time_stamp,sender,destination)"
+                + ")";
+        cdb.getSession().execute(query);
+
+//        query = "create index on message(tmp_dest);";
+//        cdb.getSession().execute(query);
     }
 
-    
     public void stop() throws NoSuchObjectException {
         UnicastRemoteObject.unexportObject(this.registry, true);
     }
 
-    public void bind(String name, RemoteObject ro) throws AccessException, RemoteException, AlreadyBoundException {
-        Remote exportObject = UnicastRemoteObject.exportObject(ro, 0);
-        registry.bind(name, exportObject);
-        try {
-            //byte[] serialize = SerializeObjects.serialize(exportObject);
-            byte[] serialize = SerializationUtils.serialize(ro);
-
-            cdb.addRMIEntry(name, serialize);
-
-        } catch (Exception ex) {
-            Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
+//    public void bind(String name, RemoteObject ro) throws AccessException, RemoteException, AlreadyBoundException {
+//        Remote exportObject = UnicastRemoteObject.exportObject(ro, 0);
+//        registry.bind(name, exportObject);
+//        try {
+//            //byte[] serialize = SerializeObjects.serialize(exportObject);
+//            byte[] serialize = SerializationUtils.serialize(ro);
+//
+//            cdb.addRMIEntry(name, serialize);
+//
+//        } catch (Exception ex) {
+//            Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//    }
     public void rebind(String name, IGroupManagement ro) throws AccessException, RemoteException {
         registry.rebind(name, ro);
         try {
@@ -116,7 +131,7 @@ public class RMIServer implements Serializable {
         }
     }
 
-    public void rebindRO(String name, Remote ro) throws AccessException, RemoteException {
+    public void rebindRO(String name, IGroupManagement ro) throws AccessException, RemoteException {
         registry.rebind(name, ro);
     }
 

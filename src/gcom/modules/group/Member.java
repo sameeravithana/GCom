@@ -40,6 +40,8 @@ public class Member extends UnicastRemoteObject implements IMember {
     private HashMap<String, Integer> vectorClock;//*
     private Date joined;
 
+    private boolean isOffline;
+
     public Member(String name, Group parent) throws RemoteException {
         this.parentGroup = parent;
         this.name = name;
@@ -107,7 +109,9 @@ public class Member extends UnicastRemoteObject implements IMember {
                 LinkedList<IMember> llist = this.getMembers();
                 int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
                 IMember neighbour = source.getNeighbour(position);
-                parentGroup.removeMember(source.getName());
+
+                //parentGroup.removeMember(source.getName());
+                source.setOffline(true);
 
                 Message emessage = new Message(parentGroup.getGroupName(), members.indexOf(neighbour), neighbour.getIdentifier(), MESSAGE_TYPE.ELECTION);
 
@@ -120,7 +124,7 @@ public class Member extends UnicastRemoteObject implements IMember {
                         IMember mem = membersList.get(key);
 
                         mem.updateGroup(Member.this.parentGroup);
-                        mem.removeMember(source);
+                        //mem.removeMember(source);
                     } catch (RemoteException ex) {
                         Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -134,8 +138,6 @@ public class Member extends UnicastRemoteObject implements IMember {
                     }
                 }
 
-            } catch (GroupManagementException ex) {
-                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RemoteException ex) {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -246,8 +248,14 @@ public class Member extends UnicastRemoteObject implements IMember {
     }
 
     @Override
-    public IMember getNeighbour(int pos) {
-        return this.getMembers().get((pos + 1) % this.getMembers().size());
+    public IMember getNeighbour(int pos) throws RemoteException {
+        IMember neighbor = this.getMembers().get((pos++) % this.getMembers().size());
+
+        while (neighbor.isOffline()) {
+            neighbor = this.getMembers().get((pos++) % this.getMembers().size());
+        }
+
+        return neighbor;
     }
 
     public void printJoinOrder() throws RemoteException {
@@ -334,15 +342,13 @@ public class Member extends UnicastRemoteObject implements IMember {
     public void multicastMessages(final Message message, boolean isInitReliable) throws RemoteException {
         //MESSAGE_TYPE multicasttype = message.getMulticastType();
         MESSAGE_TYPE messageOrderType = message.getMessageOrderType();
-
+        final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         if (messageOrderType == MESSAGE_TYPE.CAUSAL) {
             if (isInitReliable) {
                 updateVectorCell(this.getName());
                 message.setVectorClock(this.getVectorClock());
                 Logger.getLogger(Member.class.getName()).log(Level.INFO, "Vector clock received : ", this.getVectorClock());
             }
-
-            final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
 
             for (final String key : membersList.keySet()) {
                 new Thread() {
@@ -360,7 +366,6 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             }
         } else if (messageOrderType == MESSAGE_TYPE.UNORDERED) {
-            final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
             for (final String key : membersList.keySet()) {
                 // Create separate Threads for each multicastMembersList.
                 new Thread() {
@@ -378,7 +383,7 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             }
         }
-
+        propertyChangeSupport.firePropertyChange("InsertMsgToDB", message, membersList.keySet());
         Logger.getLogger(Member.class.getName()).log(Level.INFO, "Message Multicasted. : {0} : {1}", new Object[]{message.getMessage(), message.getMessageOrderType()});
     }
 
@@ -462,6 +467,7 @@ public class Member extends UnicastRemoteObject implements IMember {
 
                 Message rmessage = new Message(this.getParentGroup().getGroupName(), this.parentGroup.getMembersList().get(this.getName()), message.getMessage(), MESSAGE_TYPE.ACKNOWLEDGEMENT);
                 rmessage.setDestination(message.getSource());
+
                 message.getSource().getAcknowledgement(rmessage);
 
                 isReleased = true;
@@ -694,14 +700,28 @@ public class Member extends UnicastRemoteObject implements IMember {
     /**
      * @return the joined
      */
-    public Date getJoined() {
+    public Date getJoined() throws RemoteException {
         return joined;
     }
 
     /**
      * @param joined the joined to set
      */
-    public void setJoined(Date joined) {
+    public void setJoined(Date joined) throws RemoteException {
         this.joined = joined;
+    }
+
+    /**
+     * @return the isOffline
+     */
+    public boolean isOffline() throws RemoteException {
+        return isOffline;
+    }
+
+    /**
+     * @param isOffline the isOffline to set
+     */
+    public void setOffline(boolean isOffline) throws RemoteException {
+        this.isOffline = isOffline;
     }
 }

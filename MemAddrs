@@ -1,0 +1,2 @@
+Proxy[IGroupManagement,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[90.231.70.219:33119](local),objID:[75e3fd62:143bc48bd3c:-7fff, -2283294014471998950]]]]]
+Proxy[IGroupManagement,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[90.231.70.219:33119](remote),objID:[75e3fd62:143bc48bd3c:-7fff, -2283294014471998950]]]]]

@@ -1,1 +1,7 @@
-grant {permission java.security.AllPermission;};
+/* AUTOMATICALLY GENERATED ON Thu Jan 23 00:17:03 CET 2014*/
+/* DO NOT EDIT */
+
+grant codeBase "file:/home/git/GCom/--" {
+  permission java.security.AllPermission;
+};
+

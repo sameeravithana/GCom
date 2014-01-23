@@ -11,7 +11,7 @@ import gcom.modules.group.Message;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.rmi.RemoteException;
-import java.util.HashMap;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,9 +57,9 @@ public class SignalListener implements PropertyChangeListener {
             } catch (Exception ex) {
                 Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }else if (evt.getPropertyName().equals("VectorReceived")) {
+        } else if (evt.getPropertyName().equals("VectorReceived")) {
             try {
-                memWindow.vectorReceived(evt.getOldValue(),evt.getNewValue());
+                memWindow.vectorReceived(evt.getOldValue(), evt.getNewValue());
             } catch (Exception ex) {
                 Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -78,6 +78,12 @@ public class SignalListener implements PropertyChangeListener {
         } else if (evt.getPropertyName().equals("Kill")) {
             try {
                 memWindow.killProcess();
+            } catch (Exception ex) {
+                Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (evt.getPropertyName().equals("InsertMsgToDB")) {
+            try {
+                memWindow.insertMessage((Message) evt.getOldValue(), (Set<String>) evt.getNewValue());
             } catch (Exception ex) {
                 Logger.getLogger(SignalListener.class.getName()).log(Level.SEVERE, null, ex);
             }
