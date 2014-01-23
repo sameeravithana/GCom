@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -74,12 +75,21 @@ public class DebugWindow extends javax.swing.JFrame {
         }
     }
 
-    public void initialize() {
+    public void initialize(List<Message> loadMessages) {
         try {
             setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
         } catch (RemoteException ex) {
             Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        for (Message msg : loadMessages) {
+            try {
+                messageReceived(msg);
+            } catch (RemoteException ex) {
+                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
     }
 
     public void messageReceived(Message message) throws RemoteException {
@@ -88,15 +98,20 @@ public class DebugWindow extends javax.swing.JFrame {
             holdback = member.getHoldingQueue();
             fillHoldingQueue(holdback);
         } else {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
             member.releaseMessages(message);
             releaseHoldback();
             updateStatus(message.getMulticastType() + " Multicast message from " + message.getSource().getName() + " released.");
-        }        
+        }
     }
-    
+
     //Try to release blocked messages
-    public void releaseHoldback() throws RemoteException{        
-        for(Message hmessage:member.getHoldingQueue()){
+    public void releaseHoldback() throws RemoteException {
+        for (Message hmessage : member.getHoldingQueue()) {
             member.releaseMessages(hmessage);
         }
     }

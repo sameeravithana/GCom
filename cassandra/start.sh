@@ -24,11 +24,8 @@ if [ "$NODEID" -eq 1 ]; then
 		-Dcom.sun.management.jmxremote.authenticate=false"
 fi
 
-<<<<<<< HEAD
+
 JAVA=/usr/lib/jvm/java-7-openjdk/bin/java
-=======
-JAVA=/usr/lib/jvm/java-1.7.0-openjdk-amd64/bin/java
->>>>>>> 030e71122f4002f4bff967625a9fe63fd2ddfcfa
 CLASSPATH=`find apache-cassandra-2.0.1/ -name "*.jar" | paste -d: -s`
 $JAVA $JMX \
 	-Dlog4j.configuration=log4j-server.properties -Dlog4j.defaultInitOverride=true \

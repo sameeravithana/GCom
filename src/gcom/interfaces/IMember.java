@@ -45,7 +45,7 @@ public interface IMember extends Remote, Serializable {
 
     public void removeMember(IMember member) throws RemoteException;
 
-    public IMember getNeighbour(int pos) throws RemoteException;    
+    public IMember getNeighbour(int pos) throws RemoteException;
 
     public boolean isElectionParticipant() throws RemoteException;
 
@@ -88,4 +88,8 @@ public interface IMember extends Remote, Serializable {
     public Date getJoined() throws RemoteException;
 
     public void setJoined(Date joined) throws RemoteException;
+
+    public boolean isOffline() throws RemoteException;
+
+    public void setOffline(boolean isOffline) throws RemoteException;
 }

@@ -85,6 +85,8 @@ public class NewMember extends javax.swing.JFrame {
             Logger.getLogger(NewMember.class.getName()).log(Level.SEVERE, null, ex);
             lblMsg.setText("Cannot Connect to " + host + " from " + port + ".");
             lblMsg.setForeground(Color.red);
+        }catch(Exception e){
+            e.printStackTrace();
         }
 
     }
@@ -168,7 +170,7 @@ public class NewMember extends javax.swing.JFrame {
                 setVisible(false);
                 memWindow.setMember(member);
                 memWindow.setMemContainer(memContainer);
-                memWindow.initialize(member, statusLog);
+                memWindow.initialize(member, statusLog,cdb);
                 memWindow.setServer(srv);
                 memWindow.setVisible(true);
 

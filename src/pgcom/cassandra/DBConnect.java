@@ -21,30 +21,6 @@ public class DBConnect {
         String[] hosts = new String[]{"127.0.1.1", "127.0.1.2", "127.0.1.3"};
         addContactPoint(hosts);
         connectKeySpace("mykeyspace");
-
-//        //session.execute("CREATE TABLE log(id int PRIMARY KEY, log_text text)");
-//        //SimpleStatement toPrepare = prepareStatement("SELECT * FROM users WHERE user_id=1");
-//        toPrepare.setConsistencyLevel(ConsistencyLevel.ONE);
-//        ResultSet resultSet = executeQeuery(toPrepare);
-//
-//        // Print results
-//        Row result = resultSet.one();
-//        System.out.println(String.format(
-//                "Users with ID 1: %s %s",
-//                result.getString("firstName"),
-//                result.getString("lastName")));
-//
-//        // Execute another statement
-//        resultSet = session.execute("SELECT * FROM users");
-//
-//        // Print results
-//        System.out.println("All users:");
-//        for (Row row : resultSet) {
-//            System.out.println(String.format("%d %s %s",
-//                    row.getInt("user_id"),
-//                    row.getString("firstName"),
-//                    row.getString("lastName")));
-//        }
     }
 
     public DBConnect(String[] hosts) {

@@ -74,7 +74,7 @@ public class GComWindow extends javax.swing.JFrame {
 //            }
 //        }
         cdb = new DBConnect(hosts);
-        cdb = new DBConnect(hosts); 
+        cdb = new DBConnect(hosts);
         cdb.connectKeySpace("pgcomkeyspace");
 //        String query = "CREATE KEYSPACE pgcomkeyspace\n"
 //                + "WITH REPLICATION = { 'class' : 'SimpleStrategy',\n"
@@ -165,14 +165,15 @@ public class GComWindow extends javax.swing.JFrame {
                     updateStatus(msg);
 
                     GroupManagement obj = new GroupManagement();
-                    IGroupManagement stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);
+                    IGroupManagement stub;
 
                     try {
-                        IGroupManagement regLookUp = server.regLookUp("IGroupManagement");
+                        stub = server.regLookUp("IGroupManagement");
                         System.out.println("ERR");
-                        System.out.println("Size " + regLookUp);
+                        System.out.println("Size " + stub);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);
                         System.out.println("Stub " + stub);
                         server.rebind("IGroupManagement", stub);
                     }
