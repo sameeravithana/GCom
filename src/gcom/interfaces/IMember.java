@@ -92,4 +92,6 @@ public interface IMember extends Remote, Serializable {
     public boolean isOffline() throws RemoteException;
 
     public void setOffline(boolean isOffline) throws RemoteException;
+
+    public void offlineMember(IMember source) throws RemoteException;
 }

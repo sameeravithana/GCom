@@ -25,7 +25,7 @@ if [ "$NODEID" -eq 1 ]; then
 fi
 
 
-JAVA=/usr/lib/jvm/java-7-openjdk/bin/java
+JAVA=/usr/lib/jvm/java-1.7.0-openjdk-amd64/bin/java
 CLASSPATH=`find apache-cassandra-2.0.1/ -name "*.jar" | paste -d: -s`
 $JAVA $JMX \
 	-Dlog4j.configuration=log4j-server.properties -Dlog4j.defaultInitOverride=true \

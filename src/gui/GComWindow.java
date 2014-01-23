@@ -168,14 +168,14 @@ public class GComWindow extends javax.swing.JFrame {
                     IGroupManagement stub;
 
                     try {
-                        stub = server.regLookUp("IGroupManagement");
-                        System.out.println("ERR");
-                        System.out.println("Size " + stub);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        stub = server.regLookUp("IGroupManagement");                        
+                        System.out.println("Found! " + stub);
+                    }catch(NotBoundException nex){ 
                         stub = (IGroupManagement) UnicastRemoteObject.exportObject(obj, 0);
-                        System.out.println("Stub " + stub);
+                        System.out.println("Not Found! " + stub);
                         server.rebind("IGroupManagement", stub);
+                    }catch (Exception e) {
+                        e.printStackTrace();                        
                     }
 
                     msg = "Default stub binded:" + " IGroupManagement";

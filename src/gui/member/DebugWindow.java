@@ -75,20 +75,14 @@ public class DebugWindow extends javax.swing.JFrame {
         }
     }
 
-    public void initialize(List<Message> loadMessages) {
+    public void initialize() {
         try {
             setTitle("Debug : " + memName + " of " + member.getParentGroup().getGroupName());
         } catch (RemoteException ex) {
             Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        for (Message msg : loadMessages) {
-            try {
-                messageReceived(msg);
-            } catch (RemoteException ex) {
-                Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+
 
     }
 

@@ -39,7 +39,6 @@ public class Member extends UnicastRemoteObject implements IMember {
     private static LinkedList<Message> receivedMessages;
     private HashMap<String, Integer> vectorClock;//*
     private Date joined;
-
     private boolean isOffline;
 
     public Member(String name, Group parent) throws RemoteException {
@@ -80,11 +79,18 @@ public class Member extends UnicastRemoteObject implements IMember {
                 if (parentGroup.getGroupType() == Group.STATIC_GROUP && parentGroup.isFilled()) {
                     return null;
                 }
-                this.parentGroup.addMember(m);
-                this.addMember(m);
+
+                if (!this.parentGroup.getMembersList().containsKey(m.getName())) {
+                    this.parentGroup.addMember(m);
+                    this.addMember(m);
+                    
+                }
+
+                    
+                m.setParentGroup(this.parentGroup);
                 Logger.getLogger(Member.class.getName()).log(Level.INFO, "Leader added member : {0}", m.getName());
 
-                m.setParentGroup(this.parentGroup);
+                
 
                 updateMembers(m);
                 multicastMembersList(message);
@@ -110,8 +116,8 @@ public class Member extends UnicastRemoteObject implements IMember {
                 int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
                 IMember neighbour = source.getNeighbour(position);
 
-                //parentGroup.removeMember(source.getName());
-                source.setOffline(true);
+                parentGroup.removeMember(source.getName());
+                //source.setOffline(true);
 
                 Message emessage = new Message(parentGroup.getGroupName(), members.indexOf(neighbour), neighbour.getIdentifier(), MESSAGE_TYPE.ELECTION);
 
@@ -124,7 +130,54 @@ public class Member extends UnicastRemoteObject implements IMember {
                         IMember mem = membersList.get(key);
 
                         mem.updateGroup(Member.this.parentGroup);
-                        //mem.removeMember(source);
+                        mem.removeMember(source);
+                    } catch (RemoteException ex) {
+                        Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    //  }
+                    //}.loadRMIEntries();
+
+                }
+                if (source.isGroupLeader()) {
+                    if (!source.getName().equals(neighbour.getName())) {
+                        neighbour.callElection(emessage);
+                    }
+                }
+
+            } catch (RemoteException ex) {
+                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (GroupManagementException ex) {
+                Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (message.getMessageOrderType() == MESSAGE_TYPE.MEMBER_OFFLINE) {
+
+            final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
+
+            final IMember source = membersList.get(message.getMessage());
+
+            Logger.getLogger(Member.class.getName()).log(Level.INFO, "Member is offline : {0}", message.getMessage());
+
+            try {
+                LinkedList<IMember> llist = this.getMembers();
+                int position = llist.indexOf(this.parentGroup.getMembersList().get(this.getName()));
+                IMember neighbour = source.getNeighbour(position);
+
+                //parentGroup.removeMember(source.getName());
+                //source.setOffline(true);
+                this.parentGroup.getMembersList().get(source.getName()).setOffline(true);
+
+                Message emessage = new Message(parentGroup.getGroupName(), members.indexOf(neighbour), neighbour.getIdentifier(), MESSAGE_TYPE.ELECTION);
+
+                for (final String key : membersList.keySet()) {
+
+                    //new Thread() {
+                    //  @Override
+                    //public void run() {
+                    try {
+                        IMember mem = membersList.get(key);
+
+                        mem.updateGroup(Member.this.parentGroup);
+                        mem.offlineMember(source);
                     } catch (RemoteException ex) {
                         Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -142,6 +195,10 @@ public class Member extends UnicastRemoteObject implements IMember {
                 Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
+
+
+
         try {
             IGroupManagement igm = srv.regLookUp("IGroupManagement");
             igm.updateGroup(parentGroup);
@@ -208,7 +265,6 @@ public class Member extends UnicastRemoteObject implements IMember {
     public void updateMembers(final IMember member) throws RemoteException {
         for (final IMember m : this.getMembers()) {
             new Thread() {
-
                 @Override
                 public void run() {
                     try {
@@ -352,12 +408,13 @@ public class Member extends UnicastRemoteObject implements IMember {
 
             for (final String key : membersList.keySet()) {
                 new Thread() {
-
                     @Override
                     public void run() {
                         try {
                             IMember m = membersList.get(key);
-                            m.deliver(message);
+                            if (!m.isOffline()) {
+                                m.deliver(message);
+                            }
                         } catch (RemoteException ex) {
                             Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -369,12 +426,13 @@ public class Member extends UnicastRemoteObject implements IMember {
             for (final String key : membersList.keySet()) {
                 // Create separate Threads for each multicastMembersList.
                 new Thread() {
-
                     @Override
                     public void run() {
                         try {
                             IMember m = membersList.get(key);
-                            m.deliver(message);
+                            if (!m.isOffline()) {
+                                m.deliver(message);
+                            }
                         } catch (RemoteException ex) {
                             Logger.getLogger(Member.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -674,7 +732,6 @@ public class Member extends UnicastRemoteObject implements IMember {
         final HashMap<String, IMember> membersList = this.parentGroup.getMembersList();
         for (final String key : membersList.keySet()) {
             new Thread() {
-
                 @Override
                 public void run() {
                     try {
@@ -723,5 +780,10 @@ public class Member extends UnicastRemoteObject implements IMember {
      */
     public void setOffline(boolean isOffline) throws RemoteException {
         this.isOffline = isOffline;
+    }
+
+    @Override
+    public void offlineMember(IMember source) throws RemoteException {
+        propertyChangeSupport.firePropertyChange("MemberOffline", parentGroup, source);
     }
 }

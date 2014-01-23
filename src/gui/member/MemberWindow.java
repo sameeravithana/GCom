@@ -47,6 +47,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.lang3.SerializationUtils;
 import pgcom.cassandra.DBConnect;
 
+
 /**
  *
  * @author Praneeth
@@ -66,7 +67,6 @@ public class MemberWindow extends javax.swing.JFrame {
     //private HashMap<String, SingleChat> chatWindows;
     private ChatWindow chatWindow;
     private boolean isOffline;
-
     private DBConnect cdb;
 
     public MemberWindow(Member member, IMember stub) throws RemoteException, AccessException, NotBoundException {
@@ -86,8 +86,7 @@ public class MemberWindow extends javax.swing.JFrame {
             chatWindow = new ChatWindow(this, false, stub);
             debug.updateStatus(statusLog);
             debug.updateMemberTable();
-            List<Message> loadMessages = loadMessages();
-            debug.initialize(loadMessages);
+            debug.initialize();
             lblMemberName.setText(member.getName());
 
         } catch (Exception ex) {
@@ -206,6 +205,7 @@ public class MemberWindow extends javax.swing.JFrame {
     }
 
     public void messageReceived(Message message) throws RemoteException {
+        System.out.println("****"+message.getMessage());
         debug.messageReceived(message);
     }
 
@@ -257,6 +257,16 @@ public class MemberWindow extends javax.swing.JFrame {
             Message msg = new Message(groupName, member, params, MESSAGE_TYPE.JOIN_REQUEST);
 
             memContainer.setStub(stub);
+            System.out.println("Rejoin 1");
+            List<Message> loadMessages = loadMessages();
+            for (Message m : loadMessages) {
+                try {
+                    messageReceived(m);
+                    System.out.println("Rejoin Messgaes");
+                } catch (RemoteException ex) {
+                    Logger.getLogger(DebugWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
             String statusLog = "Member," + memContainer.getMember().getName() + " (" + memContainer.getMember().getIdentifier() + ") rejoined the Group " + groupName;
             if (group.getMemberCount() < 1) {
@@ -272,6 +282,7 @@ public class MemberWindow extends javax.swing.JFrame {
             }
             statusLog += ".";
 
+            System.out.println(statusLog);
             //setMember(member);
             //setMemContainer(memContainer);
             member.setJoined(new Date());
@@ -284,16 +295,25 @@ public class MemberWindow extends javax.swing.JFrame {
         }
     }
 
-    public void logout() throws NotBoundException, RemoteException {
-        Message msg = new Message(member.getParentGroup().getGroupName(), member, memName, MESSAGE_TYPE.MEMBER_LEAVES);
+    public void logout(boolean isOffline) throws NotBoundException, RemoteException {
+        MESSAGE_TYPE mt = MESSAGE_TYPE.MEMBER_LEAVES;
         String groupName = member.getParentGroup().getGroupName();
         IMember leader = server.regMemLookUp(groupName);
-        if (member.isGroupLeader()) {
-            server.unbind(groupName);
+        
+        
+        if (isOffline) {
+            mt = MESSAGE_TYPE.MEMBER_OFFLINE;
+        } else {
+            if (member.isGroupLeader()) {
+                server.unbind(groupName);
+            }
         }
+
+        Message msg = new Message(member.getParentGroup().getGroupName(), member, memName, mt);       
+
         leader.sendRequest(msg);
         lstContacts.setListData(new Vector());
-        debug.updateStatus("# LOGGED OUT. # " + group.getMemberCount());
+        debug.updateStatus("# LOGGED OUT. # ");
         setWindowTitle();
     }
 
@@ -322,7 +342,7 @@ public class MemberWindow extends javax.swing.JFrame {
         if (!isOffline && ((JLabel) cmbStatus.getSelectedItem()).getText().equals("Offline")) {
             isOffline = true;
             try {
-                logout();
+                logout(isOffline);
                 Logger.getLogger(NewMember.class.getName()).log(Level.INFO, "Logged out : {0}", member.getName());
             } catch (NotBoundException ex) {
                 Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -551,7 +571,7 @@ public class MemberWindow extends javax.swing.JFrame {
         int response = JOptionPane.showConfirmDialog(MemberWindow.this, "Are you sure want to exit?", "Exit GCom", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
         if (response == JOptionPane.OK_OPTION) {
             try {
-                logout();
+                logout(false);
             } catch (AccessException ex) {
                 Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RemoteException ex) {
@@ -695,8 +715,13 @@ public class MemberWindow extends javax.swing.JFrame {
             Logger.getLogger(MemberWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-}
 
+    public void offlineMember(IMember iMember) throws RemoteException {
+        contacts.remove(iMember.getName());
+        fillContacts(contacts);
+        chatWindow.changeMemberCount(contacts.size());
+    }
+}
 class MyListRenderer extends DefaultListCellRenderer {
 
     @Override
